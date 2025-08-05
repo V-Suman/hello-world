@@ -1,594 +1,127 @@
-Goal: For the submit button.. I will need to check the status of both the checkboxes.. update personal information and update 
-address information. If neither of the forms are checked.. I need the submit button to be disabled. If at least one of the form is checked
-I need you to console.log the values of that form. For the cancel button when the cancel button is clicked.. it should route the user back 
-to '/notary-profile/applicantId'. 
+Goal: To build and console.log the final update personal information object when the user checks the update personal information checkbox 
+and subsequently presses the submit button. 
 
-Rules: Use the onSubmit() and onCancel() functions I have. 
+Rules: When the user clicks the udpate personal information chekbox and then proceeds to make changes in the input fields OR may not make 
+any changes in the input fields and hits the submit button.. the details present in the input fields need to be packaged into an object and 
+should be console.logged.
+The final object into which the form data needs to be packed is an interface available in update-profile-info.model.ts file called 
+UpdatePersonalProfileInformation.. so for each input fields in the update personal information section 
+Ask clarifying questions before you start implementing.
+export interface UpdatePersonalProfileInformation
+{
+  applicantId: number;
+  accountId: number;
+  salutationTypeId: number;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  suffix: string;
+  dateOfBirth: string;
+  dateOfDeath: string;
+  resignationDate: string;
+  isOfficalNameChange: boolean;
+  isNameCorrection: boolean;
+  contactsDto: [
+    {
+      contactId: number;
+      applicantId: number;
+      contactTypeId: number;
+      contactValue: string;
+      isPrimary: boolean;
+    }
+  ]
+}
+1. Salutation: Whatever the user clicks there.. the data will be saved as text.. so you will have to use the text selected by the user then 
+query it against the salutationOptions and pick the salutationId relating to that and pass the it to salutationId. Example: If the user 
+selected "Dr." as salutation.. then pick the string Dr. then search the salutationOptions to get the salutationId for Dr. and use that salutationId
+as salutationId for the UpdatePersonalProfileInformation. This is salutationRef just in case 
+export interface SalutationRef {
+  salutationTypeId: number;
+  code: string;
+  value: string;
+  description: string;
+}
+2. First Name, Middle Name, Last Name and Suffix are pretty straightforward. The values of those.. need to be saved into the UpdatePersonalProfileInformation
+as firstName, lastName, middleName and suffix.
+3. Email Address field. Now, this is a bit tricky. When an email exists.. I want you to pick the email from the form saved values.. and then 
+build the contactsDto's member like this. Example: If the email already exists when update-notary-profile-information page loads and is 
+testt@tedst.com with applicantId as 1690 then the email contact would look like this     {
+      "contactId": 0,
+      "applicantId": 1690,
+      "contactTypeId": 2,
+      "contactValue": "testt@tedst.com",
+      "isPrimary": false
+    }
+Remember the isPrimary flag is always false for an email contact. And the contactId that you see there is also available for you upstream. 
+If it is not available (It only won't be ever available if the email is not available).. you will have to set 0 for the contactId. 
+Example: if the email does not exist when update-notary-profile-information page loads.. while building the contactsDto.. set the contactId
+to 0 and enter whatever the user mentioned in the email address field. 
+4. Primary Phone.. The data will be split into 3 input fields phone 1, phone 2 and phone 3.. for a phone number 123-456-7891 I want the contactsDto to 
+display it like this     {
+      "contactId": 3354 (taken from notary-profile-information),
+      "applicantId": 1690, (can be picked from as a result of displayData?.personalInfoDetails?.notaryIdentifier) 
+      "contactTypeId": 1 (is always 1 for phone numbers),
+      "contactValue": "6175523457" (is the phone number),
+      "isPrimary": true (is true for primary phone number)
+    }
+5. Secondary Phone.. same as primary but secondary phone the isPrimary will be set to false at all costs. 
+6. Date of Birth, Date of Death and Date of Resignation should be saved in a format (I think this is SQL formatting) for example if the user 
+selected 08/12/1980 the dateOfBirth or dateOfDeath or resignationDate should display "Tue Aug 12 1980 00:00:00 GMT-0400 (Eastern Daylight Time)"
+as the value. Every date they select.. turn it into the above date time representation and then push that into the respective UpdatePersonalProfileInformation
+properties. 
+7. Type of change.. when the user selects either of the official or correction radiobuttons we will have to check the respective boolean to true
+or false and the flags are isOfficalNameChange and isNameCorrection 
 
-Here is the html file: 
-<div class="page-wrapper">
-  <div class="heading-and-asterisk">
-    <h2 class="notary-title">
-      Update Profile Information –
-      {{ displayData?.personalInfoDetails?.firstName }} {{ displayData?.personalInfoDetails?.lastName }}
-      ({{ displayData?.personalInfoDetails?.notaryIdentifier }})
-    </h2>
-    <div class="required-indicator">
-      <div class="asterisk">*</div>
-      <div class="required-indicator-text"> – Required fields</div>
-    </div>
-  </div>
-
-  <form [formGroup]="personalForm">
-    <!-- PERSONAL INFO -->
-    <div class="personal-information-section">
-      <div class="div-header-section">
-        <input type="checkbox"
-               kendoCheckBox
-               (change)="togglePersonalInfo($event)"
-               [checked]="updatePersonalChecked"
-               class="checkbox-override"/>
-        <div class="checkbox-header-level">
-          Update Personal Information
-        </div>
-      </div>
-      <div class="div-content-section">
-        <!-- Row 1 -->
-        <div class="form-row">
-          <kendo-formfield class="flex-item">
-            <label kendoLabel for="salutation">
-              Salutation <sup class="text-danger asterisk">*</sup>
-            </label>
-            <kendo-dropdownlist id="salutation"
-                                formControlName="salutation"
-                                [data]="salutationOptions"
-                                [valuePrimitive]="true"
-                                placeholder="Select...">
-            </kendo-dropdownlist>
-          </kendo-formfield>
-
-          <kendo-formfield class="flex-item">
-            <label kendoLabel for="firstName">
-              First Name <sup class="text-danger asterisk">*</sup>
-            </label>
-            <input kendoTextBox id="firstName" formControlName="firstName" />
-          </kendo-formfield>
-
-          <kendo-formfield class="flex-item">
-            <label kendoLabel for="middleName">
-              Middle Name <sup class="text-danger disable-super">*</sup>
-            </label>
-            <input kendoTextBox id="middleName" formControlName="middleName" />
-          </kendo-formfield>
-
-          <kendo-formfield class="flex-item">
-            <label kendoLabel for="lastName">
-              Last Name <sup class="text-danger asterisk">*</sup>
-            </label>
-            <input kendoTextBox id="lastName" formControlName="lastName" />
-          </kendo-formfield>
-
-          <kendo-formfield class="flex-item">
-            <label kendoLabel for="suffix">
-              Suffix <sup class="text-danger disable-super">*</sup>
-            </label>
-            <input kendoTextBox id="suffix" formControlName="suffix" />
-          </kendo-formfield>
-        </div>
-
-        <!-- Row 2 -->
-        <div class="form-row">
-          <kendo-formfield class="flex-item">
-            <label kendoLabel for="dateOfBirth">
-              Date of Birth <sup class="text-danger asterisk">*</sup>
-            </label>
-            <kendo-datepicker id="dateOfBirth"
-                              formControlName="dateOfBirth"
-                              [format]="'MM/dd/yyyy'"
-                              placeholder="MM/DD/YYYY">
-            </kendo-datepicker>
-          </kendo-formfield>
-
-          <kendo-formfield class="flex-item">
-            <label kendoLabel for="dateOfDeath">
-              Date of Death <sup class="text-danger disable-super">*</sup>
-            </label>
-            <kendo-datepicker id="dateOfDeath"
-                              formControlName="dateOfDeath"
-                              [format]="'MM/dd/yyyy'"
-                              placeholder="MM/DD/YYYY">
-            </kendo-datepicker>
-          </kendo-formfield>
-
-          <kendo-formfield class="flex-item">
-            <label kendoLabel for="dateOfResignation">
-              Date of Resignation <sup class="text-danger disable-super">*</sup>
-            </label>
-            <kendo-datepicker id="dateOfResignation"
-                              formControlName="dateOfResignation"
-                              [format]="'MM/dd/yyyy'"
-                              placeholder="MM/DD/YYYY">
-            </kendo-datepicker>
-          </kendo-formfield>
-        </div>
-
-        <!-- Row 3 -->
-        <div class="form-row">
-          <kendo-formfield class="flex-item">
-            <label kendoLabel for="email">
-              Email Address <sup class="text-danger asterisk">*</sup>
-            </label>
-            <input kendoTextBox id="email" formControlName="email" />
-          </kendo-formfield>
-
-          <!-- Primary Phone -->
-          <div class="flex-item">
-            <label class="group-label">
-              Primary Phone <sup class="text-danger asterisk">*</sup>
-            </label>
-            <div class="phone-group">
-              <kendo-formfield>
-                <input kendoTextBox
-                       id="primaryPhone1"
-                       formControlName="primaryPhone1"
-                       maxlength="3"
-                       class="three-size" />
-              </kendo-formfield>
-              <span class="dash">-</span>
-              <kendo-formfield>
-                <input kendoTextBox
-                       id="primaryPhone2"
-                       formControlName="primaryPhone2"
-                       maxlength="3"
-                       class="three-size" />
-              </kendo-formfield>
-              <span class="dash">-</span>
-              <kendo-formfield>
-                <input kendoTextBox
-                       id="primaryPhone3"
-                       formControlName="primaryPhone3"
-                       maxlength="4"
-                       class="four-size" />
-              </kendo-formfield>
-            </div>
-          </div>
-
-          <!-- Secondary Phone -->
-          <div class="flex-item">
-            <label class="group-label">
-              Secondary Phone <sup class="text-danger asterisk">*</sup>
-            </label>
-            <div class="phone-group">
-              <kendo-formfield>
-                <input kendoTextBox
-                       id="secondaryPhone1"
-                       formControlName="secondaryPhone1"
-                       maxlength="3"
-                       class="three-size" />
-              </kendo-formfield>
-              <span class="dash">-</span>
-              <kendo-formfield>
-                <input kendoTextBox
-                       id="secondaryPhone2"
-                       formControlName="secondaryPhone2"
-                       maxlength="3"
-                       class="three-size" />
-              </kendo-formfield>
-              <span class="dash">-</span>
-              <kendo-formfield>
-                <input kendoTextBox
-                       id="secondaryPhone3"
-                       formControlName="secondaryPhone3"
-                       maxlength="4"
-                       class="four-size" />
-              </kendo-formfield>
-            </div>
-          </div>
-        </div>
-
-        <!-- Row 4: Radio -->
-        <div class="form-row">
-          <label kendoLabel class="flex-item radio-modifier">
-            Type of change <sup class="text-danger asterisk">*</sup>
-          </label>
-          <kendo-formfield class="flex-item radio-fields-modifier">
-            <kendo-radiobutton formControlName="changeType"
-                               name="changeType"
-                               id="changeTypeOfficial"
-                               value="Official">
-            </kendo-radiobutton>
-            <label for="changeTypeOfficial">Official</label>
-          </kendo-formfield>
-          <kendo-formfield class="flex-item radio-fields-modifier">
-            <kendo-radiobutton formControlName="changeType"
-                               name="changeType"
-                               id="changeTypeCorrection"
-                               value="Correction">
-            </kendo-radiobutton>
-            <label for="changeTypeCorrection">Correction</label>
-          </kendo-formfield>
-        </div>
-      </div>
-    </div>
-  </form>
-
-  <!-- ADDRESS INFO FORM -->
-  <form [formGroup]="addressForm">
-    <div class="address-information-section">
-      <div class="div-header-section">
-        <input type="checkbox"
-               kendoCheckBox
-               (change)="toggleAddressInfo($event)"
-               [checked]="updateAddressChecked"
-               class="checkbox-override"/>
-        <div class="checkbox-header-level">
-          Update Address Information
-        </div>
-      </div>
-      <div class="div-content-section address-div">
-        <!-- Row 1: Preferred Radio -->
-        <div class="form-row">
-          <span class="flex-item exception-flex-item">
-            Preferred address for communication? <sup class="question-asterisk">*</sup>
-          </span>
-          <input type="radio" formControlName="preferredAddress" value="Residence" />
-          <label class="flex-item">Residence</label>
-
-          <input type="radio" formControlName="preferredAddress" value="Business" />
-          <label class="flex-item">Business</label>
-        </div>
-
-        <!-- Row 2: Residence Address -->
-        <div class="form-row">
-          <div class="flex-item" formGroupName="residenceAddress">
-            <div class="heading-and-error">
-              <div class="section-heading">
-                Residence Address (PO boxes not accepted)
-              </div>
-              <span class="error-message error-message-with-top-marg" *ngIf="submittedAddress && preferred === 'Business' && addressForm.get('residenceAddress')?.invalid">
-                Please complete all the fields or none.
-              </span>
-            </div>
-
-            <!-- Street -->
-            <div class="label-and-error-message">
-              <label class="label-and-asterisk" kendoLabel>Street Address <sup class="text-danger" [class.disable-super]="preferred==='Business'">*</sup></label>
-              <div class="error-message">
-                <span *ngIf="submittedAddress && addressForm.get('residenceAddress')?.hasError('noStreet')">
-                  Street number and Address Line are required.
-                </span>
-              </div>
-            </div>
-            <div class="form-row-no-wrap">
-              <input kendoTextBox formControlName="street1" id="street-number" placeholder="Street No." />
-              <input kendoTextBox formControlName="street2" id="address-line" placeholder="Address Line" />
-              <input kendoTextBox formControlName="street3" id="address-suffix" placeholder="Suffix" />
-            </div>
-            <div class="form-row">
-              <input kendoTextBox formControlName="street4" placeholder="Address Line 2" />
-            </div>
-
-            <!-- State / Zip -->
-            <div class="form-row state-and-zip">
-              <kendo-formfield class="flex-item">
-                <label class="label-and-asterisk" kendoLabel>
-                  State
-                  <sup class="text-danger" [class.disable-super]="preferred==='Business'">
-                    *
-                  </sup>
-                  <button kendoPopoverAnchor
-                          [popover]="pop"
-                          showOn="hover"
-                          class="village-hyperlink"
-                          kendoButton>
-                    ?
-                  </button>
-
-                  <kendo-popover #pop title="Need help?" [width]="400">
-                    <!-- this template will override the `body` property -->
-                    <ng-template kendoPopoverBodyTemplate>
-                      <p>
-                        Need help with finding the name of your Village/Neighborhood? You can
-                        <a href="https://www.sec.state.ma.us/divisions/cis/historical/archaic-names.htm"
-                           target="_blank"
-                           rel="noopener">
-                          view them here.
-                        </a>
-                      </p>
-                    </ng-template>
-                  </kendo-popover>
-                </label>
-                <kendo-dropdownlist [data]="stateOptions" [valuePrimitive]="true" formControlName="state">
-                </kendo-dropdownlist>
-                <div class="error-message">
-                  <span *ngIf="submittedAddress && addressForm.get('residenceAddress.state')?.hasError('required')">
-                    State is required.
-                  </span>
-                </div>
-              </kendo-formfield>
-              <ng-container *ngIf="cityOptions.length && addressForm.get('residenceAddress.state')?.value === 'Massachusetts'; else resCityInput">
-                <kendo-formfield class="flex-item">
-                  <label kendoLabel class="label-and-asterisk">
-                    City / Town <sup class="text-danger" [class.disable-super]="preferred==='Business'">*</sup>
-                  </label>
-                  <kendo-dropdownlist formControlName="cityTown"
-                                      [data]="cityOptions"
-                                      [valuePrimitive]="true"
-                                      textField="value"
-                                      valueField="value"
-                                      class="dynamic-dropdown">
-                  </kendo-dropdownlist>
-                  <div class="error-message">
-                    <span *ngIf="submittedAddress && addressForm.get('residenceAddress.cityTown')?.hasError('required')">
-                      City/Town is required.
-                    </span>
-                  </div>
-                </kendo-formfield>
-              </ng-container>
-
-              <ng-template #resCityInput>
-                <kendo-formfield class="flex-item">
-                  <label kendoLabel class="label-and-asterisk">
-                    City / Town <sup class="text-danger" [class.disable-super]="preferred==='Business'">*</sup>
-                  </label>
-                  <input kendoTextBox formControlName="cityTown" class="city-town-input-element" />
-                  <div class="error-message">
-                    <span *ngIf="submittedAddress && addressForm.get('residenceAddress.cityTown')?.hasError('required')">
-                      City/Town is required.
-                    </span>
-                  </div>
-                </kendo-formfield>
-              </ng-template>
-              <!-- wrap the overall label in a plain div -->
-              <div class="flex-item zip-code-field">
-                <label class="label-and-asterisk" kendoLabel>
-                  Zip Code
-                  <sup class="text-danger" [class.disable-super]="preferred==='Business'">*</sup>
-                </label>
-
-                <div class="zip-inputs">
-
-                  <!-- form-field for the 5-digit part -->
-                  <kendo-formfield>
-                    <input kendoTextBox
-                           formControlName="zipCode"
-                           class="zip-input-boxes"
-                           maxlength="5"
-                           placeholder="12345"
-                           (keypress)="allowOnlyNumbers($event)"
-                           (paste)="onZipPaste($event,'residenceAddress.zipCode')" />
-                    <!-- your existing error spans here -->
-                    <div class="error-message">
-                      <span *ngIf="submittedAddress && addressForm.get('residenceAddress.zipCode')?.hasError('required')">
-                        Zip Code is required.
-                      </span>
-                      <span *ngIf="submittedAddress && addressForm.get('residenceAddress.zipCode')?.hasError('pattern')">
-                        Must be exactly 5 digits.
-                      </span>
-                    </div>
-                  </kendo-formfield>
-
-                  <span class="hyphen">–</span>
-
-                  <!-- form-field for the 4-digit plus-4 part -->
-                  <kendo-formfield>
-                    <input kendoTextBox
-                           formControlName="zipPlus"
-                           class="zip-input-boxes"
-                           maxlength="4"
-                           placeholder="6789"
-                           (keypress)="allowOnlyNumbers($event)"
-                           (paste)="onZipPaste($event,'residenceAddress.zipPlus')" />
-                    <!-- error for just this control -->
-                    <div class="error-message">
-                      <span *ngIf="submittedAddress && addressForm.get('residenceAddress.zipPlus')?.hasError('pattern')">
-                        Enter at least 2 digits (up to 4).
-                      </span>
-                    </div>
-                  </kendo-formfield>
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Row 3: Business Address -->
-        <div class="form-row">
-          <div class="flex-item" formGroupName="businessAddress">
-            <div class="heading-and-error">
-              <div class="section-heading">
-                Business Address
-              </div>
-              <span class="error-message error-message-with-top-marg" *ngIf="submittedAddress && preferred === 'Residence' && addressForm.get('businessAddress')?.invalid">
-                Please complete all the fields or none.
-              </span>
-            </div>
-
-            <!-- Street -->
-            <div class="label-and-error-message">
-              <label class="label-and-asterisk" kendoLabel>
-                Street Address
-                <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
-                <input type="checkbox"
-                       kendoCheckBox
-                       (change)="togglePoBox($event)"
-                       [checked]="isPoBox"
-                       class="checkbox-override"
-                       [disabled]="!updateAddressChecked"/>
-                <label kendoLabel>
-                  Is this a PO Box?
-                </label>
-              </label>
-              <div class="error-message">
-                <span *ngIf="submittedAddress && addressForm.get('businessAddress')?.hasError('noStreet')">
-                  Street number and Address Line are required.
-                </span>
-              </div>
-            </div>
-            <div class="form-row-no-wrap"
-                 *ngIf="!addressForm.get('businessAddress.isPoBox')!.value; else poBoxTpl">
-              <input kendoTextBox formControlName="street1" id="street-number" placeholder="Street No." />
-              <input kendoTextBox formControlName="street2" id="address-line" placeholder="Address Line" />
-              <input kendoTextBox formControlName="street3" id="address-suffix" placeholder="Suffix" />
-            </div>
-            <ng-template #poBoxTpl>
-              <div class="form-row-no-wrap">
-                <!-- show PO Box literal -->
-                <input kendoTextBox
-                       formControlName="street2"
-                       [readonly]="true"
-                       [disabled]="true"
-                       class="po-box-label"
-                       placeholder="PO Box" />
-
-                <!-- PO Box number -->
-                <input kendoTextBox
-                       formControlName="street3"
-                       placeholder="PO Box number" />
-              </div>
-            </ng-template>
-            <div class="error-message"
-                 *ngIf="submittedAddress
-             && addressForm.get('businessAddress.isPoBox')!.value
-             && addressForm.get('businessAddress.street3')!.hasError('required')">
-              Enter some PO Box number
-            </div>
-            <div class="form-row">
-              <input kendoTextBox formControlName="street4" placeholder="Address Line 2" />
-            </div>
-
-            <!-- State / Zip -->
-            <div class="form-row state-and-zip">
-              <kendo-formfield class="flex-item">
-                <label class="label-and-asterisk" kendoLabel>
-                  State
-                  <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
-                  <button kendoPopoverAnchor
-                          [popover]="pop"
-                          showOn="hover"
-                          class="village-hyperlink"
-                          kendoButton>
-                    ?
-                  </button>
-
-                  <kendo-popover #pop title="Need help?" [width]="400">
-                    <!-- this template will override the `body` property -->
-                    <ng-template kendoPopoverBodyTemplate>
-                      <p>
-                        Need help with finding the name of your Village/Neighborhood? You can
-                        <a href="https://www.sec.state.ma.us/divisions/cis/historical/archaic-names.htm"
-                           target="_blank"
-                           rel="noopener">
-                          view them here.
-                        </a>
-                      </p>
-                    </ng-template>
-                  </kendo-popover>
-                </label>
-                <kendo-dropdownlist [data]="stateOptions" [valuePrimitive]="true" formControlName="state">
-                </kendo-dropdownlist>
-                <div class="error-message">
-                  <span *ngIf="submittedAddress && addressForm.get('businessAddress.state')?.hasError('required')">
-                    State is required.
-                  </span>
-                </div>
-              </kendo-formfield>
-              <ng-container *ngIf="cityOptions.length && addressForm.get('businessAddress.state')?.value === 'Massachusetts'; else busCityInput">
-                <kendo-formfield class="flex-item">
-                  <label kendoLabel class="label-and-asterisk">
-                    City / Town <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
-                  </label>
-                  <kendo-dropdownlist formControlName="cityTown"
-                                      [data]="cityOptions"
-                                      [valuePrimitive]="true"
-                                      textField="value"
-                                      valueField="value"
-                                      class="dynamic-dropdown">
-                  </kendo-dropdownlist>
-                  <div class="error-message">
-                    <span *ngIf="submittedAddress && addressForm.get('businessAddress.cityTown')?.hasError('required')">
-                      City/Town is required.
-                    </span>
-                  </div>
-                </kendo-formfield>
-              </ng-container>
-
-              <ng-template #busCityInput>
-                <kendo-formfield class="flex-item">
-                  <label kendoLabel class="label-and-asterisk">
-                    City / Town <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
-                  </label>
-                  <input kendoTextBox formControlName="cityTown" class="city-town-input-element" />
-                  <div class="error-message">
-                    <span *ngIf="submittedAddress && addressForm.get('businessAddress.cityTown')?.hasError('required')">
-                      City/Town is required.
-                    </span>
-                  </div>
-                </kendo-formfield>
-              </ng-template>
-              <!-- wrap the overall label in a plain div -->
-              <div class="flex-item zip-code-field">
-                <label class="label-and-asterisk" kendoLabel>
-                  Zip Code
-                  <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
-                </label>
-
-                <div class="zip-inputs">
-
-                  <!-- form-field for the 5-digit part -->
-                  <kendo-formfield>
-                    <input kendoTextBox
-                           formControlName="zipCode"
-                           class="zip-input-boxes"
-                           maxlength="5"
-                           placeholder="12345"
-                           (keypress)="allowOnlyNumbers($event)"
-                           (paste)="onZipPaste($event,'businessAddress.zipCode')" />
-                    <!-- your existing error spans here -->
-                    <div class="error-message">
-                      <span *ngIf="submittedAddress && addressForm.get('businessAddress.zipCode')?.hasError('required')">
-                        Zip Code is required.
-                      </span>
-                      <span *ngIf="submittedAddress && addressForm.get('businessAddress.zipCode')?.hasError('pattern')">
-                        Must be exactly 5 digits.
-                      </span>
-                    </div>
-                  </kendo-formfield>
-
-                  <span class="hyphen">–</span>
-
-                  <!-- form-field for the 4-digit plus-4 part -->
-                  <kendo-formfield>
-                    <input kendoTextBox
-                           formControlName="zipPlus"
-                           class="zip-input-boxes"
-                           maxlength="4"
-                           placeholder="6789"
-                           (keypress)="allowOnlyNumbers($event)"
-                           (paste)="onZipPaste($event,'businessAddress.zipPlus')" />
-                    <!-- error for just this control -->
-                    <div class="error-message">
-                      <span *ngIf="submittedAddress && addressForm.get('businessAddress.zipPlus')?.hasError('pattern')">
-                        Enter at least 2 digits (up to 4).
-                      </span>
-                    </div>
-                  </kendo-formfield>
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </form>
-</div>
-
-<!-- Single Save Button -->
-<button kendoButton (click)="onSubmit()" class="search-button">Submit</button>
-<button kendoButton (click)="onCancel()" class="custom-button-alt">Cancel</button>
-Here is the ts file: 
+So in essence when the 
+Salutation is Ms.
+First Name is Lynda
+Middle Name is Empty
+Last Name is Maisonnevee
+Suffix is Empty
+Date Of Birth is 06/18/1988
+Email Address arrived Empty but entered test@test.com
+Primary Phone is 123-456-7890
+Secondary Phone is Empty 
+Type of change is Official 
+the end UpdatePersonalProfileInformation will look somewhat like: 
+{
+  applicantId: 854053;
+  accountId: 73915 (will be available in the displayData object);
+  salutationTypeId: 5;
+  firstName: Lynda;
+  middleName: null;
+  lastName: Maisonnevee;
+  suffix: null;
+  dateOfBirth: Sat June 18 1988 00:00:00 GMT -0400 (Eastern Datlight Time);
+  dateOfDeath: null;
+  resignationDate: null;
+  isOfficalNameChange: true;
+  isNameCorrection: false;
+  contactsDto: [
+    {
+      contactId: 199935 (will be available in the displayData object);
+      applicantId: 854053;
+      contactTypeId: 1;
+      contactValue: "1234567890";
+      isPrimary: true;
+    },
+	{
+      contactId: 3354;
+      applicantId: 854053;
+      contactTypeId: 1;
+      contactValue: 1232567890;
+      isPrimary: false;
+    },
+	{
+      contactId: 0;
+      applicantId: 854053;
+      contactTypeId: 2;
+      contactValue: test@test.com;
+      isPrimary: false;
+    }
+  ]
+}
+ts file: 
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import mockData from '../../../../mockdata/mock2.json';
@@ -1179,19 +712,36 @@ export class UpdateNotaryProfileInfoComponent {
     this.addressForm.get(controlPath)?.setValue(digits);
   }
 
-  public onSubmit() {
+  public onSubmit(): void {
     this.submittedAddress = true;
-    if (this.personalForm.valid && this.addressForm.valid) {
-      const payload = {
-        personal: this.personalForm.value,
-        address: this.addressForm.value
-      };
-      console.log('Saving:', payload);
-      // …your save logic…
+    if (!this.updatePersonalChecked && !this.updateAddressChecked) {
+      return;
+    }
+    if (this.updatePersonalChecked) {
+      if (this.personalForm.valid) {
+        console.log('Personal Information:', this.personalForm.value);
+      } else {
+        console.warn('Personal form is invalid:', this.personalForm.errors);
+      }
+    }
+    if (this.updateAddressChecked) {
+      if (this.addressForm.valid) {
+        console.log('Address Information:', this.addressForm.value);
+      } else {
+        console.warn('Address form is invalid:', this.addressForm.errors);
+      }
     }
   }
 
-  public onCancel() {
-    console.log("Cancel Clicked");
+  public onCancel(): void {
+    // pull the applicantId out of your displayData
+    const applicantId = this.displayData?.personalInfoDetails?.applicantId;
+
+    // navigate back to /notary-profile/:id
+    if (applicantId != null) {
+      this.router.navigate(['/notary-profile', applicantId]);
+    } else {
+      console.error('No applicantId available to navigate back.');
+    }
   }
 }
