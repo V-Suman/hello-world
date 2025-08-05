@@ -1,3302 +1,1197 @@
-[
-  {
-    "notaryIdentifier": 771660,
-    "lastName": "Arsenio",
-    "firstName": "Jerry",
-    "middleName": "Madaline",
-    "cityTown": "West Valley",
-    "county": "Kentucky",
-    "approvalDate": "2011-03-23",
-    "createdDate": "2016-02-06",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 731502,
-    "lastName": "Harrison",
-    "firstName": "Lila",
-    "middleName": "Winifred",
-    "cityTown": "West Valley",
-    "county": "Ohio",
-    "approvalDate": "2020-01-22",
-    "createdDate": "2016-08-18",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 874828,
-    "lastName": "Barclay",
-    "firstName": "Quinn",
-    "middleName": "David",
-    "cityTown": "Newark",
-    "county": "Utah",
-    "approvalDate": "2014-12-15",
-    "createdDate": "2018-04-14",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 21830,
-    "lastName": "Xenos",
-    "firstName": "Brett",
-    "middleName": "Garrison",
-    "cityTown": "Sioux City",
-    "county": "Indiana",
-    "approvalDate": "2013-01-20",
-    "createdDate": "2017-12-31",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 905309,
-    "lastName": "Harding",
-    "firstName": "Axel",
-    "middleName": "Gareth",
-    "cityTown": "Burlington",
-    "county": "Idaho",
-    "approvalDate": "2014-06-15",
-    "createdDate": "2018-06-15",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 224235,
-    "lastName": "Jack",
-    "firstName": "Clinton",
-    "middleName": "Carly",
-    "cityTown": "Jonesboro",
-    "county": "Louisiana",
-    "approvalDate": "2018-03-21",
-    "createdDate": "2017-09-24",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 122809,
-    "lastName": "Quamar",
-    "firstName": "Jackson",
-    "middleName": "Vielka",
-    "cityTown": "Allentown",
-    "county": "Oregon",
-    "approvalDate": "2025-08-22",
-    "createdDate": "2021-12-27",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 87666,
-    "lastName": "Malachi",
-    "firstName": "Farrah",
-    "middleName": "Jamal",
-    "cityTown": "Springdale",
-    "county": "Iowa",
-    "approvalDate": "2012-03-02",
-    "createdDate": "2020-05-20",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 824871,
-    "lastName": "Carlos",
-    "firstName": "Ashely",
-    "middleName": "Sage",
-    "cityTown": "Duluth",
-    "county": "Tennessee",
-    "approvalDate": "2017-05-08",
-    "createdDate": "2018-02-17",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 182926,
-    "lastName": "Brendan",
-    "firstName": "Todd",
-    "middleName": "Branden",
-    "cityTown": "Bellevue",
-    "county": "Pennsylvania",
-    "approvalDate": "2016-06-28",
-    "createdDate": "2018-10-16",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 850945,
-    "lastName": "Aaron",
-    "firstName": "Yuri",
-    "middleName": "Naomi",
-    "cityTown": "Hartford",
-    "county": "Idaho",
-    "approvalDate": "2017-10-30",
-    "createdDate": "2014-04-14",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 495770,
-    "lastName": "George",
-    "firstName": "Ingrid",
-    "middleName": "Dahlia",
-    "cityTown": "Idaho Falls",
-    "county": "Nebraska",
-    "approvalDate": "2018-12-26",
-    "createdDate": "2016-01-11",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 742929,
-    "lastName": "Moses",
-    "firstName": "Aaron",
-    "middleName": "Gillian",
-    "cityTown": "Savannah",
-    "county": "Georgia",
-    "approvalDate": "2019-02-17",
-    "createdDate": "2015-01-10",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 952996,
-    "lastName": "Micah",
-    "firstName": "Kasper",
-    "middleName": "Rana",
-    "cityTown": "Fayetteville",
-    "county": "Arizona",
-    "approvalDate": "2010-10-31",
-    "createdDate": "2022-01-22",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 738765,
-    "lastName": "Hunter",
-    "firstName": "Colby",
-    "middleName": "Gretchen",
-    "cityTown": "Burlington",
-    "county": "California",
-    "approvalDate": "2020-09-21",
-    "createdDate": "2017-05-08",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 121420,
-    "lastName": "Fletcher",
-    "firstName": "Miranda",
-    "middleName": "Brendan",
-    "cityTown": "Montpelier",
-    "county": "Idaho",
-    "approvalDate": "2026-01-31",
-    "createdDate": "2013-08-30",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 972742,
-    "lastName": "Quentin",
-    "firstName": "Erich",
-    "middleName": "Harlan",
-    "cityTown": "Los Angeles",
-    "county": "Missouri",
-    "approvalDate": "2013-04-02",
-    "createdDate": "2012-09-15",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 266161,
-    "lastName": "Alfonso",
-    "firstName": "Azalia",
-    "middleName": "Jelani",
-    "cityTown": "Portland",
-    "county": "Colorado",
-    "approvalDate": "2024-08-18",
-    "createdDate": "2017-07-07",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 220357,
-    "lastName": "Lewis",
-    "firstName": "Cameran",
-    "middleName": "Kalia",
-    "cityTown": "Annapolis",
-    "county": "Iowa",
-    "approvalDate": "2017-03-09",
-    "createdDate": "2023-07-15",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 292591,
-    "lastName": "Derek",
-    "firstName": "Xena",
-    "middleName": "Harding",
-    "cityTown": "Joliet",
-    "county": "Indiana",
-    "approvalDate": "2021-06-16",
-    "createdDate": "2014-03-11",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 747959,
-    "lastName": "Colorado",
-    "firstName": "Moses",
-    "middleName": "Medge",
-    "cityTown": "Baltimore",
-    "county": "Ohio",
-    "approvalDate": "2019-11-04",
-    "createdDate": "2018-09-18",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 790502,
-    "lastName": "Gannon",
-    "firstName": "Robert",
-    "middleName": "Chantale",
-    "cityTown": "Tacoma",
-    "county": "Missouri",
-    "approvalDate": "2014-09-25",
-    "createdDate": "2022-12-12",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 928094,
-    "lastName": "Lucas",
-    "firstName": "Plato",
-    "middleName": "Lani",
-    "cityTown": "Paradise",
-    "county": "Minnesota",
-    "approvalDate": "2019-09-20",
-    "createdDate": "2023-04-06",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 863145,
-    "lastName": "Austin",
-    "firstName": "Cara",
-    "middleName": "Piper",
-    "cityTown": "Worcester",
-    "county": "Kansas",
-    "approvalDate": "2013-08-27",
-    "createdDate": "2020-10-29",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 790468,
-    "lastName": "Adam",
-    "firstName": "Ryan",
-    "middleName": "Yuri",
-    "cityTown": "South Portland",
-    "county": "Arizona",
-    "approvalDate": "2021-08-27",
-    "createdDate": "2021-08-31",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 939504,
-    "lastName": "Addison",
-    "firstName": "Donovan",
-    "middleName": "Winifred",
-    "cityTown": "Meridian",
-    "county": "Vermont",
-    "approvalDate": "2019-06-03",
-    "createdDate": "2024-11-03",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 406658,
-    "lastName": "Blake",
-    "firstName": "Drake",
-    "middleName": "Rana",
-    "cityTown": "Great Falls",
-    "county": "Oklahoma",
-    "approvalDate": "2015-09-15",
-    "createdDate": "2026-02-15",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 111730,
-    "lastName": "Martin",
-    "firstName": "Indigo",
-    "middleName": "Russell",
-    "cityTown": "Tucson",
-    "county": "Iowa",
-    "approvalDate": "2022-01-19",
-    "createdDate": "2025-07-15",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 83917,
-    "lastName": "Cullen",
-    "firstName": "Silas",
-    "middleName": "Lacy",
-    "cityTown": "Orlando",
-    "county": "Nebraska",
-    "approvalDate": "2017-08-18",
-    "createdDate": "2016-08-14",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 860910,
-    "lastName": "Lester",
-    "firstName": "Brielle",
-    "middleName": "Owen",
-    "cityTown": "Billings",
-    "county": "Alaska",
-    "approvalDate": "2020-02-27",
-    "createdDate": "2016-07-07",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 304208,
-    "lastName": "Rajah",
-    "firstName": "Kathleen",
-    "middleName": "Rudyard",
-    "cityTown": "Saint Paul",
-    "county": "Idaho",
-    "approvalDate": "2012-05-17",
-    "createdDate": "2015-01-29",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 38385,
-    "lastName": "Martin",
-    "firstName": "Maia",
-    "middleName": "Tad",
-    "cityTown": "Cedar Rapids",
-    "county": "California",
-    "approvalDate": "2022-04-22",
-    "createdDate": "2019-01-20",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 115746,
-    "lastName": "Drew",
-    "firstName": "Medge",
-    "middleName": "Daniel",
-    "cityTown": "Meridian",
-    "county": "Alabama",
-    "approvalDate": "2025-04-29",
-    "createdDate": "2024-04-23",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 106733,
-    "lastName": "David",
-    "firstName": "Anthony",
-    "middleName": "Cruz",
-    "cityTown": "Fairbanks",
-    "county": "Pennsylvania",
-    "approvalDate": "2009-12-05",
-    "createdDate": "2018-06-23",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 354827,
-    "lastName": "Beck",
-    "firstName": "Jenna",
-    "middleName": "Yvette",
-    "cityTown": "Bloomington",
-    "county": "Georgia",
-    "approvalDate": "2015-09-25",
-    "createdDate": "2023-06-04",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 442143,
-    "lastName": "Carson",
-    "firstName": "Jana",
-    "middleName": "Darrel",
-    "cityTown": "Boston",
-    "county": "Massachusetts",
-    "approvalDate": "2026-02-21",
-    "createdDate": "2021-05-08",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 990321,
-    "lastName": "Hammett",
-    "firstName": "Cody",
-    "middleName": "Brandon",
-    "cityTown": "Springfield",
-    "county": "Vermont",
-    "approvalDate": "2021-12-29",
-    "createdDate": "2017-04-18",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 643618,
-    "lastName": "Alfonso",
-    "firstName": "Brenden",
-    "middleName": "Pascale",
-    "cityTown": "Bloomington",
-    "county": "Indiana",
-    "approvalDate": "2012-03-20",
-    "createdDate": "2021-04-27",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 433028,
-    "lastName": "Damon",
-    "firstName": "Kai",
-    "middleName": "Winter",
-    "cityTown": "Tacoma",
-    "county": "Texas",
-    "approvalDate": "2017-11-19",
-    "createdDate": "2016-11-27",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 554763,
-    "lastName": "Gavin",
-    "firstName": "Flynn",
-    "middleName": "Charde",
-    "cityTown": "Aurora",
-    "county": "Texas",
-    "approvalDate": "2018-07-05",
-    "createdDate": "2019-11-07",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 593080,
-    "lastName": "Tobias",
-    "firstName": "Grant",
-    "middleName": "Camilla",
-    "cityTown": "Portland",
-    "county": "Kansas",
-    "approvalDate": "2025-07-02",
-    "createdDate": "2016-11-22",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 396277,
-    "lastName": "Robert",
-    "firstName": "Nathan",
-    "middleName": "Maite",
-    "cityTown": "Minneapolis",
-    "county": "Kentucky",
-    "approvalDate": "2014-04-06",
-    "createdDate": "2021-07-30",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 472899,
-    "lastName": "Gareth",
-    "firstName": "Kenneth",
-    "middleName": "Abel",
-    "cityTown": "Rochester",
-    "county": "Wyoming",
-    "approvalDate": "2024-04-14",
-    "createdDate": "2024-07-05",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 704184,
-    "lastName": "Raja",
-    "firstName": "Kenyon",
-    "middleName": "Cameron",
-    "cityTown": "Miami",
-    "county": "Ohio",
-    "approvalDate": "2018-07-20",
-    "createdDate": "2018-10-22",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 992057,
-    "lastName": "Wyatt",
-    "firstName": "Jacqueline",
-    "middleName": "Noelani",
-    "cityTown": "Davenport",
-    "county": "Ohio",
-    "approvalDate": "2012-11-22",
-    "createdDate": "2024-04-16",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 569455,
-    "lastName": "Garrett",
-    "firstName": "Hamilton",
-    "middleName": "Quyn",
-    "cityTown": "Fort Worth",
-    "county": "Kentucky",
-    "approvalDate": "2019-11-21",
-    "createdDate": "2023-08-31",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 439592,
-    "lastName": "Prescott",
-    "firstName": "Evan",
-    "middleName": "Levi",
-    "cityTown": "Houston",
-    "county": "Florida",
-    "approvalDate": "2013-02-20",
-    "createdDate": "2016-01-16",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 989832,
-    "lastName": "Oleg",
-    "firstName": "Daria",
-    "middleName": "Aurelia",
-    "cityTown": "Huntsville",
-    "county": "Minnesota",
-    "approvalDate": "2019-02-16",
-    "createdDate": "2026-01-09",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 781133,
-    "lastName": "Abel",
-    "firstName": "Chancellor",
-    "middleName": "Hall",
-    "cityTown": "Bellevue",
-    "county": "Montana",
-    "approvalDate": "2011-11-01",
-    "createdDate": "2015-03-21",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 617610,
-    "lastName": "Ira",
-    "firstName": "Carissa",
-    "middleName": "Aileen",
-    "cityTown": "Bellevue",
-    "county": "Pennsylvania",
-    "approvalDate": "2014-11-27",
-    "createdDate": "2017-02-08",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 890273,
-    "lastName": "Philip",
-    "firstName": "Isabelle",
-    "middleName": "Emily",
-    "cityTown": "Augusta",
-    "county": "Oklahoma",
-    "approvalDate": "2016-04-23",
-    "createdDate": "2020-06-23",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 302638,
-    "lastName": "Howard",
-    "firstName": "Jessamine",
-    "middleName": "Kermit",
-    "cityTown": "Miami",
-    "county": "Arkansas",
-    "approvalDate": "2011-05-11",
-    "createdDate": "2013-04-11",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 644817,
-    "lastName": "Vance",
-    "firstName": "Elizabeth",
-    "middleName": "Kevin",
-    "cityTown": "Norfolk",
-    "county": "Louisiana",
-    "approvalDate": "2021-05-17",
-    "createdDate": "2018-10-20",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 895172,
-    "lastName": "Edward",
-    "firstName": "Adrian",
-    "middleName": "Lucas",
-    "cityTown": "Meridian",
-    "county": "Tennessee",
-    "approvalDate": "2016-10-16",
-    "createdDate": "2025-07-03",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 88543,
-    "lastName": "Hiram",
-    "firstName": "Shaeleigh",
-    "middleName": "Stacey",
-    "cityTown": "Montgomery",
-    "county": "California",
-    "approvalDate": "2011-08-26",
-    "createdDate": "2021-04-23",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 343625,
-    "lastName": "Timon",
-    "firstName": "Doris",
-    "middleName": "Xenos",
-    "cityTown": "Springdale",
-    "county": "California",
-    "approvalDate": "2015-10-06",
-    "createdDate": "2017-11-04",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 837637,
-    "lastName": "Hunter",
-    "firstName": "Dante",
-    "middleName": "Lareina",
-    "cityTown": "West Jordan",
-    "county": "Louisiana",
-    "approvalDate": "2022-03-09",
-    "createdDate": "2017-05-23",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 332705,
-    "lastName": "Anthony",
-    "firstName": "Giselle",
-    "middleName": "Dalton",
-    "cityTown": "Hillsboro",
-    "county": "Idaho",
-    "approvalDate": "2022-04-27",
-    "createdDate": "2018-12-10",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 93766,
-    "lastName": "Jackson",
-    "firstName": "Zephr",
-    "middleName": "Cooper",
-    "cityTown": "Great Falls",
-    "county": "Iowa",
-    "approvalDate": "2009-06-13",
-    "createdDate": "2023-09-23",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 694361,
-    "lastName": "Steel",
-    "firstName": "Delilah",
-    "middleName": "Riley",
-    "cityTown": "Oklahoma City",
-    "county": "Alabama",
-    "approvalDate": "2017-07-20",
-    "createdDate": "2021-07-13",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 983040,
-    "lastName": "Jermaine",
-    "firstName": "Daria",
-    "middleName": "Germaine",
-    "cityTown": "Vancouver",
-    "county": "Wisconsin",
-    "approvalDate": "2010-02-19",
-    "createdDate": "2014-10-10",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 556036,
-    "lastName": "Wyatt",
-    "firstName": "Odysseus",
-    "middleName": "Victoria",
-    "cityTown": "Los Angeles",
-    "county": "Idaho",
-    "approvalDate": "2016-06-24",
-    "createdDate": "2021-12-25",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 757939,
-    "lastName": "Tarik",
-    "firstName": "Iola",
-    "middleName": "Brenden",
-    "cityTown": "Lowell",
-    "county": "Oregon",
-    "approvalDate": "2009-05-31",
-    "createdDate": "2023-10-12",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 895149,
-    "lastName": "Flynn",
-    "firstName": "Griffith",
-    "middleName": "Thaddeus",
-    "cityTown": "Orlando",
-    "county": "Pennsylvania",
-    "approvalDate": "2009-10-05",
-    "createdDate": "2021-04-22",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 20864,
-    "lastName": "Phelan",
-    "firstName": "Jerome",
-    "middleName": "Cameron",
-    "cityTown": "Sioux City",
-    "county": "Hawaii",
-    "approvalDate": "2023-06-30",
-    "createdDate": "2025-04-30",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 933539,
-    "lastName": "Zane",
-    "firstName": "Lesley",
-    "middleName": "Cody",
-    "cityTown": "Henderson",
-    "county": "Virginia",
-    "approvalDate": "2019-11-08",
-    "createdDate": "2014-02-02",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 416733,
-    "lastName": "Kibo",
-    "firstName": "Jerry",
-    "middleName": "Wyoming",
-    "cityTown": "South Burlington",
-    "county": "Oregon",
-    "approvalDate": "2023-07-22",
-    "createdDate": "2023-05-13",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 907343,
-    "lastName": "Jelani",
-    "firstName": "Fuller",
-    "middleName": "Rogan",
-    "cityTown": "Kenosha",
-    "county": "Maine",
-    "approvalDate": "2013-05-24",
-    "createdDate": "2017-07-23",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 815236,
-    "lastName": "Warren",
-    "firstName": "Josiah",
-    "middleName": "Madeline",
-    "cityTown": "Sioux City",
-    "county": "Nevada",
-    "approvalDate": "2011-02-06",
-    "createdDate": "2024-10-06",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 126392,
-    "lastName": "Gary",
-    "firstName": "Liberty",
-    "middleName": "Signe",
-    "cityTown": "Saint Paul",
-    "county": "Texas",
-    "approvalDate": "2017-01-05",
-    "createdDate": "2020-08-06",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 878399,
-    "lastName": "Victor",
-    "firstName": "Cleo",
-    "middleName": "Jade",
-    "cityTown": "Bellevue",
-    "county": "Wyoming",
-    "approvalDate": "2025-05-26",
-    "createdDate": "2014-03-29",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 791854,
-    "lastName": "Hasad",
-    "firstName": "Fulton",
-    "middleName": "Hoyt",
-    "cityTown": "Kearney",
-    "county": "Michigan",
-    "approvalDate": "2024-07-03",
-    "createdDate": "2025-10-20",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 632006,
-    "lastName": "Thor",
-    "firstName": "Bianca",
-    "middleName": "Carly",
-    "cityTown": "Fresno",
-    "county": "Florida",
-    "approvalDate": "2025-06-05",
-    "createdDate": "2019-04-29",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 963812,
-    "lastName": "Ronan",
-    "firstName": "Nell",
-    "middleName": "India",
-    "cityTown": "Topeka",
-    "county": "Illinois",
-    "approvalDate": "2022-05-29",
-    "createdDate": "2012-10-08",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 307383,
-    "lastName": "Jared",
-    "firstName": "Rhoda",
-    "middleName": "Olympia",
-    "cityTown": "Lafayette",
-    "county": "Michigan",
-    "approvalDate": "2022-09-24",
-    "createdDate": "2015-10-20",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 68305,
-    "lastName": "Brock",
-    "firstName": "Evan",
-    "middleName": "Preston",
-    "cityTown": "Tulsa",
-    "county": "Kansas",
-    "approvalDate": "2020-05-12",
-    "createdDate": "2021-11-15",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 668106,
-    "lastName": "Christian",
-    "firstName": "Wade",
-    "middleName": "May",
-    "cityTown": "Sterling Heights",
-    "county": "Kansas",
-    "approvalDate": "2012-05-19",
-    "createdDate": "2023-08-12",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 22953,
-    "lastName": "Drake",
-    "firstName": "Amela",
-    "middleName": "Hyatt",
-    "cityTown": "Aurora",
-    "county": "Indiana",
-    "approvalDate": "2017-06-06",
-    "createdDate": "2025-02-06",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 852066,
-    "lastName": "Ryder",
-    "firstName": "Grace",
-    "middleName": "Garrett",
-    "cityTown": "Allentown",
-    "county": "Louisiana",
-    "approvalDate": "2018-02-01",
-    "createdDate": "2012-08-25",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 677048,
-    "lastName": "Zane",
-    "firstName": "Kenneth",
-    "middleName": "Brennan",
-    "cityTown": "West Jordan",
-    "county": "Kentucky",
-    "approvalDate": "2010-10-18",
-    "createdDate": "2022-08-04",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 994880,
-    "lastName": "Alexander",
-    "firstName": "Jolene",
-    "middleName": "Keaton",
-    "cityTown": "Wyoming",
-    "county": "Maryland",
-    "approvalDate": "2021-06-15",
-    "createdDate": "2024-09-19",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 194475,
-    "lastName": "Brady",
-    "firstName": "Felix",
-    "middleName": "Samuel",
-    "cityTown": "Davenport",
-    "county": "Florida",
-    "approvalDate": "2014-03-27",
-    "createdDate": "2013-12-22",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 388245,
-    "lastName": "Talon",
-    "firstName": "Olga",
-    "middleName": "Charde",
-    "cityTown": "Tuscaloosa",
-    "county": "Arkansas",
-    "approvalDate": "2015-06-27",
-    "createdDate": "2013-01-26",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 667274,
-    "lastName": "Carlos",
-    "firstName": "Zelda",
-    "middleName": "Addison",
-    "cityTown": "Missoula",
-    "county": "Oregon",
-    "approvalDate": "2023-05-16",
-    "createdDate": "2016-12-22",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 955583,
-    "lastName": "Hector",
-    "firstName": "Ali",
-    "middleName": "Melissa",
-    "cityTown": "Idaho Falls",
-    "county": "Maine",
-    "approvalDate": "2023-09-13",
-    "createdDate": "2026-02-19",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 849318,
-    "lastName": "Fuller",
-    "firstName": "Shelly",
-    "middleName": "Gwendolyn",
-    "cityTown": "Columbia",
-    "county": "Missouri",
-    "approvalDate": "2025-09-08",
-    "createdDate": "2025-11-03",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 544914,
-    "lastName": "Arthur",
-    "firstName": "Callie",
-    "middleName": "Yardley",
-    "cityTown": "Orlando",
-    "county": "Tennessee",
-    "approvalDate": "2010-01-22",
-    "createdDate": "2018-10-24",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 262502,
-    "lastName": "Aidan",
-    "firstName": "Hayden",
-    "middleName": "Cody",
-    "cityTown": "Phoenix",
-    "county": "Tennessee",
-    "approvalDate": "2019-08-04",
-    "createdDate": "2019-12-04",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 127439,
-    "lastName": "Colin",
-    "firstName": "Bo",
-    "middleName": "Lila",
-    "cityTown": "Knoxville",
-    "county": "Connecticut",
-    "approvalDate": "2022-04-23",
-    "createdDate": "2018-07-16",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 976611,
-    "lastName": "Perry",
-    "firstName": "Charissa",
-    "middleName": "Jacqueline",
-    "cityTown": "New Haven",
-    "county": "Colorado",
-    "approvalDate": "2017-01-08",
-    "createdDate": "2021-08-24",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 927832,
-    "lastName": "Harrison",
-    "firstName": "Wesley",
-    "middleName": "Kennedy",
-    "cityTown": "New Haven",
-    "county": "Arkansas",
-    "approvalDate": "2022-12-24",
-    "createdDate": "2025-04-27",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 779568,
-    "lastName": "Xanthus",
-    "firstName": "Bryar",
-    "middleName": "William",
-    "cityTown": "San Jose",
-    "county": "Michigan",
-    "approvalDate": "2023-01-07",
-    "createdDate": "2013-11-26",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 452062,
-    "lastName": "Colton",
-    "firstName": "Whitney",
-    "middleName": "Amethyst",
-    "cityTown": "Kailua",
-    "county": "Tennessee",
-    "approvalDate": "2020-05-05",
-    "createdDate": "2021-03-02",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 116787,
-    "lastName": "Trevor",
-    "firstName": "Rebecca",
-    "middleName": "Zeph",
-    "cityTown": "Wilmington",
-    "county": "Nevada",
-    "approvalDate": "2021-03-16",
-    "createdDate": "2021-12-25",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 75746,
-    "lastName": "Thor",
-    "firstName": "Claudia",
-    "middleName": "Felix",
-    "cityTown": "Little Rock",
-    "county": "Pennsylvania",
-    "approvalDate": "2019-07-12",
-    "createdDate": "2015-01-22",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 591620,
-    "lastName": "Grant",
-    "firstName": "Hollee",
-    "middleName": "Renee",
-    "cityTown": "Lincoln",
-    "county": "Arkansas",
-    "approvalDate": "2011-03-12",
-    "createdDate": "2025-03-23",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 850273,
-    "lastName": "Elton",
-    "firstName": "Mariam",
-    "middleName": "Cailin",
-    "cityTown": "Athens",
-    "county": "Pennsylvania",
-    "approvalDate": "2013-12-06",
-    "createdDate": "2022-05-17",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 561966,
-    "lastName": "Simon",
-    "firstName": "Holmes",
-    "middleName": "Anne",
-    "cityTown": "Chattanooga",
-    "county": "Kentucky",
-    "approvalDate": "2016-01-06",
-    "createdDate": "2017-12-15",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 866578,
-    "lastName": "Zephania",
-    "firstName": "Adria",
-    "middleName": "Donovan",
-    "cityTown": "Oklahoma City",
-    "county": "Idaho",
-    "approvalDate": "2016-12-07",
-    "createdDate": "2022-01-12",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 531782,
-    "lastName": "Ira",
-    "firstName": "Zenaida",
-    "middleName": "Riley",
-    "cityTown": "Hilo",
-    "county": "Oregon",
-    "approvalDate": "2016-04-01",
-    "createdDate": "2020-05-10",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 925623,
-    "lastName": "Norman",
-    "firstName": "Emi",
-    "middleName": "Quintessa",
-    "cityTown": "Wilmington",
-    "county": "Arkansas",
-    "approvalDate": "2022-01-26",
-    "createdDate": "2019-02-18",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 304108,
-    "lastName": "Sean",
-    "firstName": "Laurel",
-    "middleName": "Marsden",
-    "cityTown": "Lawton",
-    "county": "Hawaii",
-    "approvalDate": "2020-12-20",
-    "createdDate": "2023-10-19",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 13452,
-    "lastName": "Ishmael",
-    "firstName": "Sylvester",
-    "middleName": "Montana",
-    "cityTown": "Springfield",
-    "county": "Illinois",
-    "approvalDate": "2016-10-24",
-    "createdDate": "2013-04-11",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 110859,
-    "lastName": "Isaiah",
-    "firstName": "Melvin",
-    "middleName": "Zane",
-    "cityTown": "Warren",
-    "county": "Pennsylvania",
-    "approvalDate": "2022-05-05",
-    "createdDate": "2019-07-03",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 173546,
-    "lastName": "Malcolm",
-    "firstName": "Tate",
-    "middleName": "Cedric",
-    "cityTown": "Topeka",
-    "county": "Nebraska",
-    "approvalDate": "2022-06-06",
-    "createdDate": "2016-02-25",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 552899,
-    "lastName": "Marsden",
-    "firstName": "Xavier",
-    "middleName": "Calvin",
-    "cityTown": "Nashville",
-    "county": "Connecticut",
-    "approvalDate": "2020-04-09",
-    "createdDate": "2015-09-17",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 140536,
-    "lastName": "Jelani",
-    "firstName": "Avram",
-    "middleName": "Heather",
-    "cityTown": "Newark",
-    "county": "Pennsylvania",
-    "approvalDate": "2018-03-24",
-    "createdDate": "2024-12-31",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 840047,
-    "lastName": "Talon",
-    "firstName": "Hayfa",
-    "middleName": "Wade",
-    "cityTown": "Waterbury",
-    "county": "Kentucky",
-    "approvalDate": "2015-06-30",
-    "createdDate": "2023-12-06",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 679581,
-    "lastName": "Trevor",
-    "firstName": "Robin",
-    "middleName": "Claire",
-    "cityTown": "Fort Wayne",
-    "county": "Georgia",
-    "approvalDate": "2016-09-25",
-    "createdDate": "2012-06-13",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 582913,
-    "lastName": "Brendan",
-    "firstName": "Regina",
-    "middleName": "Odessa",
-    "cityTown": "Allentown",
-    "county": "Massachusetts",
-    "approvalDate": "2019-02-23",
-    "createdDate": "2023-12-01",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 25523,
-    "lastName": "Murphy",
-    "firstName": "Adria",
-    "middleName": "Ferris",
-    "cityTown": "Bloomington",
-    "county": "Delaware",
-    "approvalDate": "2013-02-23",
-    "createdDate": "2019-07-14",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 138940,
-    "lastName": "Robert",
-    "firstName": "Larissa",
-    "middleName": "Keith",
-    "cityTown": "San Jose",
-    "county": "Mississippi",
-    "approvalDate": "2022-06-06",
-    "createdDate": "2026-03-10",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 553442,
-    "lastName": "Hoyt",
-    "firstName": "TaShya",
-    "middleName": "Jacob",
-    "cityTown": "Atlanta",
-    "county": "Maryland",
-    "approvalDate": "2010-04-21",
-    "createdDate": "2021-09-16",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 404366,
-    "lastName": "Raja",
-    "firstName": "Odysseus",
-    "middleName": "Thaddeus",
-    "cityTown": "New Orleans",
-    "county": "Indiana",
-    "approvalDate": "2015-09-21",
-    "createdDate": "2020-04-16",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 787354,
-    "lastName": "Honorato",
-    "firstName": "Grace",
-    "middleName": "Ahmed",
-    "cityTown": "Glendale",
-    "county": "Nebraska",
-    "approvalDate": "2026-05-09",
-    "createdDate": "2021-06-12",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 966625,
-    "lastName": "Tobias",
-    "firstName": "Jena",
-    "middleName": "Mara",
-    "cityTown": "Evansville",
-    "county": "Arkansas",
-    "approvalDate": "2014-10-05",
-    "createdDate": "2019-09-15",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 883593,
-    "lastName": "Leo",
-    "firstName": "Quon",
-    "middleName": "Dieter",
-    "cityTown": "Detroit",
-    "county": "Vermont",
-    "approvalDate": "2022-03-25",
-    "createdDate": "2019-09-13",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 420388,
-    "lastName": "Emery",
-    "firstName": "Gage",
-    "middleName": "Farrah",
-    "cityTown": "Fort Worth",
-    "county": "Arkansas",
-    "approvalDate": "2024-01-04",
-    "createdDate": "2023-01-19",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 458943,
-    "lastName": "Holmes",
-    "firstName": "Anthony",
-    "middleName": "Gail",
-    "cityTown": "Grand Island",
-    "county": "Iowa",
-    "approvalDate": "2012-10-04",
-    "createdDate": "2022-08-17",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 180996,
-    "lastName": "Colorado",
-    "firstName": "Summer",
-    "middleName": "Martin",
-    "cityTown": "Idaho Falls",
-    "county": "Alabama",
-    "approvalDate": "2019-05-17",
-    "createdDate": "2020-09-30",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 518694,
-    "lastName": "Zephania",
-    "firstName": "Heidi",
-    "middleName": "Kaitlin",
-    "cityTown": "Meridian",
-    "county": "Alabama",
-    "approvalDate": "2025-03-29",
-    "createdDate": "2022-11-02",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 58175,
-    "lastName": "Davis",
-    "firstName": "Dillon",
-    "middleName": "Katelyn",
-    "cityTown": "Topeka",
-    "county": "Ohio",
-    "approvalDate": "2011-02-22",
-    "createdDate": "2017-11-15",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 375366,
-    "lastName": "Arthur",
-    "firstName": "Teagan",
-    "middleName": "Yen",
-    "cityTown": "Fairbanks",
-    "county": "Tennessee",
-    "approvalDate": "2024-11-02",
-    "createdDate": "2022-04-14",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 55918,
-    "lastName": "Solomon",
-    "firstName": "Nero",
-    "middleName": "Jana",
-    "cityTown": "Fayetteville",
-    "county": "Mississippi",
-    "approvalDate": "2012-12-18",
-    "createdDate": "2012-12-22",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 362160,
-    "lastName": "Theodore",
-    "firstName": "Adena",
-    "middleName": "Lev",
-    "cityTown": "Aurora",
-    "county": "Arkansas",
-    "approvalDate": "2023-12-11",
-    "createdDate": "2023-10-14",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 439451,
-    "lastName": "Solomon",
-    "firstName": "Margaret",
-    "middleName": "Vivian",
-    "cityTown": "Colorado Springs",
-    "county": "Kentucky",
-    "approvalDate": "2018-02-08",
-    "createdDate": "2026-02-13",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 12153,
-    "lastName": "Knox",
-    "firstName": "Jamalia",
-    "middleName": "Dennis",
-    "cityTown": "Dallas",
-    "county": "Oklahoma",
-    "approvalDate": "2011-06-21",
-    "createdDate": "2019-12-02",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 946039,
-    "lastName": "Holmes",
-    "firstName": "Zephania",
-    "middleName": "Flynn",
-    "cityTown": "Billings",
-    "county": "Louisiana",
-    "approvalDate": "2012-09-23",
-    "createdDate": "2019-01-26",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 48701,
-    "lastName": "Dorian",
-    "firstName": "Tarik",
-    "middleName": "Orson",
-    "cityTown": "Eugene",
-    "county": "Wyoming",
-    "approvalDate": "2012-12-08",
-    "createdDate": "2015-12-10",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 240524,
-    "lastName": "Chaim",
-    "firstName": "Ciara",
-    "middleName": "Lester",
-    "cityTown": "Hillsboro",
-    "county": "Kansas",
-    "approvalDate": "2017-06-20",
-    "createdDate": "2020-03-04",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 428213,
-    "lastName": "Malachi",
-    "firstName": "Madaline",
-    "middleName": "Jameson",
-    "cityTown": "Casper",
-    "county": "Missouri",
-    "approvalDate": "2011-05-05",
-    "createdDate": "2023-09-25",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 95685,
-    "lastName": "Gage",
-    "firstName": "Dawn",
-    "middleName": "Ann",
-    "cityTown": "Newark",
-    "county": "Michigan",
-    "approvalDate": "2021-02-26",
-    "createdDate": "2013-02-04",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 866757,
-    "lastName": "Reese",
-    "firstName": "Amir",
-    "middleName": "Stacey",
-    "cityTown": "Vancouver",
-    "county": "Wyoming",
-    "approvalDate": "2019-09-09",
-    "createdDate": "2016-08-02",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 903284,
-    "lastName": "Maxwell",
-    "firstName": "Solomon",
-    "middleName": "Kevyn",
-    "cityTown": "Philadelphia",
-    "county": "Ohio",
-    "approvalDate": "2010-11-06",
-    "createdDate": "2013-09-10",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 944459,
-    "lastName": "Ira",
-    "firstName": "Xander",
-    "middleName": "Martena",
-    "cityTown": "Tacoma",
-    "county": "Indiana",
-    "approvalDate": "2016-04-02",
-    "createdDate": "2023-07-04",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 162804,
-    "lastName": "Paul",
-    "firstName": "Calvin",
-    "middleName": "Violet",
-    "cityTown": "Billings",
-    "county": "Vermont",
-    "approvalDate": "2023-01-03",
-    "createdDate": "2020-08-30",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 400832,
-    "lastName": "Dillon",
-    "firstName": "Ray",
-    "middleName": "Hanae",
-    "cityTown": "Kapolei",
-    "county": "Nevada",
-    "approvalDate": "2012-06-06",
-    "createdDate": "2014-11-19",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 365958,
-    "lastName": "Lionel",
-    "firstName": "Garrett",
-    "middleName": "Lionel",
-    "cityTown": "Orlando",
-    "county": "Montana",
-    "approvalDate": "2024-06-05",
-    "createdDate": "2021-05-25",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 479209,
-    "lastName": "Kato",
-    "firstName": "Maggie",
-    "middleName": "Kevin",
-    "cityTown": "Anchorage",
-    "county": "Missouri",
-    "approvalDate": "2024-10-09",
-    "createdDate": "2013-07-26",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 746961,
-    "lastName": "Jeremy",
-    "firstName": "Adam",
-    "middleName": "Damian",
-    "cityTown": "South Bend",
-    "county": "Idaho",
-    "approvalDate": "2025-02-04",
-    "createdDate": "2019-01-01",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 249908,
-    "lastName": "Uriah",
-    "firstName": "Odysseus",
-    "middleName": "Kelsie",
-    "cityTown": "Oklahoma City",
-    "county": "Alabama",
-    "approvalDate": "2011-09-26",
-    "createdDate": "2020-07-22",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 637944,
-    "lastName": "Dorian",
-    "firstName": "Althea",
-    "middleName": "Phyllis",
-    "cityTown": "Newport News",
-    "county": "Washington",
-    "approvalDate": "2011-12-19",
-    "createdDate": "2020-01-11",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 638532,
-    "lastName": "Timon",
-    "firstName": "Kay",
-    "middleName": "Melissa",
-    "cityTown": "Tallahassee",
-    "county": "Georgia",
-    "approvalDate": "2016-04-14",
-    "createdDate": "2022-07-11",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 533140,
-    "lastName": "Dylan",
-    "firstName": "Chastity",
-    "middleName": "Prescott",
-    "cityTown": "Great Falls",
-    "county": "Wisconsin",
-    "approvalDate": "2025-10-20",
-    "createdDate": "2026-02-03",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 611468,
-    "lastName": "Fuller",
-    "firstName": "Matthew",
-    "middleName": "Lacota",
-    "cityTown": "Chandler",
-    "county": "Pennsylvania",
-    "approvalDate": "2019-07-12",
-    "createdDate": "2025-01-21",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 332394,
-    "lastName": "Acton",
-    "firstName": "Connor",
-    "middleName": "Ruth",
-    "cityTown": "Nashville",
-    "county": "Kentucky",
-    "approvalDate": "2015-05-21",
-    "createdDate": "2020-06-22",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 906042,
-    "lastName": "Trevor",
-    "firstName": "Ivana",
-    "middleName": "Knox",
-    "cityTown": "Topeka",
-    "county": "Connecticut",
-    "approvalDate": "2013-07-06",
-    "createdDate": "2015-09-15",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 487331,
-    "lastName": "Emmanuel",
-    "firstName": "Mona",
-    "middleName": "Amanda",
-    "cityTown": "Great Falls",
-    "county": "Nebraska",
-    "approvalDate": "2019-07-22",
-    "createdDate": "2015-04-19",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 240262,
-    "lastName": "Roth",
-    "firstName": "Xena",
-    "middleName": "Halla",
-    "cityTown": "San Diego",
-    "county": "Arkansas",
-    "approvalDate": "2026-03-30",
-    "createdDate": "2025-07-29",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 28334,
-    "lastName": "Cade",
-    "firstName": "Graham",
-    "middleName": "Barbara",
-    "cityTown": "Stamford",
-    "county": "Massachusetts",
-    "approvalDate": "2013-03-12",
-    "createdDate": "2013-01-08",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 721987,
-    "lastName": "Joseph",
-    "firstName": "Brynn",
-    "middleName": "Ivan",
-    "cityTown": "Tallahassee",
-    "county": "Hawaii",
-    "approvalDate": "2022-12-25",
-    "createdDate": "2016-01-16",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 857910,
-    "lastName": "Brody",
-    "firstName": "Micah",
-    "middleName": "Lesley",
-    "cityTown": "Fairbanks",
-    "county": "Louisiana",
-    "approvalDate": "2019-11-13",
-    "createdDate": "2023-08-18",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 854423,
-    "lastName": "Kermit",
-    "firstName": "Grant",
-    "middleName": "Wallace",
-    "cityTown": "Saint Louis",
-    "county": "Oklahoma",
-    "approvalDate": "2015-11-04",
-    "createdDate": "2019-06-30",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 61091,
-    "lastName": "Nehru",
-    "firstName": "Grace",
-    "middleName": "Aidan",
-    "cityTown": "Kapolei",
-    "county": "Colorado",
-    "approvalDate": "2020-01-17",
-    "createdDate": "2021-03-12",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 831950,
-    "lastName": "Nicholas",
-    "firstName": "Colin",
-    "middleName": "Ciaran",
-    "cityTown": "Helena",
-    "county": "Maine",
-    "approvalDate": "2024-02-02",
-    "createdDate": "2017-11-18",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 633354,
-    "lastName": "Adam",
-    "firstName": "Nolan",
-    "middleName": "Keefe",
-    "cityTown": "Reno",
-    "county": "Connecticut",
-    "approvalDate": "2022-11-09",
-    "createdDate": "2022-10-23",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 502850,
-    "lastName": "Carter",
-    "firstName": "Zachary",
-    "middleName": "Brynne",
-    "cityTown": "Metairie",
-    "county": "Colorado",
-    "approvalDate": "2026-03-10",
-    "createdDate": "2013-12-11",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 292216,
-    "lastName": "Leo",
-    "firstName": "Quinn",
-    "middleName": "Arthur",
-    "cityTown": "Topeka",
-    "county": "Kentucky",
-    "approvalDate": "2025-07-17",
-    "createdDate": "2014-02-28",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 44814,
-    "lastName": "Chaney",
-    "firstName": "Chester",
-    "middleName": "Constance",
-    "cityTown": "Detroit",
-    "county": "Massachusetts",
-    "approvalDate": "2013-05-13",
-    "createdDate": "2022-05-28",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 176468,
-    "lastName": "Yardley",
-    "firstName": "Neve",
-    "middleName": "Keith",
-    "cityTown": "Sacramento",
-    "county": "Connecticut",
-    "approvalDate": "2011-01-19",
-    "createdDate": "2016-04-01",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 470691,
-    "lastName": "Kareem",
-    "firstName": "Paul",
-    "middleName": "Cally",
-    "cityTown": "Phoenix",
-    "county": "Wisconsin",
-    "approvalDate": "2016-01-20",
-    "createdDate": "2017-03-08",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 47366,
-    "lastName": "Cooper",
-    "firstName": "Clare",
-    "middleName": "Palmer",
-    "cityTown": "Naperville",
-    "county": "Ohio",
-    "approvalDate": "2021-08-29",
-    "createdDate": "2020-06-30",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 733224,
-    "lastName": "Daniel",
-    "firstName": "Arden",
-    "middleName": "Myra",
-    "cityTown": "Phoenix",
-    "county": "Alabama",
-    "approvalDate": "2018-06-28",
-    "createdDate": "2020-05-18",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 448292,
-    "lastName": "Marsden",
-    "firstName": "Gary",
-    "middleName": "Felix",
-    "cityTown": "Bellevue",
-    "county": "Georgia",
-    "approvalDate": "2020-08-29",
-    "createdDate": "2012-10-14",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 584948,
-    "lastName": "Moses",
-    "firstName": "Cassandra",
-    "middleName": "Wing",
-    "cityTown": "Bangor",
-    "county": "Washington",
-    "approvalDate": "2011-11-29",
-    "createdDate": "2024-01-10",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 841664,
-    "lastName": "Brendan",
-    "firstName": "Shelly",
-    "middleName": "Adrian",
-    "cityTown": "Cleveland",
-    "county": "Hawaii",
-    "approvalDate": "2026-01-12",
-    "createdDate": "2025-12-16",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 184590,
-    "lastName": "Caleb",
-    "firstName": "Adam",
-    "middleName": "Destiny",
-    "cityTown": "Duluth",
-    "county": "Kansas",
-    "approvalDate": "2009-06-16",
-    "createdDate": "2016-11-05",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 317218,
-    "lastName": "Graiden",
-    "firstName": "Sydnee",
-    "middleName": "Isabelle",
-    "cityTown": "Denver",
-    "county": "Alabama",
-    "approvalDate": "2017-06-06",
-    "createdDate": "2024-08-25",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 633205,
-    "lastName": "Wesley",
-    "firstName": "Raymond",
-    "middleName": "Fleur",
-    "cityTown": "Overland Park",
-    "county": "Utah",
-    "approvalDate": "2021-07-03",
-    "createdDate": "2025-08-14",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 945338,
-    "lastName": "Sylvester",
-    "firstName": "Jermaine",
-    "middleName": "Jarrod",
-    "cityTown": "Eugene",
-    "county": "Arizona",
-    "approvalDate": "2021-01-06",
-    "createdDate": "2025-11-17",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 455623,
-    "lastName": "Kenneth",
-    "firstName": "Lacota",
-    "middleName": "Thane",
-    "cityTown": "Juneau",
-    "county": "Montana",
-    "approvalDate": "2013-04-23",
-    "createdDate": "2020-02-24",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 60814,
-    "lastName": "Donovan",
-    "firstName": "Echo",
-    "middleName": "Naomi",
-    "cityTown": "Juneau",
-    "county": "Vermont",
-    "approvalDate": "2020-10-06",
-    "createdDate": "2016-03-12",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 195019,
-    "lastName": "Leo",
-    "firstName": "Ferris",
-    "middleName": "Mariko",
-    "cityTown": "Dallas",
-    "county": "Mississippi",
-    "approvalDate": "2016-07-16",
-    "createdDate": "2015-06-02",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 645672,
-    "lastName": "Lance",
-    "firstName": "Ainsley",
-    "middleName": "Guinevere",
-    "cityTown": "Hilo",
-    "county": "Texas",
-    "approvalDate": "2017-10-16",
-    "createdDate": "2015-05-15",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 452069,
-    "lastName": "Dieter",
-    "firstName": "Penelope",
-    "middleName": "Dustin",
-    "cityTown": "Meridian",
-    "county": "Massachusetts",
-    "approvalDate": "2015-12-24",
-    "createdDate": "2021-07-21",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 874040,
-    "lastName": "Raja",
-    "firstName": "Nichole",
-    "middleName": "Rooney",
-    "cityTown": "Madison",
-    "county": "Wyoming",
-    "approvalDate": "2012-11-16",
-    "createdDate": "2020-09-19",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 392469,
-    "lastName": "Dustin",
-    "firstName": "Amity",
-    "middleName": "Jeanette",
-    "cityTown": "San Diego",
-    "county": "Nevada",
-    "approvalDate": "2015-04-24",
-    "createdDate": "2014-07-21",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 188142,
-    "lastName": "Jason",
-    "firstName": "Noelle",
-    "middleName": "Channing",
-    "cityTown": "Tuscaloosa",
-    "county": "Virginia",
-    "approvalDate": "2025-05-27",
-    "createdDate": "2024-12-20",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 583463,
-    "lastName": "Ishmael",
-    "firstName": "Wyatt",
-    "middleName": "Nell",
-    "cityTown": "Las Vegas",
-    "county": "Texas",
-    "approvalDate": "2021-08-11",
-    "createdDate": "2018-02-02",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 335690,
-    "lastName": "Quamar",
-    "firstName": "Jared",
-    "middleName": "Imelda",
-    "cityTown": "Overland Park",
-    "county": "Ohio",
-    "approvalDate": "2016-09-15",
-    "createdDate": "2021-11-07",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 901754,
-    "lastName": "Keegan",
-    "firstName": "Armand",
-    "middleName": "Ann",
-    "cityTown": "Henderson",
-    "county": "Arizona",
-    "approvalDate": "2024-02-19",
-    "createdDate": "2019-04-13",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 837901,
-    "lastName": "Jelani",
-    "firstName": "Imelda",
-    "middleName": "Allen",
-    "cityTown": "Fayetteville",
-    "county": "Montana",
-    "approvalDate": "2023-01-30",
-    "createdDate": "2017-06-29",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 372432,
-    "lastName": "Tobias",
-    "firstName": "Sawyer",
-    "middleName": "Cleo",
-    "cityTown": "Rock Springs",
-    "county": "Illinois",
-    "approvalDate": "2021-09-19",
-    "createdDate": "2016-12-21",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 450616,
-    "lastName": "Clinton",
-    "firstName": "Inez",
-    "middleName": "Solomon",
-    "cityTown": "Boston",
-    "county": "Montana",
-    "approvalDate": "2009-12-25",
-    "createdDate": "2025-04-02",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 611389,
-    "lastName": "Rogan",
-    "firstName": "Nayda",
-    "middleName": "Nina",
-    "cityTown": "Lewiston",
-    "county": "Connecticut",
-    "approvalDate": "2012-12-24",
-    "createdDate": "2018-09-04",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 831866,
-    "lastName": "Yasir",
-    "firstName": "John",
-    "middleName": "Murphy",
-    "cityTown": "Juneau",
-    "county": "Tennessee",
-    "approvalDate": "2009-06-03",
-    "createdDate": "2014-12-15",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 617282,
-    "lastName": "Denton",
-    "firstName": "Macon",
-    "middleName": "Martha",
-    "cityTown": "Los Angeles",
-    "county": "Maine",
-    "approvalDate": "2020-05-10",
-    "createdDate": "2024-09-01",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 162147,
-    "lastName": "Brenden",
-    "firstName": "Chantale",
-    "middleName": "Simon",
-    "cityTown": "Gulfport",
-    "county": "Vermont",
-    "approvalDate": "2014-08-10",
-    "createdDate": "2016-03-30",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 741530,
-    "lastName": "Jared",
-    "firstName": "Cameran",
-    "middleName": "Demetria",
-    "cityTown": "Cedar Rapids",
-    "county": "Idaho",
-    "approvalDate": "2011-08-30",
-    "createdDate": "2023-04-05",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 59369,
-    "lastName": "Rudyard",
-    "firstName": "Vance",
-    "middleName": "Mallory",
-    "cityTown": "Saint Paul",
-    "county": "Indiana",
-    "approvalDate": "2014-08-24",
-    "createdDate": "2012-06-25",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 194383,
-    "lastName": "Mark",
-    "firstName": "Gil",
-    "middleName": "Aimee",
-    "cityTown": "Wichita",
-    "county": "Colorado",
-    "approvalDate": "2013-09-18",
-    "createdDate": "2026-01-31",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 207751,
-    "lastName": "Josiah",
-    "firstName": "Rhiannon",
-    "middleName": "Mufutau",
-    "cityTown": "Racine",
-    "county": "Utah",
-    "approvalDate": "2014-12-07",
-    "createdDate": "2024-07-06",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 755903,
-    "lastName": "Buckminster",
-    "firstName": "Robert",
-    "middleName": "Mia",
-    "cityTown": "Lincoln",
-    "county": "Kentucky",
-    "approvalDate": "2014-09-09",
-    "createdDate": "2026-04-26",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 398024,
-    "lastName": "Carter",
-    "firstName": "Georgia",
-    "middleName": "Sigourney",
-    "cityTown": "Lawton",
-    "county": "Maine",
-    "approvalDate": "2019-05-19",
-    "createdDate": "2017-09-30",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 778524,
-    "lastName": "Andrew",
-    "firstName": "Robin",
-    "middleName": "Genevieve",
-    "cityTown": "Rochester",
-    "county": "Minnesota",
-    "approvalDate": "2021-01-22",
-    "createdDate": "2012-07-14",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 481860,
-    "lastName": "Beau",
-    "firstName": "Philip",
-    "middleName": "Myles",
-    "cityTown": "Casper",
-    "county": "Louisiana",
-    "approvalDate": "2022-12-05",
-    "createdDate": "2017-06-19",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 581870,
-    "lastName": "Valentine",
-    "firstName": "Ariana",
-    "middleName": "Liberty",
-    "cityTown": "Colorado Springs",
-    "county": "Delaware",
-    "approvalDate": "2020-06-18",
-    "createdDate": "2025-04-03",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 896226,
-    "lastName": "Hunter",
-    "firstName": "Kylynn",
-    "middleName": "Tamara",
-    "cityTown": "Newark",
-    "county": "Arkansas",
-    "approvalDate": "2020-09-29",
-    "createdDate": "2025-10-14",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 460203,
-    "lastName": "Knox",
-    "firstName": "Quin",
-    "middleName": "Heather",
-    "cityTown": "Portland",
-    "county": "Idaho",
-    "approvalDate": "2014-10-15",
-    "createdDate": "2014-10-10",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 522871,
-    "lastName": "Avram",
-    "firstName": "Ross",
-    "middleName": "Allegra",
-    "cityTown": "North Las Vegas",
-    "county": "Illinois",
-    "approvalDate": "2016-07-09",
-    "createdDate": "2019-07-10",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 144714,
-    "lastName": "Bruce",
-    "firstName": "Ashton",
-    "middleName": "Yoshio",
-    "cityTown": "Hartford",
-    "county": "Kentucky",
-    "approvalDate": "2020-06-15",
-    "createdDate": "2024-12-01",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 255850,
-    "lastName": "Lane",
-    "firstName": "Amir",
-    "middleName": "Boris",
-    "cityTown": "Atlanta",
-    "county": "Nevada",
-    "approvalDate": "2023-10-13",
-    "createdDate": "2019-02-28",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 957703,
-    "lastName": "Plato",
-    "firstName": "Whoopi",
-    "middleName": "Wylie",
-    "cityTown": "Detroit",
-    "county": "Kansas",
-    "approvalDate": "2019-03-13",
-    "createdDate": "2013-05-03",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 107888,
-    "lastName": "Harrison",
-    "firstName": "Aristotle",
-    "middleName": "Yoshio",
-    "cityTown": "Gary",
-    "county": "Idaho",
-    "approvalDate": "2013-01-20",
-    "createdDate": "2021-04-21",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 715944,
-    "lastName": "Eagan",
-    "firstName": "Graham",
-    "middleName": "Velma",
-    "cityTown": "Frankfort",
-    "county": "California",
-    "approvalDate": "2021-03-10",
-    "createdDate": "2024-07-03",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 722580,
-    "lastName": "Knox",
-    "firstName": "Hammett",
-    "middleName": "Maisie",
-    "cityTown": "Salem",
-    "county": "Minnesota",
-    "approvalDate": "2014-02-28",
-    "createdDate": "2018-09-25",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 572737,
-    "lastName": "Solomon",
-    "firstName": "Xander",
-    "middleName": "Rafael",
-    "cityTown": "Spokane",
-    "county": "California",
-    "approvalDate": "2024-09-03",
-    "createdDate": "2016-08-12",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 851927,
-    "lastName": "Harper",
-    "firstName": "Cassidy",
-    "middleName": "Rylee",
-    "cityTown": "Provo",
-    "county": "Georgia",
-    "approvalDate": "2014-01-16",
-    "createdDate": "2014-12-06",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 58139,
-    "lastName": "August",
-    "firstName": "Scott",
-    "middleName": "Brynne",
-    "cityTown": "Henderson",
-    "county": "Hawaii",
-    "approvalDate": "2013-01-02",
-    "createdDate": "2024-06-04",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 116463,
-    "lastName": "Ray",
-    "firstName": "Adrienne",
-    "middleName": "Damon",
-    "cityTown": "Davenport",
-    "county": "Washington",
-    "approvalDate": "2014-12-20",
-    "createdDate": "2012-08-22",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 764604,
-    "lastName": "Isaac",
-    "firstName": "Shana",
-    "middleName": "Benjamin",
-    "cityTown": "Oklahoma City",
-    "county": "Arkansas",
-    "approvalDate": "2012-03-03",
-    "createdDate": "2025-12-23",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 163994,
-    "lastName": "Hedley",
-    "firstName": "Brian",
-    "middleName": "Pandora",
-    "cityTown": "Saint Louis",
-    "county": "Montana",
-    "approvalDate": "2018-07-25",
-    "createdDate": "2013-06-29",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 68160,
-    "lastName": "Gabriel",
-    "firstName": "Dominic",
-    "middleName": "Kevyn",
-    "cityTown": "Newark",
-    "county": "Louisiana",
-    "approvalDate": "2019-05-27",
-    "createdDate": "2016-05-02",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 333733,
-    "lastName": "Kane",
-    "firstName": "Demetria",
-    "middleName": "Zenaida",
-    "cityTown": "Essex",
-    "county": "Minnesota",
-    "approvalDate": "2018-10-07",
-    "createdDate": "2016-07-08",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 315937,
-    "lastName": "Julian",
-    "firstName": "Solomon",
-    "middleName": "Kyle",
-    "cityTown": "Rock Springs",
-    "county": "Georgia",
-    "approvalDate": "2015-05-02",
-    "createdDate": "2017-08-26",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 826994,
-    "lastName": "Aaron",
-    "firstName": "MacKensie",
-    "middleName": "Jason",
-    "cityTown": "Davenport",
-    "county": "Massachusetts",
-    "approvalDate": "2020-04-30",
-    "createdDate": "2014-04-12",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 594281,
-    "lastName": "Laith",
-    "firstName": "Wyatt",
-    "middleName": "Tanisha",
-    "cityTown": "San Francisco",
-    "county": "Massachusetts",
-    "approvalDate": "2021-10-09",
-    "createdDate": "2018-03-28",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 507599,
-    "lastName": "Tate",
-    "firstName": "Winter",
-    "middleName": "Katelyn",
-    "cityTown": "Los Angeles",
-    "county": "Michigan",
-    "approvalDate": "2019-09-20",
-    "createdDate": "2016-07-02",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 334462,
-    "lastName": "John",
-    "firstName": "Galena",
-    "middleName": "Shoshana",
-    "cityTown": "South Bend",
-    "county": "Wyoming",
-    "approvalDate": "2026-01-21",
-    "createdDate": "2025-11-27",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 464375,
-    "lastName": "Cairo",
-    "firstName": "Vladimir",
-    "middleName": "Jordan",
-    "cityTown": "Chandler",
-    "county": "Michigan",
-    "approvalDate": "2009-06-22",
-    "createdDate": "2020-12-24",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 261448,
-    "lastName": "Geoffrey",
-    "firstName": "Tobias",
-    "middleName": "Gail",
-    "cityTown": "Broken Arrow",
-    "county": "California",
-    "approvalDate": "2025-10-11",
-    "createdDate": "2014-01-15",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 727719,
-    "lastName": "Abbot",
-    "firstName": "Jane",
-    "middleName": "Chava",
-    "cityTown": "Missoula",
-    "county": "Nebraska",
-    "approvalDate": "2023-04-28",
-    "createdDate": "2023-07-30",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 718771,
-    "lastName": "Jermaine",
-    "firstName": "David",
-    "middleName": "Madeson",
-    "cityTown": "Grand Rapids",
-    "county": "Maryland",
-    "approvalDate": "2023-06-04",
-    "createdDate": "2015-10-28",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 893560,
-    "lastName": "Gregory",
-    "firstName": "Ralph",
-    "middleName": "Leandra",
-    "cityTown": "Anchorage",
-    "county": "Indiana",
-    "approvalDate": "2024-06-13",
-    "createdDate": "2025-10-13",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 163273,
-    "lastName": "Cameron",
-    "firstName": "Griffin",
-    "middleName": "Igor",
-    "cityTown": "Newport News",
-    "county": "Montana",
-    "approvalDate": "2013-12-07",
-    "createdDate": "2014-06-09",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 158701,
-    "lastName": "Cullen",
-    "firstName": "Caldwell",
-    "middleName": "Genevieve",
-    "cityTown": "Missoula",
-    "county": "Idaho",
-    "approvalDate": "2013-06-06",
-    "createdDate": "2017-04-14",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 476939,
-    "lastName": "Denton",
-    "firstName": "Imani",
-    "middleName": "Imogene",
-    "cityTown": "Columbus",
-    "county": "Utah",
-    "approvalDate": "2014-08-12",
-    "createdDate": "2015-10-24",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 255233,
-    "lastName": "Brendan",
-    "firstName": "Kristen",
-    "middleName": "Xander",
-    "cityTown": "Kailua",
-    "county": "Louisiana",
-    "approvalDate": "2021-06-24",
-    "createdDate": "2014-02-25",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 230243,
-    "lastName": "Jamal",
-    "firstName": "Scarlet",
-    "middleName": "Marsden",
-    "cityTown": "Aurora",
-    "county": "Minnesota",
-    "approvalDate": "2026-03-07",
-    "createdDate": "2018-02-02",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 394965,
-    "lastName": "Palmer",
-    "firstName": "Chantale",
-    "middleName": "Tarik",
-    "cityTown": "Cambridge",
-    "county": "Texas",
-    "approvalDate": "2013-06-28",
-    "createdDate": "2019-07-19",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 853324,
-    "lastName": "Garrett",
-    "firstName": "Emmanuel",
-    "middleName": "Mari",
-    "cityTown": "Portland",
-    "county": "Arizona",
-    "approvalDate": "2014-03-31",
-    "createdDate": "2018-08-28",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 828568,
-    "lastName": "Rahim",
-    "firstName": "Rosalyn",
-    "middleName": "Eric",
-    "cityTown": "Lincoln",
-    "county": "Nevada",
-    "approvalDate": "2011-11-25",
-    "createdDate": "2021-07-09",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 799006,
-    "lastName": "Henry",
-    "firstName": "Raphael",
-    "middleName": "Lilah",
-    "cityTown": "Indianapolis",
-    "county": "Alaska",
-    "approvalDate": "2025-11-14",
-    "createdDate": "2014-03-24",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 265431,
-    "lastName": "Nicholas",
-    "firstName": "Hoyt",
-    "middleName": "Keely",
-    "cityTown": "Detroit",
-    "county": "Minnesota",
-    "approvalDate": "2026-04-25",
-    "createdDate": "2012-09-28",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 860366,
-    "lastName": "Mason",
-    "firstName": "Holly",
-    "middleName": "Colt",
-    "cityTown": "Frederick",
-    "county": "Wisconsin",
-    "approvalDate": "2021-04-13",
-    "createdDate": "2021-11-04",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 177758,
-    "lastName": "Kermit",
-    "firstName": "Keane",
-    "middleName": "Emerald",
-    "cityTown": "Tampa",
-    "county": "Kansas",
-    "approvalDate": "2013-05-01",
-    "createdDate": "2025-11-28",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 140568,
-    "lastName": "Cole",
-    "firstName": "Leilani",
-    "middleName": "Nigel",
-    "cityTown": "Hartford",
-    "county": "Kansas",
-    "approvalDate": "2014-06-01",
-    "createdDate": "2018-09-23",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 888007,
-    "lastName": "Leonard",
-    "firstName": "Felicia",
-    "middleName": "Anika",
-    "cityTown": "Chesapeake",
-    "county": "Iowa",
-    "approvalDate": "2018-07-27",
-    "createdDate": "2025-08-11",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 839121,
-    "lastName": "Scott",
-    "firstName": "Lavinia",
-    "middleName": "Ignatius",
-    "cityTown": "Norman",
-    "county": "Oregon",
-    "approvalDate": "2016-04-30",
-    "createdDate": "2025-09-25",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 744349,
-    "lastName": "Myles",
-    "firstName": "Jacob",
-    "middleName": "Elliott",
-    "cityTown": "Chesapeake",
-    "county": "Florida",
-    "approvalDate": "2021-10-26",
-    "createdDate": "2023-10-15",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 41176,
-    "lastName": "Brandon",
-    "firstName": "Deacon",
-    "middleName": "Lewis",
-    "cityTown": "Tampa",
-    "county": "Tennessee",
-    "approvalDate": "2014-04-03",
-    "createdDate": "2020-07-26",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 371085,
-    "lastName": "Blaze",
-    "firstName": "Sybil",
-    "middleName": "Daniel",
-    "cityTown": "Jonesboro",
-    "county": "Washington",
-    "approvalDate": "2016-01-02",
-    "createdDate": "2013-02-09",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 891974,
-    "lastName": "Anthony",
-    "firstName": "Oren",
-    "middleName": "Abigail",
-    "cityTown": "Rockford",
-    "county": "Kentucky",
-    "approvalDate": "2011-09-05",
-    "createdDate": "2015-09-15",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 425291,
-    "lastName": "Wylie",
-    "firstName": "Vanna",
-    "middleName": "Wallace",
-    "cityTown": "Kapolei",
-    "county": "Alabama",
-    "approvalDate": "2014-09-04",
-    "createdDate": "2024-03-19",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 764579,
-    "lastName": "Trevor",
-    "firstName": "Katelyn",
-    "middleName": "Upton",
-    "cityTown": "Columbus",
-    "county": "Maryland",
-    "approvalDate": "2017-03-27",
-    "createdDate": "2016-11-17",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 254902,
-    "lastName": "Murphy",
-    "firstName": "Charity",
-    "middleName": "Dominic",
-    "cityTown": "Gulfport",
-    "county": "Georgia",
-    "approvalDate": "2016-06-30",
-    "createdDate": "2024-12-02",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 825933,
-    "lastName": "Preston",
-    "firstName": "Sylvia",
-    "middleName": "Geoffrey",
-    "cityTown": "Kearney",
-    "county": "Iowa",
-    "approvalDate": "2025-04-24",
-    "createdDate": "2015-02-07",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 503302,
-    "lastName": "John",
-    "firstName": "Rahim",
-    "middleName": "Griffith",
-    "cityTown": "Gary",
-    "county": "Nebraska",
-    "approvalDate": "2009-11-30",
-    "createdDate": "2020-06-29",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 175795,
-    "lastName": "Callum",
-    "firstName": "Julie",
-    "middleName": "Zane",
-    "cityTown": "Clarksville",
-    "county": "Pennsylvania",
-    "approvalDate": "2009-12-16",
-    "createdDate": "2019-05-23",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 580646,
-    "lastName": "Bradley",
-    "firstName": "Herrod",
-    "middleName": "Chastity",
-    "cityTown": "Kapolei",
-    "county": "Oklahoma",
-    "approvalDate": "2020-02-27",
-    "createdDate": "2020-07-18",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 796849,
-    "lastName": "Julian",
-    "firstName": "Jade",
-    "middleName": "Iola",
-    "cityTown": "Auburn",
-    "county": "Utah",
-    "approvalDate": "2018-04-20",
-    "createdDate": "2017-09-18",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 747165,
-    "lastName": "Howard",
-    "firstName": "Gloria",
-    "middleName": "Nissim",
-    "cityTown": "Kailua",
-    "county": "Minnesota",
-    "approvalDate": "2018-11-13",
-    "createdDate": "2022-12-24",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 528830,
-    "lastName": "Abel",
-    "firstName": "Bernard",
-    "middleName": "Emerald",
-    "cityTown": "Biloxi",
-    "county": "Virginia",
-    "approvalDate": "2017-04-19",
-    "createdDate": "2023-04-11",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 57296,
-    "lastName": "Chase",
-    "firstName": "Leonard",
-    "middleName": "Gretchen",
-    "cityTown": "Colchester",
-    "county": "Oklahoma",
-    "approvalDate": "2015-08-28",
-    "createdDate": "2020-08-31",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 882230,
-    "lastName": "Norman",
-    "firstName": "Jack",
-    "middleName": "Jaquelyn",
-    "cityTown": "Indianapolis",
-    "county": "Indiana",
-    "approvalDate": "2010-03-09",
-    "createdDate": "2016-09-08",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 764209,
-    "lastName": "Ryan",
-    "firstName": "Fallon",
-    "middleName": "Odysseus",
-    "cityTown": "Dover",
-    "county": "California",
-    "approvalDate": "2009-08-13",
-    "createdDate": "2016-05-09",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 887721,
-    "lastName": "Arden",
-    "firstName": "Jordan",
-    "middleName": "Isaac",
-    "cityTown": "Tallahassee",
-    "county": "Delaware",
-    "approvalDate": "2011-11-09",
-    "createdDate": "2020-01-02",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 694305,
-    "lastName": "Luke",
-    "firstName": "Velma",
-    "middleName": "Lisandra",
-    "cityTown": "Lafayette",
-    "county": "Montana",
-    "approvalDate": "2017-01-23",
-    "createdDate": "2019-12-26",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 819518,
-    "lastName": "Plato",
-    "firstName": "Ryder",
-    "middleName": "Wallace",
-    "cityTown": "South Bend",
-    "county": "Montana",
-    "approvalDate": "2021-05-11",
-    "createdDate": "2026-02-25",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 183449,
-    "lastName": "Reece",
-    "firstName": "Ulysses",
-    "middleName": "Tucker",
-    "cityTown": "Boise",
-    "county": "Alabama",
-    "approvalDate": "2016-03-09",
-    "createdDate": "2024-02-12",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 871433,
-    "lastName": "Beck",
-    "firstName": "Hu",
-    "middleName": "Priscilla",
-    "cityTown": "Lincoln",
-    "county": "Texas",
-    "approvalDate": "2015-12-04",
-    "createdDate": "2012-09-14",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 887839,
-    "lastName": "Mark",
-    "firstName": "Deborah",
-    "middleName": "Idola",
-    "cityTown": "Frankfort",
-    "county": "Oregon",
-    "approvalDate": "2023-07-08",
-    "createdDate": "2022-02-03",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 962524,
-    "lastName": "Malcolm",
-    "firstName": "Levi",
-    "middleName": "Whilemina",
-    "cityTown": "Wyoming",
-    "county": "California",
-    "approvalDate": "2017-06-17",
-    "createdDate": "2020-10-29",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 802176,
-    "lastName": "Vaughan",
-    "firstName": "Zenia",
-    "middleName": "Elvis",
-    "cityTown": "Springfield",
-    "county": "Pennsylvania",
-    "approvalDate": "2018-05-20",
-    "createdDate": "2016-07-12",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 299974,
-    "lastName": "Trevor",
-    "firstName": "Hayes",
-    "middleName": "Sasha",
-    "cityTown": "Norfolk",
-    "county": "Hawaii",
-    "approvalDate": "2016-01-27",
-    "createdDate": "2019-05-28",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 431942,
-    "lastName": "Phillip",
-    "firstName": "Regan",
-    "middleName": "Stone",
-    "cityTown": "Rockville",
-    "county": "Iowa",
-    "approvalDate": "2014-08-28",
-    "createdDate": "2022-08-13",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 403529,
-    "lastName": "Erasmus",
-    "firstName": "Vivian",
-    "middleName": "Kimberley",
-    "cityTown": "Clarksville",
-    "county": "Minnesota",
-    "approvalDate": "2024-01-20",
-    "createdDate": "2026-01-08",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 760523,
-    "lastName": "Elvis",
-    "firstName": "Alika",
-    "middleName": "Declan",
-    "cityTown": "Boston",
-    "county": "Massachusetts",
-    "approvalDate": "2019-10-02",
-    "createdDate": "2025-02-24",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 30609,
-    "lastName": "Bradley",
-    "firstName": "Todd",
-    "middleName": "Nicholas",
-    "cityTown": "Paradise",
-    "county": "Ohio",
-    "approvalDate": "2025-08-09",
-    "createdDate": "2021-10-22",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 612689,
-    "lastName": "Shad",
-    "firstName": "Baker",
-    "middleName": "Joshua",
-    "cityTown": "Baltimore",
-    "county": "Virginia",
-    "approvalDate": "2025-10-28",
-    "createdDate": "2014-05-29",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 196532,
-    "lastName": "Micah",
-    "firstName": "Zeph",
-    "middleName": "Brett",
-    "cityTown": "Hartford",
-    "county": "Delaware",
-    "approvalDate": "2010-06-25",
-    "createdDate": "2024-06-10",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 23030,
-    "lastName": "Philip",
-    "firstName": "Orson",
-    "middleName": "Avye",
-    "cityTown": "Virginia Beach",
-    "county": "Indiana",
-    "approvalDate": "2018-10-02",
-    "createdDate": "2022-11-06",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 234654,
-    "lastName": "Howard",
-    "firstName": "Alan",
-    "middleName": "Cooper",
-    "cityTown": "Birmingham",
-    "county": "Nevada",
-    "approvalDate": "2022-06-03",
-    "createdDate": "2022-10-10",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 726870,
-    "lastName": "Rahim",
-    "firstName": "India",
-    "middleName": "Hamilton",
-    "cityTown": "Butte",
-    "county": "Missouri",
-    "approvalDate": "2022-11-14",
-    "createdDate": "2025-10-03",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 815665,
-    "lastName": "Tyrone",
-    "firstName": "Graiden",
-    "middleName": "Kyla",
-    "cityTown": "Columbia",
-    "county": "Nebraska",
-    "approvalDate": "2020-12-17",
-    "createdDate": "2023-05-05",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 573531,
-    "lastName": "Tucker",
-    "firstName": "Neil",
-    "middleName": "Benedict",
-    "cityTown": "Erie",
-    "county": "Massachusetts",
-    "approvalDate": "2018-09-29",
-    "createdDate": "2023-09-11",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 197095,
-    "lastName": "Graham",
-    "firstName": "Ori",
-    "middleName": "Gavin",
-    "cityTown": "Jackson",
-    "county": "Florida",
-    "approvalDate": "2024-10-25",
-    "createdDate": "2013-12-22",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 432771,
-    "lastName": "Marvin",
-    "firstName": "Sonia",
-    "middleName": "Solomon",
-    "cityTown": "Mesa",
-    "county": "Nebraska",
-    "approvalDate": "2021-06-05",
-    "createdDate": "2019-08-14",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 133652,
-    "lastName": "Malachi",
-    "firstName": "Minerva",
-    "middleName": "Keely",
-    "cityTown": "Huntsville",
-    "county": "Iowa",
-    "approvalDate": "2015-08-14",
-    "createdDate": "2014-02-10",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 24266,
-    "lastName": "Wade",
-    "firstName": "Lucius",
-    "middleName": "Priscilla",
-    "cityTown": "Fayetteville",
-    "county": "Maine",
-    "approvalDate": "2017-10-07",
-    "createdDate": "2024-07-07",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 587196,
-    "lastName": "Alexander",
-    "firstName": "Samantha",
-    "middleName": "Baxter",
-    "cityTown": "Austin",
-    "county": "California",
-    "approvalDate": "2019-12-10",
-    "createdDate": "2017-10-19",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 401814,
-    "lastName": "Hunter",
-    "firstName": "Jack",
-    "middleName": "Nicole",
-    "cityTown": "Salt Lake City",
-    "county": "Alaska",
-    "approvalDate": "2023-11-01",
-    "createdDate": "2021-05-01",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 98866,
-    "lastName": "Beau",
-    "firstName": "Aimee",
-    "middleName": "Mara",
-    "cityTown": "Vancouver",
-    "county": "Texas",
-    "approvalDate": "2020-11-07",
-    "createdDate": "2020-09-08",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 41636,
-    "lastName": "Driscoll",
-    "firstName": "Urielle",
-    "middleName": "Herrod",
-    "cityTown": "Eugene",
-    "county": "Kentucky",
-    "approvalDate": "2020-01-31",
-    "createdDate": "2021-11-08",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 280265,
-    "lastName": "Dante",
-    "firstName": "Curran",
-    "middleName": "Victor",
-    "cityTown": "South Portland",
-    "county": "Massachusetts",
-    "approvalDate": "2023-12-09",
-    "createdDate": "2018-03-23",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 806326,
-    "lastName": "Magee",
-    "firstName": "Idona",
-    "middleName": "Conan",
-    "cityTown": "Cambridge",
-    "county": "Louisiana",
-    "approvalDate": "2022-08-10",
-    "createdDate": "2019-01-13",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 388455,
-    "lastName": "Yoshio",
-    "firstName": "Cyrus",
-    "middleName": "Elizabeth",
-    "cityTown": "South Bend",
-    "county": "Oklahoma",
-    "approvalDate": "2017-10-02",
-    "createdDate": "2025-05-06",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 183646,
-    "lastName": "Allistair",
-    "firstName": "Abraham",
-    "middleName": "Nolan",
-    "cityTown": "Oklahoma City",
-    "county": "Connecticut",
-    "approvalDate": "2022-12-03",
-    "createdDate": "2025-01-11",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 135545,
-    "lastName": "Carson",
-    "firstName": "Nevada",
-    "middleName": "Brynn",
-    "cityTown": "Kaneohe",
-    "county": "Kansas",
-    "approvalDate": "2021-01-05",
-    "createdDate": "2018-11-07",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 622011,
-    "lastName": "Avram",
-    "firstName": "Latifah",
-    "middleName": "Len",
-    "cityTown": "Frankfort",
-    "county": "Kansas",
-    "approvalDate": "2018-01-13",
-    "createdDate": "2020-11-09",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 581264,
-    "lastName": "Benedict",
-    "firstName": "Addison",
-    "middleName": "Harper",
-    "cityTown": "Chesapeake",
-    "county": "Idaho",
-    "approvalDate": "2018-07-22",
-    "createdDate": "2019-11-17",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 277382,
-    "lastName": "Lucas",
-    "firstName": "Stuart",
-    "middleName": "Lilah",
-    "cityTown": "Stamford",
-    "county": "Florida",
-    "approvalDate": "2021-04-13",
-    "createdDate": "2024-03-02",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 461285,
-    "lastName": "Rafael",
-    "firstName": "Ulla",
-    "middleName": "Shelley",
-    "cityTown": "Akron",
-    "county": "Ohio",
-    "approvalDate": "2011-11-07",
-    "createdDate": "2012-06-06",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 332754,
-    "lastName": "Kato",
-    "firstName": "Damian",
-    "middleName": "Hollee",
-    "cityTown": "Gulfport",
-    "county": "Michigan",
-    "approvalDate": "2026-04-15",
-    "createdDate": "2018-10-03",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 870551,
-    "lastName": "Salvador",
-    "firstName": "Erin",
-    "middleName": "Anastasia",
-    "cityTown": "Newark",
-    "county": "Maine",
-    "approvalDate": "2011-11-07",
-    "createdDate": "2025-12-04",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 265234,
-    "lastName": "Jackson",
-    "firstName": "Lila",
-    "middleName": "Jasper",
-    "cityTown": "Kaneohe",
-    "county": "Colorado",
-    "approvalDate": "2013-05-08",
-    "createdDate": "2013-09-11",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 860501,
-    "lastName": "Arden",
-    "firstName": "Hiroko",
-    "middleName": "Baker",
-    "cityTown": "Stamford",
-    "county": "Virginia",
-    "approvalDate": "2019-04-13",
-    "createdDate": "2018-01-12",
-    "isRemoteNotary": "No"
-  },
-  {
-    "notaryIdentifier": 802536,
-    "lastName": "Baxter",
-    "firstName": "Joshua",
-    "middleName": "Lance",
-    "cityTown": "Hilo",
-    "county": "Georgia",
-    "approvalDate": "2009-10-01",
-    "createdDate": "2018-07-27",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 670385,
-    "lastName": "Ulric",
-    "firstName": "Heidi",
-    "middleName": "Daquan",
-    "cityTown": "Columbus",
-    "county": "Mississippi",
-    "approvalDate": "2012-05-11",
-    "createdDate": "2020-08-23",
-    "isRemoteNotary": "Yes"
-  },
-  {
-    "notaryIdentifier": 83307,
-    "lastName": "Carson",
-    "firstName": "Wylie",
-    "middleName": "Jeremy",
-    "cityTown": "Glendale",
-    "county": "Nevada",
-    "approvalDate": "2026-03-11",
-    "createdDate": "2016-01-14",
-    "isRemoteNotary": "Yes"
+Goal: For the submit button.. I will need to check the status of both the checkboxes.. update personal information and update 
+address information. If neither of the forms are checked.. I need the submit button to be disabled. If at least one of the form is checked
+I need you to console.log the values of that form. For the cancel button when the cancel button is clicked.. it should route the user back 
+to '/notary-profile/applicantId'. 
+
+Rules: Use the onSubmit() and onCancel() functions I have. 
+
+Here is the html file: 
+<div class="page-wrapper">
+  <div class="heading-and-asterisk">
+    <h2 class="notary-title">
+      Update Profile Information –
+      {{ displayData?.personalInfoDetails?.firstName }} {{ displayData?.personalInfoDetails?.lastName }}
+      ({{ displayData?.personalInfoDetails?.notaryIdentifier }})
+    </h2>
+    <div class="required-indicator">
+      <div class="asterisk">*</div>
+      <div class="required-indicator-text"> – Required fields</div>
+    </div>
+  </div>
+
+  <form [formGroup]="personalForm">
+    <!-- PERSONAL INFO -->
+    <div class="personal-information-section">
+      <div class="div-header-section">
+        <input type="checkbox"
+               kendoCheckBox
+               (change)="togglePersonalInfo($event)"
+               [checked]="updatePersonalChecked"
+               class="checkbox-override"/>
+        <div class="checkbox-header-level">
+          Update Personal Information
+        </div>
+      </div>
+      <div class="div-content-section">
+        <!-- Row 1 -->
+        <div class="form-row">
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="salutation">
+              Salutation <sup class="text-danger asterisk">*</sup>
+            </label>
+            <kendo-dropdownlist id="salutation"
+                                formControlName="salutation"
+                                [data]="salutationOptions"
+                                [valuePrimitive]="true"
+                                placeholder="Select...">
+            </kendo-dropdownlist>
+          </kendo-formfield>
+
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="firstName">
+              First Name <sup class="text-danger asterisk">*</sup>
+            </label>
+            <input kendoTextBox id="firstName" formControlName="firstName" />
+          </kendo-formfield>
+
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="middleName">
+              Middle Name <sup class="text-danger disable-super">*</sup>
+            </label>
+            <input kendoTextBox id="middleName" formControlName="middleName" />
+          </kendo-formfield>
+
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="lastName">
+              Last Name <sup class="text-danger asterisk">*</sup>
+            </label>
+            <input kendoTextBox id="lastName" formControlName="lastName" />
+          </kendo-formfield>
+
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="suffix">
+              Suffix <sup class="text-danger disable-super">*</sup>
+            </label>
+            <input kendoTextBox id="suffix" formControlName="suffix" />
+          </kendo-formfield>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="form-row">
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="dateOfBirth">
+              Date of Birth <sup class="text-danger asterisk">*</sup>
+            </label>
+            <kendo-datepicker id="dateOfBirth"
+                              formControlName="dateOfBirth"
+                              [format]="'MM/dd/yyyy'"
+                              placeholder="MM/DD/YYYY">
+            </kendo-datepicker>
+          </kendo-formfield>
+
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="dateOfDeath">
+              Date of Death <sup class="text-danger disable-super">*</sup>
+            </label>
+            <kendo-datepicker id="dateOfDeath"
+                              formControlName="dateOfDeath"
+                              [format]="'MM/dd/yyyy'"
+                              placeholder="MM/DD/YYYY">
+            </kendo-datepicker>
+          </kendo-formfield>
+
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="dateOfResignation">
+              Date of Resignation <sup class="text-danger disable-super">*</sup>
+            </label>
+            <kendo-datepicker id="dateOfResignation"
+                              formControlName="dateOfResignation"
+                              [format]="'MM/dd/yyyy'"
+                              placeholder="MM/DD/YYYY">
+            </kendo-datepicker>
+          </kendo-formfield>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="form-row">
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="email">
+              Email Address <sup class="text-danger asterisk">*</sup>
+            </label>
+            <input kendoTextBox id="email" formControlName="email" />
+          </kendo-formfield>
+
+          <!-- Primary Phone -->
+          <div class="flex-item">
+            <label class="group-label">
+              Primary Phone <sup class="text-danger asterisk">*</sup>
+            </label>
+            <div class="phone-group">
+              <kendo-formfield>
+                <input kendoTextBox
+                       id="primaryPhone1"
+                       formControlName="primaryPhone1"
+                       maxlength="3"
+                       class="three-size" />
+              </kendo-formfield>
+              <span class="dash">-</span>
+              <kendo-formfield>
+                <input kendoTextBox
+                       id="primaryPhone2"
+                       formControlName="primaryPhone2"
+                       maxlength="3"
+                       class="three-size" />
+              </kendo-formfield>
+              <span class="dash">-</span>
+              <kendo-formfield>
+                <input kendoTextBox
+                       id="primaryPhone3"
+                       formControlName="primaryPhone3"
+                       maxlength="4"
+                       class="four-size" />
+              </kendo-formfield>
+            </div>
+          </div>
+
+          <!-- Secondary Phone -->
+          <div class="flex-item">
+            <label class="group-label">
+              Secondary Phone <sup class="text-danger asterisk">*</sup>
+            </label>
+            <div class="phone-group">
+              <kendo-formfield>
+                <input kendoTextBox
+                       id="secondaryPhone1"
+                       formControlName="secondaryPhone1"
+                       maxlength="3"
+                       class="three-size" />
+              </kendo-formfield>
+              <span class="dash">-</span>
+              <kendo-formfield>
+                <input kendoTextBox
+                       id="secondaryPhone2"
+                       formControlName="secondaryPhone2"
+                       maxlength="3"
+                       class="three-size" />
+              </kendo-formfield>
+              <span class="dash">-</span>
+              <kendo-formfield>
+                <input kendoTextBox
+                       id="secondaryPhone3"
+                       formControlName="secondaryPhone3"
+                       maxlength="4"
+                       class="four-size" />
+              </kendo-formfield>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 4: Radio -->
+        <div class="form-row">
+          <label kendoLabel class="flex-item radio-modifier">
+            Type of change <sup class="text-danger asterisk">*</sup>
+          </label>
+          <kendo-formfield class="flex-item radio-fields-modifier">
+            <kendo-radiobutton formControlName="changeType"
+                               name="changeType"
+                               id="changeTypeOfficial"
+                               value="Official">
+            </kendo-radiobutton>
+            <label for="changeTypeOfficial">Official</label>
+          </kendo-formfield>
+          <kendo-formfield class="flex-item radio-fields-modifier">
+            <kendo-radiobutton formControlName="changeType"
+                               name="changeType"
+                               id="changeTypeCorrection"
+                               value="Correction">
+            </kendo-radiobutton>
+            <label for="changeTypeCorrection">Correction</label>
+          </kendo-formfield>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- ADDRESS INFO FORM -->
+  <form [formGroup]="addressForm">
+    <div class="address-information-section">
+      <div class="div-header-section">
+        <input type="checkbox"
+               kendoCheckBox
+               (change)="toggleAddressInfo($event)"
+               [checked]="updateAddressChecked"
+               class="checkbox-override"/>
+        <div class="checkbox-header-level">
+          Update Address Information
+        </div>
+      </div>
+      <div class="div-content-section address-div">
+        <!-- Row 1: Preferred Radio -->
+        <div class="form-row">
+          <span class="flex-item exception-flex-item">
+            Preferred address for communication? <sup class="question-asterisk">*</sup>
+          </span>
+          <input type="radio" formControlName="preferredAddress" value="Residence" />
+          <label class="flex-item">Residence</label>
+
+          <input type="radio" formControlName="preferredAddress" value="Business" />
+          <label class="flex-item">Business</label>
+        </div>
+
+        <!-- Row 2: Residence Address -->
+        <div class="form-row">
+          <div class="flex-item" formGroupName="residenceAddress">
+            <div class="heading-and-error">
+              <div class="section-heading">
+                Residence Address (PO boxes not accepted)
+              </div>
+              <span class="error-message error-message-with-top-marg" *ngIf="submittedAddress && preferred === 'Business' && addressForm.get('residenceAddress')?.invalid">
+                Please complete all the fields or none.
+              </span>
+            </div>
+
+            <!-- Street -->
+            <div class="label-and-error-message">
+              <label class="label-and-asterisk" kendoLabel>Street Address <sup class="text-danger" [class.disable-super]="preferred==='Business'">*</sup></label>
+              <div class="error-message">
+                <span *ngIf="submittedAddress && addressForm.get('residenceAddress')?.hasError('noStreet')">
+                  Street number and Address Line are required.
+                </span>
+              </div>
+            </div>
+            <div class="form-row-no-wrap">
+              <input kendoTextBox formControlName="street1" id="street-number" placeholder="Street No." />
+              <input kendoTextBox formControlName="street2" id="address-line" placeholder="Address Line" />
+              <input kendoTextBox formControlName="street3" id="address-suffix" placeholder="Suffix" />
+            </div>
+            <div class="form-row">
+              <input kendoTextBox formControlName="street4" placeholder="Address Line 2" />
+            </div>
+
+            <!-- State / Zip -->
+            <div class="form-row state-and-zip">
+              <kendo-formfield class="flex-item">
+                <label class="label-and-asterisk" kendoLabel>
+                  State
+                  <sup class="text-danger" [class.disable-super]="preferred==='Business'">
+                    *
+                  </sup>
+                  <button kendoPopoverAnchor
+                          [popover]="pop"
+                          showOn="hover"
+                          class="village-hyperlink"
+                          kendoButton>
+                    ?
+                  </button>
+
+                  <kendo-popover #pop title="Need help?" [width]="400">
+                    <!-- this template will override the `body` property -->
+                    <ng-template kendoPopoverBodyTemplate>
+                      <p>
+                        Need help with finding the name of your Village/Neighborhood? You can
+                        <a href="https://www.sec.state.ma.us/divisions/cis/historical/archaic-names.htm"
+                           target="_blank"
+                           rel="noopener">
+                          view them here.
+                        </a>
+                      </p>
+                    </ng-template>
+                  </kendo-popover>
+                </label>
+                <kendo-dropdownlist [data]="stateOptions" [valuePrimitive]="true" formControlName="state">
+                </kendo-dropdownlist>
+                <div class="error-message">
+                  <span *ngIf="submittedAddress && addressForm.get('residenceAddress.state')?.hasError('required')">
+                    State is required.
+                  </span>
+                </div>
+              </kendo-formfield>
+              <ng-container *ngIf="cityOptions.length && addressForm.get('residenceAddress.state')?.value === 'Massachusetts'; else resCityInput">
+                <kendo-formfield class="flex-item">
+                  <label kendoLabel class="label-and-asterisk">
+                    City / Town <sup class="text-danger" [class.disable-super]="preferred==='Business'">*</sup>
+                  </label>
+                  <kendo-dropdownlist formControlName="cityTown"
+                                      [data]="cityOptions"
+                                      [valuePrimitive]="true"
+                                      textField="value"
+                                      valueField="value"
+                                      class="dynamic-dropdown">
+                  </kendo-dropdownlist>
+                  <div class="error-message">
+                    <span *ngIf="submittedAddress && addressForm.get('residenceAddress.cityTown')?.hasError('required')">
+                      City/Town is required.
+                    </span>
+                  </div>
+                </kendo-formfield>
+              </ng-container>
+
+              <ng-template #resCityInput>
+                <kendo-formfield class="flex-item">
+                  <label kendoLabel class="label-and-asterisk">
+                    City / Town <sup class="text-danger" [class.disable-super]="preferred==='Business'">*</sup>
+                  </label>
+                  <input kendoTextBox formControlName="cityTown" class="city-town-input-element" />
+                  <div class="error-message">
+                    <span *ngIf="submittedAddress && addressForm.get('residenceAddress.cityTown')?.hasError('required')">
+                      City/Town is required.
+                    </span>
+                  </div>
+                </kendo-formfield>
+              </ng-template>
+              <!-- wrap the overall label in a plain div -->
+              <div class="flex-item zip-code-field">
+                <label class="label-and-asterisk" kendoLabel>
+                  Zip Code
+                  <sup class="text-danger" [class.disable-super]="preferred==='Business'">*</sup>
+                </label>
+
+                <div class="zip-inputs">
+
+                  <!-- form-field for the 5-digit part -->
+                  <kendo-formfield>
+                    <input kendoTextBox
+                           formControlName="zipCode"
+                           class="zip-input-boxes"
+                           maxlength="5"
+                           placeholder="12345"
+                           (keypress)="allowOnlyNumbers($event)"
+                           (paste)="onZipPaste($event,'residenceAddress.zipCode')" />
+                    <!-- your existing error spans here -->
+                    <div class="error-message">
+                      <span *ngIf="submittedAddress && addressForm.get('residenceAddress.zipCode')?.hasError('required')">
+                        Zip Code is required.
+                      </span>
+                      <span *ngIf="submittedAddress && addressForm.get('residenceAddress.zipCode')?.hasError('pattern')">
+                        Must be exactly 5 digits.
+                      </span>
+                    </div>
+                  </kendo-formfield>
+
+                  <span class="hyphen">–</span>
+
+                  <!-- form-field for the 4-digit plus-4 part -->
+                  <kendo-formfield>
+                    <input kendoTextBox
+                           formControlName="zipPlus"
+                           class="zip-input-boxes"
+                           maxlength="4"
+                           placeholder="6789"
+                           (keypress)="allowOnlyNumbers($event)"
+                           (paste)="onZipPaste($event,'residenceAddress.zipPlus')" />
+                    <!-- error for just this control -->
+                    <div class="error-message">
+                      <span *ngIf="submittedAddress && addressForm.get('residenceAddress.zipPlus')?.hasError('pattern')">
+                        Enter at least 2 digits (up to 4).
+                      </span>
+                    </div>
+                  </kendo-formfield>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Business Address -->
+        <div class="form-row">
+          <div class="flex-item" formGroupName="businessAddress">
+            <div class="heading-and-error">
+              <div class="section-heading">
+                Business Address
+              </div>
+              <span class="error-message error-message-with-top-marg" *ngIf="submittedAddress && preferred === 'Residence' && addressForm.get('businessAddress')?.invalid">
+                Please complete all the fields or none.
+              </span>
+            </div>
+
+            <!-- Street -->
+            <div class="label-and-error-message">
+              <label class="label-and-asterisk" kendoLabel>
+                Street Address
+                <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
+                <input type="checkbox"
+                       kendoCheckBox
+                       (change)="togglePoBox($event)"
+                       [checked]="isPoBox"
+                       class="checkbox-override"
+                       [disabled]="!updateAddressChecked"/>
+                <label kendoLabel>
+                  Is this a PO Box?
+                </label>
+              </label>
+              <div class="error-message">
+                <span *ngIf="submittedAddress && addressForm.get('businessAddress')?.hasError('noStreet')">
+                  Street number and Address Line are required.
+                </span>
+              </div>
+            </div>
+            <div class="form-row-no-wrap"
+                 *ngIf="!addressForm.get('businessAddress.isPoBox')!.value; else poBoxTpl">
+              <input kendoTextBox formControlName="street1" id="street-number" placeholder="Street No." />
+              <input kendoTextBox formControlName="street2" id="address-line" placeholder="Address Line" />
+              <input kendoTextBox formControlName="street3" id="address-suffix" placeholder="Suffix" />
+            </div>
+            <ng-template #poBoxTpl>
+              <div class="form-row-no-wrap">
+                <!-- show PO Box literal -->
+                <input kendoTextBox
+                       formControlName="street2"
+                       [readonly]="true"
+                       [disabled]="true"
+                       class="po-box-label"
+                       placeholder="PO Box" />
+
+                <!-- PO Box number -->
+                <input kendoTextBox
+                       formControlName="street3"
+                       placeholder="PO Box number" />
+              </div>
+            </ng-template>
+            <div class="error-message"
+                 *ngIf="submittedAddress
+             && addressForm.get('businessAddress.isPoBox')!.value
+             && addressForm.get('businessAddress.street3')!.hasError('required')">
+              Enter some PO Box number
+            </div>
+            <div class="form-row">
+              <input kendoTextBox formControlName="street4" placeholder="Address Line 2" />
+            </div>
+
+            <!-- State / Zip -->
+            <div class="form-row state-and-zip">
+              <kendo-formfield class="flex-item">
+                <label class="label-and-asterisk" kendoLabel>
+                  State
+                  <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
+                  <button kendoPopoverAnchor
+                          [popover]="pop"
+                          showOn="hover"
+                          class="village-hyperlink"
+                          kendoButton>
+                    ?
+                  </button>
+
+                  <kendo-popover #pop title="Need help?" [width]="400">
+                    <!-- this template will override the `body` property -->
+                    <ng-template kendoPopoverBodyTemplate>
+                      <p>
+                        Need help with finding the name of your Village/Neighborhood? You can
+                        <a href="https://www.sec.state.ma.us/divisions/cis/historical/archaic-names.htm"
+                           target="_blank"
+                           rel="noopener">
+                          view them here.
+                        </a>
+                      </p>
+                    </ng-template>
+                  </kendo-popover>
+                </label>
+                <kendo-dropdownlist [data]="stateOptions" [valuePrimitive]="true" formControlName="state">
+                </kendo-dropdownlist>
+                <div class="error-message">
+                  <span *ngIf="submittedAddress && addressForm.get('businessAddress.state')?.hasError('required')">
+                    State is required.
+                  </span>
+                </div>
+              </kendo-formfield>
+              <ng-container *ngIf="cityOptions.length && addressForm.get('businessAddress.state')?.value === 'Massachusetts'; else busCityInput">
+                <kendo-formfield class="flex-item">
+                  <label kendoLabel class="label-and-asterisk">
+                    City / Town <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
+                  </label>
+                  <kendo-dropdownlist formControlName="cityTown"
+                                      [data]="cityOptions"
+                                      [valuePrimitive]="true"
+                                      textField="value"
+                                      valueField="value"
+                                      class="dynamic-dropdown">
+                  </kendo-dropdownlist>
+                  <div class="error-message">
+                    <span *ngIf="submittedAddress && addressForm.get('businessAddress.cityTown')?.hasError('required')">
+                      City/Town is required.
+                    </span>
+                  </div>
+                </kendo-formfield>
+              </ng-container>
+
+              <ng-template #busCityInput>
+                <kendo-formfield class="flex-item">
+                  <label kendoLabel class="label-and-asterisk">
+                    City / Town <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
+                  </label>
+                  <input kendoTextBox formControlName="cityTown" class="city-town-input-element" />
+                  <div class="error-message">
+                    <span *ngIf="submittedAddress && addressForm.get('businessAddress.cityTown')?.hasError('required')">
+                      City/Town is required.
+                    </span>
+                  </div>
+                </kendo-formfield>
+              </ng-template>
+              <!-- wrap the overall label in a plain div -->
+              <div class="flex-item zip-code-field">
+                <label class="label-and-asterisk" kendoLabel>
+                  Zip Code
+                  <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
+                </label>
+
+                <div class="zip-inputs">
+
+                  <!-- form-field for the 5-digit part -->
+                  <kendo-formfield>
+                    <input kendoTextBox
+                           formControlName="zipCode"
+                           class="zip-input-boxes"
+                           maxlength="5"
+                           placeholder="12345"
+                           (keypress)="allowOnlyNumbers($event)"
+                           (paste)="onZipPaste($event,'businessAddress.zipCode')" />
+                    <!-- your existing error spans here -->
+                    <div class="error-message">
+                      <span *ngIf="submittedAddress && addressForm.get('businessAddress.zipCode')?.hasError('required')">
+                        Zip Code is required.
+                      </span>
+                      <span *ngIf="submittedAddress && addressForm.get('businessAddress.zipCode')?.hasError('pattern')">
+                        Must be exactly 5 digits.
+                      </span>
+                    </div>
+                  </kendo-formfield>
+
+                  <span class="hyphen">–</span>
+
+                  <!-- form-field for the 4-digit plus-4 part -->
+                  <kendo-formfield>
+                    <input kendoTextBox
+                           formControlName="zipPlus"
+                           class="zip-input-boxes"
+                           maxlength="4"
+                           placeholder="6789"
+                           (keypress)="allowOnlyNumbers($event)"
+                           (paste)="onZipPaste($event,'businessAddress.zipPlus')" />
+                    <!-- error for just this control -->
+                    <div class="error-message">
+                      <span *ngIf="submittedAddress && addressForm.get('businessAddress.zipPlus')?.hasError('pattern')">
+                        Enter at least 2 digits (up to 4).
+                      </span>
+                    </div>
+                  </kendo-formfield>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Single Save Button -->
+<button kendoButton (click)="onSubmit()" class="search-button">Submit</button>
+<button kendoButton (click)="onCancel()" class="custom-button-alt">Cancel</button>
+Here is the ts file: 
+import { Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import mockData from '../../../../mockdata/mock2.json';
+import mockProfileData from '../../../../mockdata/mock-profile-data.json';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { RefGetterService } from '../../../services/helper-services/ref-get-service/ref-getter.service';
+import { CityCountyRef, SalutationRef, StateRef } from '../../../models/ref-items-model/ref-items.model';
+import { take } from 'rxjs';
+import { BuildEditObject } from '../../../models/update-profile-info-model/update-profile-info.model';
+
+interface NotaryRecord {
+  notaryIdentifier: number;
+  lastName: string;
+  firstName: string;
+  middleName: string;
+  cityTown: string;
+  county: string;
+  approvalDate: string;
+  createdDate: string;
+  isRemoteNotary: string;
+  salutationValue: string;
+}
+interface NotaryProfileRecord {
+  notaryDetailInformation: NotaryDetailInformation;
+  notaryAccountDetails: NotaryAccountDetails;
+}
+interface NotaryAccountDetails {
+  notaryStatus: string;
+  comissionDate: string;
+  expirationDate: string;
+  hasResigned: string;
+}
+interface NotaryDetailInformation {
+  notaryIdentifier: number;
+  dateOfBirth: string;
+  phone1: string;
+  phone2: string;
+  dateOfDeath: string;
+  residentialAddress: string;
+  businessAddress: string;
+  emailAddress: string;
+}
+
+@Component({
+  selector: 'app-update-notary-profile-info',
+  templateUrl: './update-notary-profile-info.component.html',
+  styleUrls: ['./update-notary-profile-info.component.css', '../add-new-record/add-new-record.component.css']
+})
+export class UpdateNotaryProfileInfoComponent {
+  public personalForm!: FormGroup;
+  public addressForm!: FormGroup;
+
+  public record?: NotaryRecord;
+  public detailInfo?: NotaryDetailInformation;
+  public accountInfo?: NotaryAccountDetails;
+
+  // start empty, we’ll overwrite once the call returns
+  public salutationOptions: string[] = [];
+  public stateOptions: string[] = [];
+  public stateRefs: StateRef[] = [];
+  public cityOptions: CityCountyRef[] = [];
+  private allCityCountyData: CityCountyRef[] = [];
+
+  public updatePersonalChecked = false;
+  public updateAddressChecked = false;
+  public isPoBox = false;
+  public submittedAddress = false;
+
+  private originalPersonalValues: any;
+  private originalAddressValues: any;
+
+  public displayData?: BuildEditObject;
+
+  constructor(
+    private fb: FormBuilder,
+    private refGetter: RefGetterService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+    // 1) Preferred: getCurrentNavigation (only on the initial nav)
+    const nav = this.router.getCurrentNavigation();
+    this.displayData = nav?.extras.state?.['buildEditObject'] as BuildEditObject | undefined;
+
+    // 2) Fallback (and works after page reload):
+    if (!this.displayData && history.state?.buildEditObject) {
+      this.displayData = history.state.buildEditObject;
+    }
+
+    console.log('Received buildEditObject:', this.displayData);
   }
-]
+
+  ngOnInit() {
+    // — your existing route + mock-data lookup logic —
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (!idParam) { console.error('No "id" in route!'); return; }
+    const notaryId = Number(idParam);
+    if (isNaN(notaryId)) { console.error(`Bad id: ${idParam}`); return; }
+
+    this.record = (mockData as NotaryRecord[])
+      .find(r => r.notaryIdentifier === notaryId);
+
+    const profile = (mockProfileData as NotaryProfileRecord[])
+      .find(p => p.notaryDetailInformation.notaryIdentifier === notaryId);
+
+    if (profile) {
+      this.detailInfo = profile.notaryDetailInformation;
+      this.accountInfo = profile.notaryAccountDetails;
+    }
+
+    // build your form with all controls starting as null
+    this.personalForm = this.fb.group({
+      salutation: [null],
+      firstName: [null],
+      middleName: [null],
+      lastName: [null],
+      suffix: [null],
+      dateOfBirth: [null],
+      dateOfDeath: [null],
+      dateOfResignation: [null],
+      email: [null],
+      primaryPhone1: [null],
+      primaryPhone2: [null],
+      primaryPhone3: [null],
+      secondaryPhone1: [null],
+      secondaryPhone2: [null],
+      secondaryPhone3: [null],
+      changeType: [null]
+    });
+
+    this.buildAddressForm();
+
+
+    if (this.displayData?.personalInfoDetails) {
+      const p = this.displayData.personalInfoDetails;
+
+      // 1) Salutation, names, suffix
+      this.personalForm.patchValue({
+        salutation: p.salutationType,    // string-based dropdown
+        firstName: p.firstName,
+        middleName: p.middleName,
+        lastName: p.lastName,
+        suffix: p.suffix,
+
+        // 2) Dates
+        dateOfBirth: p.dateOfBirth ? new Date(p.dateOfBirth) : null,
+        dateOfDeath: p.dateOfDeath ? new Date(p.dateOfDeath) : null,
+        dateOfResignation: null,          // always blank
+
+        // 3) Email
+        email: p.emailAddress || null
+      });
+
+      // 4) Phones: strip non-digits, then slice into [3,3,4]
+      const toSlices = (raw: string) => {
+        const d = raw.replace(/\D/g, '');
+        return [d.slice(0, 3), d.slice(3, 6), d.slice(6)];
+      };
+
+      const primary = p.contactDetails.find(c =>
+        c.contactType === 'Phone' && c.isPrimary
+      );
+      if (primary) {
+        const [a, b, c] = toSlices(primary.contactValue);
+        this.personalForm.patchValue({
+          primaryPhone1: a,
+          primaryPhone2: b,
+          primaryPhone3: c
+        });
+      }
+
+      const secondary = p.contactDetails.find(c =>
+        c.contactType === 'Phone' && !c.isPrimary
+      );
+      if (secondary) {
+        const [a, b, c] = toSlices(secondary.contactValue);
+        this.personalForm.patchValue({
+          secondaryPhone1: a,
+          secondaryPhone2: b,
+          secondaryPhone3: c
+        });
+      }
+
+      // 5) Type-of-change left null → radios start unchecked
+      //    (and dateOfResignation already set to null above)
+    }
+
+    this.originalPersonalValues = this.personalForm.value;
+    this.personalForm.disable();
+    //this.originalAddressValues = this.addressForm.value;
+    //this.addressForm.disable();
+
+    const resState = this.addressForm.get('residenceAddress.state')!;
+    const busState = this.addressForm.get('businessAddress.state')!;
+    resState.valueChanges.subscribe(() => {
+      this.addressForm.get('residenceAddress.cityTown')!.reset();
+      this.updateCityOptions();
+    });
+    busState.valueChanges.subscribe(() => {
+      this.addressForm.get('businessAddress.cityTown')!.reset();
+      this.updateCityOptions();
+    });
+
+    // now fetch the salutations, map to the "value" array, or log any error
+    this.refGetter.getSalutations().subscribe(
+      (all: SalutationRef[]) => {
+        this.salutationOptions = all.map(x => x.value);
+      },
+      err => console.error('Failed to load salutations', err)
+    );
+
+    this.getStatesForDropDown();
+    this.cacheCityCountyData();
+  }
+
+  private buildAddressForm() {
+    this.addressForm = this.fb.group({
+      preferredAddress: ['Residence', Validators.required],
+
+      residenceAddress: this.fb.group({
+        street1: [''],
+        street2: [''],
+        street3: [''],
+        street4: [''],
+        state: [''],
+        zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+        zipPlus: ['', Validators.pattern(/^$|^\d{2,4}$/)],
+        cityTown: ['']
+      }, { validators: this.streetValidator() }),
+
+      businessAddress: this.fb.group({
+        isPoBox: [false],          // new!
+        street1: [''],             // Street No.
+        street2: [''],             // Address Line / will become "PO Box"
+        street3: [''],             // Suffix / will become PO Box number
+        street4: [''],             // Address Line 2
+        state: [''],
+        zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+        zipPlus: ['', Validators.pattern(/^$|^\d{2,4}$/)],
+        cityTown: ['']
+      }, { validators: this.streetValidator() })
+    });
+
+    // re-apply validators when preferred changes
+    this.addressForm.get('preferredAddress')!
+      .valueChanges
+      .subscribe(pref => this.updateAddressValidators(pref));
+
+    // init validators for default “Residence”
+    this.updateAddressValidators(this.addressForm.get('preferredAddress')!.value);
+  }
+
+  private streetValidator(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const g = group as FormGroup;
+      const s1 = g.get('street1')!.value;
+      const s2 = g.get('street2')!.value;
+      return (!s1 && !s2) ? { noStreet: true } : null;
+    };
+  }
+
+  private optionalGroupValidator(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const g = group as FormGroup;
+      const hasAny = Object.values(g.value).some(v => !!v);
+      if (!hasAny) { return null; }
+
+      // must satisfy street + required fields
+      const streetErr = this.streetValidator()(g);
+      if (streetErr) { return { noStreet: true }; }
+      for (const field of ['state', 'zipCode', 'cityTown']) {
+        if (!g.get(field)!.value) {
+          return { [`${field}Req`]: true };
+        }
+      }
+      return null;
+    };
+  }
+
+  private updateAddressValidators(pref: 'Residence' | 'Business') {
+    const resG = this.addressForm.get('residenceAddress') as FormGroup;
+    const busG = this.addressForm.get('businessAddress') as FormGroup;
+
+    // clear all
+    [resG, busG].forEach(grp => {
+      grp.clearValidators();
+      Object.values(grp.controls).forEach(c => c.clearValidators());
+    });
+
+    if (pref === 'Residence') {
+      // Residence required
+      resG.setValidators(this.streetValidator());
+      ['state', 'zipCode', 'cityTown'].forEach(name => {
+        const ctrl = resG.get(name)!;
+        ctrl.setValidators(name === 'zipCode'
+          ? [Validators.required, Validators.pattern(/^\d{5}$/)]
+          : Validators.required);
+      });
+      resG.get('zipPlus')!.setValidators(Validators.pattern(/^$|^\d{2,4}$/));
+
+      // Business optional
+      busG.setValidators(this.optionalGroupValidator());
+    } else {
+      // Business required
+      busG.setValidators(this.streetValidator());
+      ['state', 'zipCode', 'cityTown'].forEach(name => {
+        const ctrl = busG.get(name)!;
+        ctrl.setValidators(name === 'zipCode'
+          ? [Validators.required, Validators.pattern(/^\d{5}$/)]
+          : Validators.required);
+      });
+      busG.get('zipPlus')!.setValidators(Validators.pattern(/^$|^\d{2,4}$/));
+
+      // Residence optional
+      resG.setValidators(this.optionalGroupValidator());
+    }
+
+    // re-run
+    [resG, busG].forEach(g => g.updateValueAndValidity({ onlySelf: true }));
+    ['state', 'zipCode', 'cityTown', 'zipPlus']
+      .forEach(n => {
+        resG.get(n)?.updateValueAndValidity({ onlySelf: true });
+        busG.get(n)?.updateValueAndValidity({ onlySelf: true });
+      });
+  }
+
+  public togglePoBox(event: any): void {
+    const isPo = event.target.checked;
+    const bus = this.addressForm.get('businessAddress') as FormGroup;
+    bus.get('isPoBox')!.setValue(isPo);
+
+    if (isPo) {
+      // 1) Clear street1, street4
+      bus.get('street1')!.setValue(null);
+      bus.get('street1')!.clearValidators();
+      bus.get('street1')!.updateValueAndValidity();
+      bus.get('street4')!.setValue(null);
+      bus.get('street4')!.clearValidators();
+      bus.get('street4')!.updateValueAndValidity();
+
+      // 2) Force street2 = "PO Box" (keep enabled but read-only in template)
+      bus.get('street2')!.setValue('PO Box');
+      bus.get('street2')!.clearValidators();
+      bus.get('street2')!.updateValueAndValidity();
+
+      // 3) Make PO Box number (street3) required
+      bus.get('street3')!
+        .setValidators([Validators.required]);
+      bus.get('street3')!.updateValueAndValidity();
+
+      // 4) Replace the group-level validator so only street3 is enforced
+      bus.clearValidators();
+      bus.setValidators(this.poBoxGroupValidator());
+      bus.updateValueAndValidity();
+    } else {
+      // Reset to the default “Business required” rules
+      bus.get('street2')!.setValue('');
+      bus.get('street3')!.setValue('');
+      bus.get('street1')!.setValidators([]);
+      bus.get('street2')!.setValidators([]);
+      bus.get('street3')!.setValidators([]);
+      bus.get('street4')!.setValidators([]);
+      bus.get('street1')!.updateValueAndValidity();
+      bus.get('street2')!.updateValueAndValidity();
+      bus.get('street3')!.updateValueAndValidity();
+      bus.get('street4')!.updateValueAndValidity();
+
+      // re-apply the original Business validators
+      this.updateAddressValidators('Business');
+    }
+  }
+
+  private poBoxGroupValidator(): ValidatorFn {
+    return (ctl: AbstractControl): ValidationErrors | null => {
+      const g = ctl as FormGroup;
+      return g.get('street3')!.value
+        ? null
+        : { poBoxNumberReq: true };
+    };
+  }
+
+  private getStatesForDropDown() {
+    this.refGetter.getStates().pipe(take(1)).subscribe(
+      (all: StateRef[]) => {
+        this.stateRefs = all;               // store full refs
+        this.stateOptions = all.map(s => s.value);
+
+        // now that we know full state list, patch the addressForm:
+        this.patchAddressDetails();
+      },
+      err => console.error('States load failed', err)
+    );
+  }
+
+  private cacheCityCountyData() {
+    this.refGetter.getCityCounty().pipe(take(1)).subscribe(
+      (all: CityCountyRef[]) => {
+        this.allCityCountyData = all;
+        this.updateCityOptions();
+
+        // now that cityOptions is populated, re-patch the cityTown field
+        if (this.displayData) {
+          const addrs = this.displayData.personalInfoDetails.addressDetails;
+          const res = addrs.find(a => a.addressType === 'Residential');
+          if (res) {
+            this.addressForm.get('residenceAddress.cityTown')!
+              .setValue(res.city);
+          }
+          const bus = addrs.find(a => a.addressType === 'Business');
+          if (bus) {
+            this.addressForm.get('businessAddress.cityTown')!
+              .setValue(bus.city);
+          }
+        }
+      },
+      err => console.error('CityCounty load failed', err)
+    );
+  }
+
+  private patchAddressDetails(): void {
+    if (!this.displayData) { return; }
+    const addrs = this.displayData.personalInfoDetails.addressDetails;
+
+    // 1) Pick out the preferred vs. non-preferred
+    const preferred = addrs.find(a => a.isPrefered) || addrs[0];
+    const other = addrs.find(a => !a.isPrefered) || null;
+
+    // 2) Select the radio
+    const prefType = preferred.addressType === 'Business' ? 'Business' : 'Residence';
+    this.addressForm.get('preferredAddress')!.setValue(prefType);
+
+    // 3) Helper to patch a single FormGroup
+    const doPatch = (grpName: 'residenceAddress' | 'businessAddress', addr: any) => {
+      const grp = this.addressForm.get(grpName) as FormGroup;
+
+      // State → full name lookup
+      const stateRef = this.stateRefs.find(s => s.stateId === addr.stateId);
+      const fullState = stateRef?.value || '';
+      grp.get('state')!.setValue(fullState);
+
+      // trigger city-options (will pick up MA → dropdown)
+      grp.get('cityTown')!.reset();
+      this.updateCityOptions();
+      grp.get('cityTown')!.setValue(addr.city);
+
+      // Zip
+      grp.get('zipCode')!.setValue(addr.zipCode);
+      grp.get('zipPlus')!.setValue(addr.zipPlus || '');
+
+      if (grpName === 'businessAddress' && addr.isPoBox) {
+        // Set the checkbox state first
+        this.isPoBox = true;
+        // let your helper do the heavy lifting
+        this.togglePoBox({ target: { checked: true } });
+        // PO Box number → street3
+        grp.get('street3')!.setValue(addr.aptNumber);
+      } else {
+        // ensure PO-Box logic turned off for business
+        if (grpName === 'businessAddress') {
+          this.isPoBox = false;
+          this.togglePoBox({ target: { checked: false } });
+        }
+        grp.patchValue({
+          street1: addr.streetNumber,
+          street2: addr.streetName,
+          street3: addr.aptNumber,
+          street4: addr.addressLine2
+        });
+      }
+    };
+
+    // 4) Patch “Residence” if present
+    const res = addrs.find(a => a.addressType === 'Residential');
+    if (res) { doPatch('residenceAddress', res); }
+
+    // 5) Patch “Business” if present
+    const bus = addrs.find(a => a.addressType === 'Business');
+    if (bus) { doPatch('businessAddress', bus); }
+
+    // 6) Snapshot these new values as “original” and re-disable
+    this.originalAddressValues = this.addressForm.value;
+    this.addressForm.disable();
+  }
+
+  private updateCityOptions() {
+    const res = this.addressForm.get('residenceAddress.state')!.value;
+    const bus = this.addressForm.get('businessAddress.state')!.value;
+    this.cityOptions = (res === 'Massachusetts' || bus === 'Massachusetts')
+      ? this.allCityCountyData
+      : [];
+  }
+
+  public get preferred(): 'Residence' | 'Business' {
+    return this.addressForm.get('preferredAddress')!.value;
+  }
+
+  public onCheckboxChange(value: boolean): void {
+    console.log('Checkbox value:', value);
+  }
+
+  public togglePersonalInfo(evt: Event): void {
+    const chk = (evt.target as HTMLInputElement).checked;
+    this.updatePersonalChecked = chk;
+
+    if (chk) {
+      // enable editing
+      this.personalForm.enable();
+    } else {
+      // reset to original values, then disable
+      this.personalForm.reset(this.originalPersonalValues);
+      this.personalForm.disable();
+    }
+  }
+
+  public toggleAddressInfo(evt: Event): void {
+    const chk = (evt.target as HTMLInputElement).checked;
+    this.updateAddressChecked = chk;
+
+    //console.log('Toggle checkbox:', chk);
+    //console.log('Before toggle - Residence city:', this.addressForm.get('residenceAddress.cityTown')?.value);
+    //console.log('Before toggle - Business city:', this.addressForm.get('businessAddress.cityTown')?.value);
+
+    if (chk) {
+      // Enable the form first
+      this.addressForm.enable();
+
+      //console.log('After enable - Residence city:', this.addressForm.get('residenceAddress.cityTown')?.value);
+      //console.log('After enable - Business city:', this.addressForm.get('businessAddress.cityTown')?.value);
+
+      // Then restore city values for Massachusetts states
+      this.restoreCityValuesForMassachusetts();
+    } else {
+      // Reset to original values, then disable
+      this.addressForm.reset(this.originalAddressValues);
+
+      //console.log('After reset - Residence city:', this.addressForm.get('residenceAddress.cityTown')?.value);
+      //console.log('After reset - Business city:', this.addressForm.get('businessAddress.cityTown')?.value);
+
+      // IMPORTANT: After reset, we need to update city options and restore city values
+      // because the state-to-city dependency needs to be reestablished
+      this.updateCityOptions();
+
+      // Re-patch the city values after cityOptions is updated
+      this.restoreCityValuesForMassachusetts();
+
+      this.addressForm.disable();
+    }
+  }
+
+  private restoreCityValuesForMassachusetts(): void {
+    if (!this.displayData) return;
+
+    const addrs = this.displayData.personalInfoDetails.addressDetails;
+
+    // Use a longer timeout to ensure dropdowns are fully rendered
+    setTimeout(() => {
+      // Restore residence city if it exists and state is Massachusetts
+      const res = addrs.find(a => a.addressType === 'Residential');
+      if (res && this.addressForm.get('residenceAddress.state')?.value === 'Massachusetts') {
+        const cityControl = this.addressForm.get('residenceAddress.cityTown');
+        //console.log('Setting residence city to:', res.city);
+        //console.log('City options available:', this.cityOptions);
+        if (cityControl) {
+          cityControl.setValue(res.city, { emitEvent: false });
+          //console.log('After setting residence city:', cityControl.value);
+        }
+      }
+
+      // Restore business city if it exists and state is Massachusetts  
+      const bus = addrs.find(a => a.addressType === 'Business');
+      if (bus && this.addressForm.get('businessAddress.state')?.value === 'Massachusetts') {
+        const cityControl = this.addressForm.get('businessAddress.cityTown');
+        //console.log('Setting business city to:', bus.city);
+        if (cityControl) {
+          cityControl.setValue(bus.city, { emitEvent: false });
+          //console.log('After setting business city:', cityControl.value);
+        }
+      }
+    }, 100); // Increased timeout
+  }
+
+  public allowOnlyNumbers(event: KeyboardEvent) {
+    if (event.key.length === 1 && !/^\d$/.test(event.key)) event.preventDefault();
+  }
+
+  public onZipPaste(event: ClipboardEvent, controlPath: string) {
+    event.preventDefault();
+    const digits = (event.clipboardData?.getData('text') || '').replace(/\D/g, '');
+    this.addressForm.get(controlPath)?.setValue(digits);
+  }
+
+  public onSubmit() {
+    this.submittedAddress = true;
+    if (this.personalForm.valid && this.addressForm.valid) {
+      const payload = {
+        personal: this.personalForm.value,
+        address: this.addressForm.value
+      };
+      console.log('Saving:', payload);
+      // …your save logic…
+    }
+  }
+
+  public onCancel() {
+    console.log("Cancel Clicked");
+  }
+}
