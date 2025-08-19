@@ -1,618 +1,701 @@
-import { Component, OnInit } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  FormControl,
-  Validators,
-  AbstractControl,
-  ValidationErrors,
-  ValidatorFn
-} from '@angular/forms';
-import { RefGetterService } from '../../../services/helper-services/ref-get-service/ref-getter.service';
-import { CityCountyRef, SalutationRef, StateRef } from '../../../models/ref-items-model/ref-items.model';
-import { AddNewRecordRequest, AddressDto, ContactDto, PersonalInfo } from '../../../models/add-new-record-model/add-new-record-request.model';
-import { take } from 'rxjs/operators';
-import { AddNotaryResponse, NewNotaryRecordService } from '../../../services/new-record/new-notary-record.service';
-import { NotarySearchService } from '../../../services/search/notary-search.service';
-import { GeneralSearchRequest, LiveSearchWrapper } from '../../../models/live-search-model/live-search.model';
-import { Router } from '@angular/router';
+Goal: To add checkboxes to each of the inputs next to their labels (Renewal Date, Paid Date, and Qualified Date) such that we enable the individual values. 
+Rules: 
+Currently as it stands.. when the user clicks the update notary appointment checkbox all the inputs (Renewal Date, Paid Date, and Qualified Date) get activated and then the 
+user can sibsequently submit the input boxes with/without changing the dates for inputs (Renewal Date, Paid Date, and Qualified Date). If the user changed the input value of 
+any of the inputs we console.log those. If the user did not change any we simply just console.log the already patched ones. THat is the current mechanism. And the moment the 
+user checks the update notary appointment checkbox.. we enable the save button. 
 
+But, I want to implement 3 checkboxes for each of the inputs (Renewal Date, Paid Date, and Qualified Date) next to their labels which will be in a disabled state initially. 
+Such that.. When the user clicks the udate notary appointment checkbox We enable the checkboxes but, WE STILL DO NOT ENABLE THE SAVE button. 
+But, instead ONLY IF the user clicks the respective checkbox then we enable the save button. Also, the user can click the update notary appointment chekbox and then click a 
+respective checkbox.. and NOT edit the value.. we will have to consider whatever patched value we have as the console.log value (meaning final) value. 
+
+Ask all clarifying questions before you get to implementation
+
+HTML file: 
+<div class="page-wrapper">
+  <div class="heading-and-asterisk">
+    <h2 class="notary-title">
+      Update Notary Details – {{ temp }}
+    </h2>
+    <div class="required-indicator">
+      <div class="asterisk">*</div>
+      <div class="required-indicator-text"> – Required fields</div>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-class" novalidate>
+    <!-- ADD NOTES -->
+    <div class="notes-section" formGroupName="addNotes">
+      <div class="div-header-section">
+        <input type="checkbox"
+               kendoCheckBox
+               formControlName="enabled"
+               class="checkbox-override" />
+        <div class="checkbox-header-level">Add Notes</div>
+      </div>
+
+      <div class="div-content-section">
+        <kendo-formfield class="full-width">
+          <label kendoLabel for="notes">
+            Notes <span class="text-danger asterisk padding-exception">*</span>
+          </label>
+          <!-- Disabled until checkbox is checked; value is preserved -->
+          <textarea kendoTextArea
+                    id="notes"
+                    formControlName="notes"
+                    rows="6"
+                    maxlength="5000"></textarea>
+          <kendo-formerror *ngIf="notesCtrl?.touched && notesCtrl?.errors?.['required']">
+            Notes are required.
+          </kendo-formerror>
+          <kendo-formerror *ngIf="notesCtrl?.touched && notesCtrl?.errors?.['maxlength']">
+            Max 500 characters.
+          </kendo-formerror>
+        </kendo-formfield>
+      </div>
+    </div>
+    <div class="appointment-section" formGroupName="updateAppointment">
+      <div class="div-header-section">
+        <input type="checkbox"
+               kendoCheckBox
+               formControlName="enabled"
+               class="checkbox-override" />
+        <div class="checkbox-header-level">Update Notary Appointment</div>
+      </div>
+
+      <div class="div-content-section">
+        <div class="form-column">
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="renewalDate">
+              Renewal Date <span class="text-danger asterisk">*</span>
+            </label>
+            <kendo-datepicker id="renewalDate"
+                              formControlName="renewalDate"
+                              [format]="'MM/dd/yyyy'"
+                              placeholder="MM/DD/YYYY"
+                              [min]="renewalMin"
+                              [max]="renewalMax">
+            </kendo-datepicker>
+          </kendo-formfield>
+
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="paidDate">
+              Paid Date <span class="text-danger asterisk">*</span>
+            </label>
+            <kendo-datepicker id="paidDate"
+                              formControlName="paidDate"
+                              [format]="'MM/dd/yyyy'"
+                              placeholder="MM/DD/YYYY"
+                              [min]="paidMin"
+                              [max]="paidMax">
+            </kendo-datepicker>
+          </kendo-formfield>
+
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="qualifiedDate">
+              Qualified Date <span class="text-danger asterisk">*</span>
+            </label>
+            <kendo-datepicker id="qualifiedDate"
+                              formControlName="qualifiedDate"
+                              [format]="'MM/dd/yyyy'"
+                              placeholder="MM/DD/YYYY">
+            </kendo-datepicker>
+          </kendo-formfield>
+        </div>
+      </div>
+    </div>
+
+    <div class="valid-certificate-section" formGroupName="validCertificate">
+      <div class="div-header-section">
+        <input type="checkbox"
+               kendoCheckBox
+               formControlName="enabled"
+               class="checkbox-override" />
+        <div class="checkbox-header-level">Valid Certificate</div>
+      </div>
+
+      <div class="div-content-section">
+        <div class="form-column">
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="validationCertificate">
+              Validation Certificate #
+            </label>
+            <input kendoTextBox
+                   id="validationCertificate"
+                   formControlName="validationCertificate"
+                   maxlength="10"
+                   inputmode="numeric"
+                   pattern="[0-9]*"
+                   (keypress)="digitsOnly($event)" />
+            <kendo-formerror *ngIf="validationCertificateCtrl?.touched && validationCertificateCtrl?.errors?.['maxlength']">
+              Max 10 digits.
+            </kendo-formerror>
+            <kendo-formerror *ngIf="validationCertificateCtrl?.touched && validationCertificateCtrl?.errors?.['pattern']">
+              Numbers only.
+            </kendo-formerror>
+          </kendo-formfield>
+
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="validationStartDate">
+              Validation Start Date <span class="text-danger asterisk">*</span>
+            </label>
+            <kendo-datepicker id="validationStartDate"
+                              formControlName="validationStartDate"
+                              [format]="'MM/dd/yyyy'"
+                              placeholder="MM/DD/YYYY">
+            </kendo-datepicker>
+          </kendo-formfield>
+
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="validationEndDate">
+              Validation End Date <span class="text-danger asterisk">*</span>
+            </label>
+            <kendo-datepicker id="validationEndDate"
+                              formControlName="validationEndDate"
+                              [format]="'MM/dd/yyyy'"
+                              placeholder="MM/DD/YYYY">
+            </kendo-datepicker>
+          </kendo-formfield>
+        </div>
+      </div>
+    </div>
+    <div class="add-complaint-section" formGroupName="addComplaint">
+      <div class="div-header-section">
+        <input type="checkbox"
+               kendoCheckBox
+               formControlName="enabled"
+               class="checkbox-override" />
+        <div class="checkbox-header-level">Add Complaint</div>
+      </div>
+
+      <div class="div-content-section">
+        <div class="form-column row-one">
+          <!-- Date of Complaint -->
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="dateOfComplaint">
+              Date of Complaint <span class="text-danger asterisk">*</span>
+            </label>
+            <kendo-datepicker id="dateOfComplaint"
+                              formControlName="dateOfComplaint"
+                              [format]="'MM/dd/yyyy'"
+                              placeholder="MM/DD/YYYY">
+            </kendo-datepicker>
+            <kendo-formerror *ngIf="dateOfComplaintCtrl?.touched && dateOfComplaintCtrl?.errors?.['required']">
+              Date of complaint is required.
+            </kendo-formerror>
+          </kendo-formfield>
+
+          <!-- Is RON Complaint -->
+          <kendo-formfield class="flex-item checkbox-option">
+            <input type="checkbox"
+                   kendoCheckBox
+                   id="isRoncomplaint"
+                   formControlName="isRoncomplaint" />
+            <label kendoLabel for="isRoncomplaint" id="is-ron-complaint">Remote Online Complaint?</label>
+          </kendo-formfield>
+        </div>
+
+        <div class="form-column">
+          <!-- Complaint Details -->
+          <kendo-formfield class="full-width">
+            <label kendoLabel for="complaintDetails">
+              Complaint Details <span class="text-danger asterisk">*</span>
+            </label>
+            <textarea kendoTextArea
+                      id="complaintDetails"
+                      formControlName="complaintDetails"
+                      rows="4"
+                      maxlength="200"></textarea>
+            <kendo-formerror *ngIf="complaintDetailsCtrl?.touched && complaintDetailsCtrl?.errors?.['required']">
+              Complaint details are required.
+            </kendo-formerror>
+            <kendo-formerror *ngIf="complaintDetailsCtrl?.touched && complaintDetailsCtrl?.errors?.['maxlength']">
+              Max 200 characters.
+            </kendo-formerror>
+          </kendo-formfield>
+        </div>
+
+        <!--<div class="form-column">
+          <kendo-formfield class="flex-item">
+            <label kendoLabel for="isResolved">Resolved?</label>
+            <input type="checkbox"
+                   kendoCheckBox
+                   id="isResolved"
+                   formControlName="isResolved" />
+          </kendo-formfield>
+
+          <kendo-formfield class="flex-item" *ngIf="isResolvedCtrl.value">
+            <label kendoLabel for="resolutionDate">
+              Resolution Date <span class="text-danger asterisk">*</span>
+            </label>
+            <kendo-datepicker id="resolutionDate"
+                              formControlName="resolutionDate"
+                              [format]="'MM/dd/yyyy'"
+                              placeholder="MM/DD/YYYY">
+            </kendo-datepicker>
+            <kendo-formerror *ngIf="resolutionDateCtrl?.touched && resolutionDateCtrl?.errors?.['required']">
+              Resolution date is required when resolved.
+            </kendo-formerror>
+          </kendo-formfield>
+        </div>-->
+
+        <div class="form-column">
+          <!-- Resolution Notes -->
+          <kendo-formfield class="full-width resolution-override height-override">
+            <label kendoLabel *ngIf="isResolvedCtrl.value" for="resolutionNotes">
+              Resolution Notes <span class="text-danger asterisk">*</span>
+            </label>
+            <label kendoLabel *ngIf="!isResolvedCtrl.value" for="resolutionNotes">
+              Resolution Notes <span class="text-normal asterisk">*</span>
+            </label>
+            <textarea kendoTextArea
+                      id="resolutionNotes"
+                      formControlName="resolutionNotes"
+                      rows="4"
+                      maxlength="200"></textarea>
+            <kendo-formerror *ngIf="resolutionNotesCtrl?.touched && resolutionNotesCtrl?.errors?.['required']">
+              Resolution notes are required when resolved.
+            </kendo-formerror>
+            <kendo-formerror *ngIf="resolutionNotesCtrl?.touched && resolutionNotesCtrl?.errors?.['maxlength']">
+              Max 200 characters.
+            </kendo-formerror>
+          </kendo-formfield>
+          <div class="resolved-and-date">
+            <kendo-formfield class="flex-item checkbox-option">
+              <label kendoLabel for="isResolved" id="is-ron-complaint">Resolved?</label>
+              <input type="checkbox"
+                     kendoCheckBox
+                     id="isResolved"
+                     formControlName="isResolved" />
+            </kendo-formfield>
+
+            <kendo-formfield class="flex-item" *ngIf="isResolvedCtrl.value">
+              <label kendoLabel for="resolutionDate">
+                Resolution Date <span class="text-danger asterisk">*</span>
+              </label>
+              <kendo-datepicker id="resolutionDate"
+                                formControlName="resolutionDate"
+                                [format]="'MM/dd/yyyy'"
+                                placeholder="MM/DD/YYYY">
+              </kendo-datepicker>
+              <kendo-formerror *ngIf="resolutionDateCtrl?.touched && resolutionDateCtrl?.errors?.['required']">
+                Resolution date is required when resolved.
+              </kendo-formerror>
+            </kendo-formfield>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons-row">
+      <button kendoButton
+              themeColor="primary"
+              type="button"
+              class="custom-button-alt"
+              (click)="onCancel($event)">
+        Cancel
+      </button>
+      <button kendoButton
+              class="search-button"
+              themeColor="primary"
+              type="submit"
+              [disabled]="!hasAnySectionEnabled || form.invalid">
+        Save
+      </button>
+    </div>
+  </form>
+</div>
+import { Component, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
+import { ApprovalDate, RefGetterService } from '../../../services/helper-services/ref-get-service/ref-getter.service';
+import { BuildEditObject } from '../../../models/update-profile-info-model/update-profile-info.model';
 
 @Component({
-  selector: 'app-add-new-record',
-  templateUrl: './add-new-record.component.html',
-  styleUrls: ['./add-new-record.component.css']
+  selector: 'app-update-notary-details',
+  templateUrl: './update-notary-details.component.html',
+  styleUrl: './update-notary-details.component.css'
 })
-export class AddNewRecordComponent implements OnInit {
-  public form!: FormGroup;
-  public addressForm!: FormGroup;
-  public submitted = false;
-  public submittedAddress = false;
-  public stateOptions: string[] = [];
-  //public cityOptions: string[] = [];
-  public cityOptions: CityCountyRef[] = [];
-  //public countyValue: string = '';
-  public salutationOptions: string[] = [];
+export class UpdateNotaryDetailsComponent implements OnInit {
+  temp: string | null = '0';
+  form!: FormGroup;
+  approvalDates: ApprovalDate[] = [];
+  public displayData?: BuildEditObject;
+  public accountId: number = 0;
+  today = this.stripTime(new Date());
+  renewalMin = this.today;
+  renewalMax = new Date(2100, 11, 31); // Dec 31, 2100
+  paidMin = new Date(1899, 11, 31);    // Dec 31, 1899
+  paidMax = this.today;
 
-  // Only letters, spaces, hyphens or slashes
-  private namePattern = /^[A-Za-z\s\-\/]+$/;
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private fb: FormBuilder,
+    private refGetter: RefGetterService
+  ) {
+    // 1) Preferred: getCurrentNavigation (only on the initial nav)
+    const nav = this.router.getCurrentNavigation();
+    this.displayData = nav?.extras.state?.['buildEditObject'] as BuildEditObject | undefined;
 
-  //to call once and cache
-  private allCityCountyData: CityCountyRef[] = [];
+    // 2) Fallback (and works after page reload):
+    if (!this.displayData && history.state?.buildEditObject) {
+      this.displayData = history.state.buildEditObject;
+    }
 
-  public salutations: SalutationRef[] = [];
-  public stateRefs: StateRef[] = [];
+    if (this.displayData) {
+      this.accountId = this.displayData.personalInfoDetails.accountId;
+    }
 
-  public existingNotaries: any;
-  public showExistingRecords: boolean = false;
-  private pendingRequest: AddNewRecordRequest | null = null;
-  public isSubmitting = false;
-
-  showAddressSection: boolean = false;
-  viewHeading: string = 'Personal Information'
-
-  constructor(private fb: FormBuilder,
-              private refGetter: RefGetterService,
-              private newNotaryService: NewNotaryRecordService,
-              private router: Router,
-              private notarySearch: NotarySearchService) { }
+    console.log('Received buildEditObject:', this.accountId);
+  }
 
   ngOnInit(): void {
-    this.buildPersonalForm();
-    this.buildAddressForm();
-    this.getSalutationsForDropDown();
-    this.getStatesForDropDown();
-    this.cacheCityCountyData();
+    this.temp = this.route.snapshot.paramMap.get('id');
 
-    // watch the two state controls:
-    const resState = this.addressForm.get('residenceAddress.state')!;
-    const busState = this.addressForm.get('businessAddress.state')!;
-
-    resState.valueChanges.subscribe(() => {
-      const resAddressGroup = this.addressForm.get('residenceAddress');
-      resAddressGroup?.get('cityTown')!.reset();
-      this.updateCityOptions();
-    });
-
-    busState.valueChanges.subscribe(() => {
-      const busAddressGroup = this.addressForm.get('businessAddress');
-      busAddressGroup?.get('cityTown')!.reset();
-      this.updateCityOptions();
-    });
-  }
-
-  private getStatesForDropDown(): void {
-    this.refGetter.getStates().subscribe(
-      (all: StateRef[]) => {
-        this.stateRefs = all;
-        this.stateOptions = all.map(s => s.value);
-      },
-      err => console.error('Failed to load states', err)
-    );
-  }
-
-  private getSalutationsForDropDown(): void {
-    this.refGetter.getSalutations().subscribe(
-      (all: SalutationRef[]) => {
-        this.salutations = all;
-        this.salutationOptions = all.map(x => x.value);
-      },
-      err => console.error('Failed to load salutations', err)
-    );
-  }
-
-  private cacheCityCountyData(): void {
-    this.refGetter.getCityCounty().pipe(take(1)).subscribe(
-      (all: CityCountyRef[]) => {
-        this.allCityCountyData = all;
-      },
-      err => console.error('Failed to load city/county', err)
-    );
-  }
-
-  private updateCityOptions() {
-    const resStateValue = this.addressForm.get('residenceAddress.state')!.value;
-    const busStateValue = this.addressForm.get('businessAddress.state')!.value;
-
-    if (resStateValue === 'Massachusetts' || busStateValue === 'Massachusetts') {
-      this.cityOptions = this.allCityCountyData;
-    } else {
-      this.cityOptions = []; // Clear the list only if NEITHER is Massachusetts
-    }
-  }
-
-  public get preferred(): 'Residence' | 'Business' {
-    return this.addressForm.get('preferredAddress')!.value;
-  }
-
-  private buildPersonalForm() {
+    // Parent form with nested section groups
     this.form = this.fb.group({
-      salutation: ['', Validators.required],
-      firstName: ['', [Validators.required, Validators.pattern(this.namePattern)]],
-      middleName: ['', Validators.pattern(this.namePattern)],
-      lastName: ['', [Validators.required, Validators.pattern(this.namePattern)]],
-      suffix: ['', Validators.pattern(this.namePattern)],
-      dateOfBirth: [null, Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      primaryPhone1: ['', [Validators.required, Validators.pattern(/^\d{3}$/)]],
-      primaryPhone2: ['', [Validators.required, Validators.pattern(/^\d{3}$/)]],
-      primaryPhone3: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
-      secondaryPhone1: ['', Validators.pattern(/^\d{3}$/)],
-      secondaryPhone2: ['', Validators.pattern(/^\d{3}$/)],
-      secondaryPhone3: ['', Validators.pattern(/^\d{4}$/)],
+      addNotes: this.fb.group({
+        enabled: [false], // checkbox state (not submitted)
+        notes: [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(5000)]]
+      }),
+      updateAppointment: this.fb.group({
+        enabled: [false],
+        renewalDate: [{ value: null, disabled: true }],
+        paidDate: [{ value: null, disabled: true }],
+        qualifiedDate: [{ value: null, disabled: true }]
+      }),
+      validCertificate: this.fb.group({
+        enabled: [false],
+        validationCertificate: [{ value: '', disabled: true },
+        [Validators.maxLength(10), Validators.pattern(/^\d{0,10}$/)]
+        ],
+        validationStartDate: [{ value: null, disabled: true }],
+        validationEndDate: [{ value: null, disabled: true }]
+      }),
+      addComplaint: this.fb.group({
+        enabled: [false],
+
+        dateOfComplaint: [{ value: null, disabled: true }, [Validators.required]],
+
+        isRoncomplaint: [{ value: false, disabled: true }],
+
+        complaintDetails: [{ value: '', disabled: true },
+        [Validators.required, Validators.maxLength(200)]
+        ],
+
+        isResolved: [{ value: false, disabled: true }],
+
+        // hidden until resolved; start at today (kept disabled until resolved)
+        resolutionDate: [{ value: this.today, disabled: true }],
+
+        resolutionNotes: [{ value: '', disabled: true }, [Validators.maxLength(200)]]
+      }),
+    });
+
+    // Wire the checkbox to the control's enable/disable & validators
+    this.addNotesEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
+      const notes = this.notesCtrl;
+      if (enabled) {
+        notes.enable({ emitEvent: false });
+        notes.setValidators([Validators.required, Validators.maxLength(500)]);
+      } else {
+        notes.disable({ emitEvent: false });   // value preserved, excluded from validation
+        notes.clearValidators();
+      }
+      notes.updateValueAndValidity({ emitEvent: false });
+    });
+
+    this.updateAppointmentEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
+      const g = this.updateAppointmentGroup;
+      (['renewalDate', 'paidDate', 'qualifiedDate'] as const).forEach(name => {
+        const c = g.get(name)!;
+        enabled ? c.enable({ emitEvent: false }) : c.disable({ emitEvent: false });
+      });
+    });
+
+    this.validCertificateEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
+      const g = this.validCertificateGroup;
+      (['validationCertificate', 'validationStartDate', 'validationEndDate'] as const).forEach(name => {
+        const c = g.get(name)!;
+        enabled ? c.enable({ emitEvent: false }) : c.disable({ emitEvent: false });
+      });
+    });
+
+    this.addComplaintEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
+      const g = this.addComplaintGroup;
+      // Toggle children
+      (['dateOfComplaint', 'isRoncomplaint', 'complaintDetails', 'isResolved', 'resolutionNotes'] as const)
+        .forEach(name => {
+          const c = g.get(name)!;
+          enabled ? c.enable({ emitEvent: false }) : c.disable({ emitEvent: false });
+        });
+
+      // resolutionDate stays disabled until isResolved = true
+      const doc = this.dateOfComplaintCtrl;
+      // If enabling and no date set, seed with today
+      if (enabled && !doc.value) {
+        doc.setValue(this.today, { emitEvent: false });
+      }
+
+      // Required validator for dateOfComplaint only when section is enabled
+      if (enabled) {
+        doc.setValidators([Validators.required]);
+      } else {
+        doc.clearValidators();
+      }
+      doc.updateValueAndValidity({ emitEvent: false });
+    });
+
+    this.isResolvedCtrl.valueChanges.subscribe((resolved: boolean) => {
+      const rd = this.resolutionDateCtrl;
+      const rn = this.resolutionNotesCtrl;
+
+      if (resolved) {
+        // enable + require both
+        rd.enable({ emitEvent: false });
+        rn.enable({ emitEvent: false });
+
+        // seed date if empty
+        if (!rd.value) rd.setValue(this.today, { emitEvent: false });
+
+        rd.setValidators([Validators.required]);
+        rn.setValidators([Validators.required, Validators.maxLength(200)]);
+      } else {
+        // optional + disabled (hidden in UI); keep values but not validated
+        rd.disable({ emitEvent: false });
+        rn.clearValidators();              // notes optional when not resolved
+        rd.clearValidators();
+      }
+
+      rd.updateValueAndValidity({ emitEvent: false });
+      rn.updateValueAndValidity({ emitEvent: false });
+    });
+
+    this.refGetter.getApprovalDates('U').subscribe({
+      next: (res) => {
+        this.approvalDates = res ?? [];
+        const first = res?.[0]?.nextApprovalDate;          // "YYYY-MM-DD"
+        const seed = this.parseAsLocalDate(first) ?? this.today;
+
+        const renewalInit = this.clampDate(seed, this.renewalMin, this.renewalMax); // Today → 12/31/2100
+        const paidInit = this.clampDate(seed, this.paidMin, this.paidMax);       // 12/31/1899 → Today
+        const qualifiedInit = seed;                                                    // no limits
+
+        const startInit = seed;
+        const endInit = this.addMonths(seed, 1);
+
+        this.updateAppointmentGroup.patchValue(
+          { renewalDate: renewalInit, paidDate: paidInit, qualifiedDate: qualifiedInit },
+          { emitEvent: false }
+        );
+
+        this.validCertificateGroup.patchValue(
+          {
+            validationCertificate: String(this.accountId ?? ''),
+            validationStartDate: startInit,
+            validationEndDate: endInit
+          },
+          { emitEvent: false }
+        );
+      },
+      error: (err) => {
+        console.error('Failed to fetch approval dates', err);
+      }
     });
   }
 
-  private buildAddressForm() {
-    this.addressForm = this.fb.group({
-      preferredAddress: ['Residence', Validators.required],
-
-      // Residence sub‐group
-      residenceAddress: this.fb.group({
-        street1: [''],  // required: at least one of street1/2/3
-        street2: [''],
-        street3: [''],
-        street4: [''],
-        state: [''],
-        isPoBox: [false],
-        zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
-        zipPlus: ['', Validators.pattern(/^$|^\d{2,4}$/)],
-        cityTown: ['']
-      }, { validators: this.streetValidator() }),
-
-      // Business sub‐group
-      businessAddress: this.fb.group({
-        street1: [''],
-        street2: [''],
-        street3: [''],
-        street4: [''],
-        state: [''],
-        isPoBox: [false],
-        zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
-        zipPlus: ['', Validators.pattern(/^$|^\d{2,4}$/)],
-        cityTown: ['']
-      }, { validators: this.streetValidator() })
-    });
-
-    const busGroup = this.addressForm.get('businessAddress') as FormGroup;
-    busGroup.get('isPoBox')!
-      .valueChanges
-      .subscribe(isPo => this.onBusinessPoBoxToggle(isPo));
-
-    // whenever the radio changes, re‐apply validators
-    this.addressForm.get('preferredAddress')!
-      .valueChanges
-      .subscribe(pref => this.updateAddressValidators(pref));
-    // initialize validators for Residence default
-    this.updateAddressValidators('Residence');
+  get addComplaintGroup(): FormGroup {
+    return this.form.get('addComplaint') as FormGroup;
+  }
+  get addComplaintEnabledCtrl(): AbstractControl {
+    return this.addComplaintGroup.get('enabled')!;
+  }
+  get dateOfComplaintCtrl(): AbstractControl {
+    return this.addComplaintGroup.get('dateOfComplaint')!;
+  }
+  get isRoncomplaintCtrl(): AbstractControl {
+    return this.addComplaintGroup.get('isRoncomplaint')!;
+  }
+  get complaintDetailsCtrl(): AbstractControl {
+    return this.addComplaintGroup.get('complaintDetails')!;
+  }
+  get isResolvedCtrl(): AbstractControl {
+    return this.addComplaintGroup.get('isResolved')!;
+  }
+  get resolutionDateCtrl(): AbstractControl {
+    return this.addComplaintGroup.get('resolutionDate')!;
+  }
+  get resolutionNotesCtrl(): AbstractControl {
+    return this.addComplaintGroup.get('resolutionNotes')!;
   }
 
-  get busPoBox() {
-    return this.addressForm.get('businessAddress.isPoBox')!.value;
+  get validCertificateGroup(): FormGroup {
+    return this.form.get('validCertificate') as FormGroup;
+  }
+  get validCertificateEnabledCtrl(): AbstractControl {
+    return this.validCertificateGroup.get('enabled')!;
+  }
+  get validationCertificateCtrl(): AbstractControl {
+    return this.validCertificateGroup.get('validationCertificate')!;
+  }
+  get validationStartCtrl(): AbstractControl {
+    return this.validCertificateGroup.get('validationStartDate')!;
+  }
+  get validationEndCtrl(): AbstractControl {
+    return this.validCertificateGroup.get('validationEndDate')!;
   }
 
-  private onBusinessPoBoxToggle(isPoBox: boolean) {
-    const bus = this.addressForm.get('businessAddress') as FormGroup;
-    const s1 = bus.get('street1')!;
-    const s2 = bus.get('street2')!;
-    const s3 = bus.get('street3')!;
+  get updateAppointmentGroup(): FormGroup {
+    return this.form.get('updateAppointment') as FormGroup;
+  }
+  get updateAppointmentEnabledCtrl(): AbstractControl {
+    return this.updateAppointmentGroup.get('enabled')!;
+  }
+  get renewalCtrl(): AbstractControl {
+    return this.updateAppointmentGroup.get('renewalDate')!;
+  }
+  get paidCtrl(): AbstractControl {
+    return this.updateAppointmentGroup.get('paidDate')!;
+  }
+  get qualifiedCtrl(): AbstractControl {
+    return this.updateAppointmentGroup.get('qualifiedDate')!;
+  }
 
-    if (isPoBox) {
-      s1.reset(); s2.reset();
-      s1.disable(); s2.disable();
-      s3.setValidators([Validators.required]);
+  private stripTime(d: Date): Date {
+    const nd = new Date(d); nd.setHours(0, 0, 0, 0); return nd;
+  }
+  private parseAsLocalDate(s?: string): Date | null {
+    if (!s) return null;
+    const [y, m, d] = s.split('-').map(Number);
+    return new Date(y, (m ?? 1) - 1, d ?? 1);
+  }
+  private toSql(date?: Date | null): string | null {
+    if (!date) return null;
+    const y = date.getFullYear(), m = date.getMonth(), d = date.getDate();
+    return new Date(Date.UTC(y, m, d, 0, 0, 0)).toISOString();
+  }
+
+  private clampDate(date: Date | null, min: Date, max: Date): Date {
+    const src = date ? new Date(date) : new Date();
+    src.setHours(0, 0, 0, 0);
+    const lo = new Date(min); lo.setHours(0, 0, 0, 0);
+    const hi = new Date(max); hi.setHours(0, 0, 0, 0);
+    const t = Math.min(Math.max(src.getTime(), lo.getTime()), hi.getTime());
+    return new Date(t);
+  }
+
+  // ---- convenience getters ----
+  get addNotesGroup(): FormGroup {
+    return this.form.get('addNotes') as FormGroup;
+  }
+  get addNotesEnabledCtrl(): AbstractControl {
+    return this.addNotesGroup.get('enabled')!;
+  }
+  get notesCtrl(): AbstractControl {
+    return this.addNotesGroup.get('notes')!;
+  }
+  get hasAnySectionEnabled(): boolean {
+    // Future-proof: extend this OR across other section checkboxes
+    return !!this.addNotesEnabledCtrl.value
+      || !!this.updateAppointmentEnabledCtrl.value
+      || !!this.validCertificateEnabledCtrl.value
+      || !!this.addComplaintEnabledCtrl.value;
+  }
+
+  private addMonths(date: Date, months: number): Date {
+    const d0 = new Date(date);
+    const d = new Date(date);
+    d.setMonth(d.getMonth() + months);
+    // handle month overflow (e.g., Jan 31 + 1 month -> Feb end)
+    if (d.getDate() !== d0.getDate()) d.setDate(0);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  private sanitize(text: string | null | undefined): string {
+    if (!text) return '';
+    // strip control chars, angle/brace/semicolon brackets, collapse whitespace, trim
+    return text
+      .replace(/[\x00-\x1F\x7F]/g, '')
+      .replace(/[<>{}\[\];]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  digitsOnly(e: KeyboardEvent) {
+    const allowed = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'];
+    if (allowed.includes(e.key)) return;
+    if (!/^\d$/.test(e.key)) e.preventDefault();
+  }
+
+  onSubmit(): void {
+
+    if (!this.hasAnySectionEnabled) return;
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    // Build payload: only include sections that are enabled
+    const payload: { notes?: string } = {};
+    if (this.addNotesEnabledCtrl.value) {
+      payload.notes = this.notesCtrl.value;
+      console.log('SUBMIT payload:', payload);
+    }
+
+    if (this.updateAppointmentEnabledCtrl.value) {
+      // Always read whatever is currently in the controls (updated or initial patched)
+      const renewal = this.renewalCtrl.value as Date | null;
+      const paid = this.paidCtrl.value as Date | null;
+      const qualified = this.qualifiedCtrl.value as Date | null;
+
+      // Always log all three (even if user changed only one)
+      console.log({ applicationId: this.accountId, approvalDate: this.toSql(renewal) });
+      console.log({ applicationId: this.accountId, payDate: this.toSql(paid) });
+      console.log({ applicationId: this.accountId, qualifiedDate: this.toSql(qualified) });
+    }
+
+    if (this.validCertificateEnabledCtrl.value) {
+      const cert = (this.validationCertificateCtrl.value ?? '').toString();
+      const start = this.validationStartCtrl.value as Date | null;
+      const end = this.validationEndCtrl.value as Date | null;
+
+      console.log({ validationCertificate: cert, accountId: this.accountId });
+      console.log({ validationStartDate: this.toSql(start), accountId: this.accountId });
+      console.log({ validationEndDate: this.toSql(end), accountId: this.accountId });
+    }
+
+    if (this.addComplaintEnabledCtrl.value) {
+      const dateOfComplaint = this.dateOfComplaintCtrl.value as Date | null;
+      const isRoncomplaint = !!this.isRoncomplaintCtrl.value;
+      const isResolved = !!this.isResolvedCtrl.value;
+      const resolutionDate = this.resolutionDateCtrl.value as Date | null;
+
+      const complaintDetails = this.sanitize(this.complaintDetailsCtrl.value as string);
+      const resolutionNotes = this.sanitize(this.resolutionNotesCtrl.value as string);
+
+      console.log({
+        accountId: this.accountId,
+        dateOfComplaint: this.toSql(dateOfComplaint),                 // Option A: UTC midnight
+        isRoncomplaint,
+        complaintDetails,
+        isResolved,
+        resolutionDate: isResolved ? this.toSql(resolutionDate) : null,
+        resolutionNotes: isResolved ? resolutionNotes || null : null
+      });
+    }
+  }
+
+  onCancel(evt?: Event): void {
+    evt?.preventDefault();
+    evt?.stopPropagation();
+    if (this.temp != null) {
+      this.router.navigate(['/notary-profile', this.temp]);
     } else {
-      s1.enable(); s2.enable();
-      s3.clearValidators();
+      console.error('No applicantId available to navigate back.');
     }
-    [s1, s2, s3].forEach(c => c.updateValueAndValidity({ onlySelf: true }));
-    bus.clearValidators();
-    if (isPoBox) {
-      bus.setValidators(this.optionalGroupValidator('businessAddress'));
-    } else {
-      bus.setValidators(this.streetValidator());
-    }
-    bus.updateValueAndValidity({ onlySelf: true });
-  }
-
-  private streetValidator(): ValidatorFn {
-    return (group: AbstractControl): ValidationErrors | null => {
-      const g = group as FormGroup;
-      const s1 = g.get('street1')!.value;
-      const s2 = g.get('street2')!.value;
-      return (!s1 && !s2) ? { noStreet: true } : null;
-    };
-  }
-
-  private optionalGroupValidator(prefix: 'residenceAddress' | 'businessAddress'): ValidatorFn {
-    return (group: AbstractControl): ValidationErrors | null => {
-      const g = group as FormGroup;
-      const vals = Object.values(g.value).some(v => !!v);
-      if (!vals) {
-        return null; // completely empty is OK
-      }
-      // now enforce: streetValidator + required on state/zipCode/cityTown
-      const streetErr = this.streetValidator()(g);
-      if (streetErr) {
-        return { noStreet: true };
-      }
-      for (const field of ['state', 'zipCode', 'cityTown']) {
-        if (!g.get(field)!.value) {
-          return { [`${field}Req`]: true };
-        }
-      }
-      return null;
-    };
-  }
-
-  private updateAddressValidators(pref: 'Residence' | 'Business') {
-    const resGroup = this.addressForm.get('residenceAddress') as FormGroup;
-    const busGroup = this.addressForm.get('businessAddress') as FormGroup;
-
-    for (const grp of [resGroup, busGroup]) {
-      // clear group‐level validators
-      grp.clearValidators();
-      Object.values(grp.controls).forEach(ctrl => {
-        ctrl.clearValidators();
-        // re‐run validation so old errors go away
-        ctrl.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-      });
-    }
-
-    if (pref === 'Residence') {
-      resGroup.setValidators(this.streetValidator());
-      resGroup.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-
-      ['state', 'zipCode', 'cityTown'].forEach(name => {
-        const c = resGroup.get(name)!;
-        if (name === 'zipCode') {
-          // required AND exactly 5 digits
-          c.setValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
-        } else {
-          c.setValidators(Validators.required);
-        }
-        c.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-      });
-
-      // re-apply pattern to zipPlus (optional but must be 2–4 digits if entered)
-      const zp = resGroup.get('zipPlus')!;
-      zp.setValidators(Validators.pattern(/^$|^\d{2,4}$/));
-      zp.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-
-      // 2b) Business is fully optional (only validate if user types something)
-      busGroup.setValidators(this.optionalGroupValidator('businessAddress'));
-      busGroup.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-    }
-    else {
-      // 3a) Business is required:
-      busGroup.setValidators(this.streetValidator());
-      busGroup.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-
-      ['state', 'zipCode', 'cityTown'].forEach(name => {
-        const c = busGroup.get(name)!;
-        if (name === 'zipCode') {
-          c.setValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
-        } else {
-          c.setValidators(Validators.required);
-        }
-        c.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-      });
-
-      const zpBus = busGroup.get('zipPlus')!;
-      zpBus.setValidators(Validators.pattern(/^$|^\d{2,4}$/));
-      zpBus.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-
-      // 3b) Residence is optional
-      resGroup.setValidators(this.optionalGroupValidator('residenceAddress'));
-      resGroup.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-    }
-  }
-
-  public onSubmit(): void {
-    this.submitted = true;
-    this.form.markAllAsTouched();
-    if (this.form.invalid) {return;}
-    this.triggerAddressSection();
-  }
-
-  public onAddressSubmit(): void {
-    this.submittedAddress = true;
-    this.addressForm.markAllAsTouched();
-    if (this.addressForm.invalid) { return; }
-
-    // helper: turn '' or all-whitespace into null
-    const nullOr = (s: string | undefined | null): string | null =>
-      s?.trim() ? s.trim() : null;
-
-    const pv = this.form.value;         // personal form values
-    const av = this.addressForm.value;  // address form values
-
-    // 1) build ContactDto[]
-    const primaryPhone = pv.primaryPhone1 + pv.primaryPhone2 + pv.primaryPhone3;
-    const secondaryPhone = (pv.secondaryPhone1 && pv.secondaryPhone2 && pv.secondaryPhone3)
-      ? pv.secondaryPhone1 + pv.secondaryPhone2 + pv.secondaryPhone3
-      : null;
-    const contacts: ContactDto[] = [
-      { contactTypeId: 1, contactValue: primaryPhone, isPrimary: true },
-      ...(secondaryPhone
-        ? [{ contactTypeId: 1, contactValue: secondaryPhone, isPrimary: false }]
-        : []),
-      { contactTypeId: 2, contactValue: pv.email, isPrimary: false }
-    ];
-
-    // 2) build AddressDto[]
-    const makeAddress = (grp: any, typeId: number, preferred: boolean): AddressDto => {
-      const isPo = grp.isPoBox === true;
-      return {
-        addressTypeId: typeId,
-        isPrefered: preferred,
-        isPoBox: isPo,                            
-        streetNumber: isPo ? null : nullOr(grp.street1),         
-        streetName: isPo ? 'PO Box' : nullOr(grp.street2),
-        aptNumber: nullOr(grp.street3),              
-        addressLine2: nullOr(grp.street4),
-        zipCode: grp.zipCode,
-        zipPlus: nullOr(grp.zipPlus),
-        city: grp.cityTown,
-        stateId: this.stateRefs.find(s => s.value === grp.state)!.stateId
-      };
-    };
-
-    const addresses: AddressDto[] = [
-      makeAddress(av.residenceAddress, 1, av.preferredAddress === 'Residence')
-    ];
-    if (Object.values(av.businessAddress).some(x => !!(x?.toString().trim()))) {
-      addresses.push(
-        makeAddress(av.businessAddress, 2, av.preferredAddress === 'Business')
-      );
-    }
-
-    // 3) map salutation ID
-    const salId = this.salutations
-      .find(s => s.value === pv.salutation)!
-      .salutationTypeId;
-
-    // 4) assemble PersonalInfo payload
-    const personalInfo: PersonalInfo = {
-      salutationTypeId: salId,
-      firstName: pv.firstName,
-      middleName: nullOr(pv.middleName),
-      lastName: pv.lastName,
-      suffix: nullOr(pv.suffix),
-      dateOfBirth: this.formatDate(pv.dateOfBirth),
-      contactsDto: contacts,
-      addressDto: addresses
-    };
-
-    // 5) final request
-    const request: AddNewRecordRequest = { personalInfoDto: personalInfo };
-    this.pendingRequest = request;
-    console.log(request);
-    const gs: GeneralSearchRequest = {
-      applicantId: null,
-      firstName: this.form.value.firstName,
-      lastName: this.form.value.lastName,
-      cityTown: this.addressForm.get('residenceAddress.cityTown')!.value, // or businessAddress if preferred
-      approvalDate: null,
-      dateOfBirth: this.formatDate(this.form.value.dateOfBirth),
-      remoteNotaryOnly: false
-    };
-    const searchWrapper: LiveSearchWrapper = { generalSearch: gs };
-
-    this.notarySearch.searchNotaries(searchWrapper)
-      .subscribe(
-        res => {
-          const msg = res.message || '';
-
-          if (msg.includes('Below are the 0 record(s) that match your search criteria')) {
-            // 1) no existing match: go ahead and add
-            this.newNotaryService.addNewNotaryRecord(request)
-              .subscribe(
-                addRes => {
-                  const rawCode: string = addRes.code || '';
-                  const parts = rawCode.split(':');
-                  if (parts.length > 1) {
-                    const idStr = parts[1].trim();
-                    const applicantId = Number(idStr);
-                    if (!isNaN(applicantId)) {
-                      // 3) navigate with the numeric ID
-                      this.router.navigate(['/notary-profile', applicantId]);
-                    } else {
-                      console.error('Unable to parse applicantId from code:', rawCode);
-                      alert('Unexpected response format; cannot navigate to profile.');
-                      this.router.navigate(['/']);
-                    }
-                  } else {
-                    console.error('Unexpected code format:', rawCode);
-                    alert('Unexpected response format; cannot navigate to profile.');
-                    this.router.navigate(['/']);
-                  }
-                },
-                addErr => {
-                  console.error('Failed to add notary record', addErr);
-                  alert('There was an issue trying to create the new record.');
-                  this.router.navigate(['/']);
-                }
-              );
-          } else {
-            // found one or more matches—log them and skip creation
-            this.existingNotaries = res.notarySearchResultsInternalDto;
-            console.log(this.existingNotaries);
-            this.showExistingRecords = true;
-          }
-        },
-        searchErr => {
-          console.error('Notary search failed', searchErr);
-          alert('There was an issue searching for existing records.');
-        }
-      );
-  }
-
-  triggerAddressSection(): void {
-    this.showAddressSection = true;
-    this.viewHeading = 'Address Information';
-  }
-
-  private formatDate(input: Date | string | null): string {
-    if (!input) {
-      return '';
-    }
-    // if it’s already a Date use it, otherwise coerce
-    const d = input instanceof Date ? input : new Date(input);
-    if (isNaN(d.getTime())) {
-      return '';
-    }
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  }
-
-  public onCancel(): void {
-    // e.g. navigate back or to another route
-    window.history.back();
-  }
-
-  public onPhoneInput(
-    curr: HTMLInputElement,
-    next?: HTMLInputElement
-  ): void {
-    if (next && curr.value.length === curr.maxLength) {
-      next.focus();
-    }
-  }
-
-  public onPhoneKeydown(
-    evt: KeyboardEvent,
-    curr: HTMLInputElement,
-    prev: HTMLInputElement | null
-  ): void {
-    if (evt.key === 'Backspace' && curr.value.length === 0 && prev) {
-      evt.preventDefault();
-      prev.focus();
-      // place caret at end
-      const len = prev.value.length;
-      prev.setSelectionRange(len, len);
-    }
-  }
-
-  public onPhonePaste(
-    evt: ClipboardEvent,
-    inputs: HTMLInputElement[]
-  ): void {
-    evt.preventDefault();
-    const text = evt.clipboardData
-      ?.getData('text/plain')
-      .replace(/\D/g, '') || '';
-    let rest = text;
-
-    inputs.forEach((inp) => {
-      const ml = inp.maxLength;
-      const chunk = rest.slice(0, ml);
-      rest = rest.slice(ml);
-
-      inp.value = chunk;
-      // update the FormControl too
-      const name = inp.getAttribute('formControlName');
-      if (name) {
-        this.form.get(name)!.setValue(chunk);
-      }
-    });
-
-    // focus the first not-full box, or the last one if all are full
-    const next = inputs.find(i => i.value.length < i.maxLength) || inputs[inputs.length - 1];
-    next.focus();
-    next.setSelectionRange(next.value.length, next.value.length);
-  }
-
-  public allowOnlyNumbers(event: KeyboardEvent): void {
-    // Allow navigation keys (backspace, tab, arrows):
-    if (event.key.length === 1 && !/^\d$/.test(event.key)) {
-      event.preventDefault();
-    }
-  }
-
-  public onZipPaste(event: ClipboardEvent, controlPath: string): void {
-    event.preventDefault();
-    const text = event.clipboardData?.getData('text/plain') || '';
-    const digits = text.replace(/\D/g, '');
-    const ctrl = this.addressForm.get(controlPath);
-    if (ctrl) {
-      ctrl.setValue(digits);
-    }
-  }
-
-  public onEdit(): void {
-    this.showAddressSection = false;
-  }
-
-  public onDuplicateEdit(): void {
-    this.showExistingRecords = false;
-    this.showAddressSection = false;
-  }
-
-  public onDuplicateIgnore(): void {
-    if (!this.pendingRequest) { return; }
-
-    this.isSubmitting = true;
-    this.newNotaryService.addNewNotaryRecord(this.pendingRequest)
-      .subscribe(
-        addRes => this.handleAddSuccess(addRes),
-        addErr => {
-          console.error('Failed to add notary record', addErr);
-          this.isSubmitting = false;
-          alert('There was an issue trying to create the new record.');
-          this.router.navigate(['/']);
-        }
-      );
-  }
-  private createAndNavigate(request: AddNewRecordRequest) {
-    this.isSubmitting = true;
-    this.newNotaryService.addNewNotaryRecord(request)
-      .subscribe(
-        addRes => this.handleAddSuccess(addRes),
-        addErr => {
-          console.error('Failed to add notary record', addErr);
-          this.isSubmitting = false;
-          alert('There was an issue trying to create the new record.');
-          this.router.navigate(['/']);
-        }
-      );
-  }
-
-  /** parse `addRes.code`, pull the numeric ID, navigate  */
-  private handleAddSuccess(addRes: any) {
-    const rawCode = addRes.code || '';
-    const parts = rawCode.split(':');
-    if (parts.length > 1) {
-      const id = Number(parts[1].trim());
-      if (!isNaN(id)) {
-        this.router.navigate(['/notary-profile', id]);
-        return;
-      }
-    }
-    // fallback on any unexpected format
-    console.error('Unexpected code format:', rawCode);
-    alert('Unexpected response format; cannot navigate to profile.');
-    this.router.navigate(['/']);
-  }
-
-  public testDupeMatchDialog(): void {
-    this.showExistingRecords = true;
-    this.existingNotaries = [
-      {
-        "applicantId": 1460,
-        "approvalDate": "2004-11-10",
-        "cityTown": "Attleboro",
-        "county": "Bristol",
-        "createdDate": "2004-10-28",
-        "dateOfBirth": "1974-07-31",
-        "firstName": "Jennifer",
-        "isRemoteNotary": false,
-        "lastName": "Savini",
-        "middleName": "Lee",
-        "newRenewal": "Renew"
-      }
-    ];
   }
 }
