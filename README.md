@@ -1,289 +1,23 @@
-Look, ideally the end goal is when the user expands the compains expansion panel.. we will populate the complaints grid right.. That grid
-contains the complaintId value in the Complaint # column. THE values in the column should be clickable. 
-And when the user clicks the value.. we will have to console.log its respective buildUpdateComplaintObject. Sounds good? 
-Go through the code and ask clarifying questions before you start implementing. 
-Here is the component.html file:
-<div *ngIf="profileDetail; else notFoundTpl" class="page-wrapper">
-  <div class="information-section">
-    <div class="top-back-link">
-      <a (click)="returnToSearch()" class="notary-id-link">
-        <<< Return to search results
-      </a>
-    </div>
-    <div class="display-section">
-      <div class="notary-detail-information">
-        <div class="notary-detail-header-active-complaint">
-          <h3 class="notary-detail-information-header">Notary Detail Information</h3>
-          <div *ngIf="activeComplaints" class="active-complaint-div"> Active Complaint</div>
-        </div>
-        <div class="flex-item-wrapper">
-          <div class="flex-item">
-            <div class="flex-sub-item">
-              <div class="flex-label">Name</div>
-              <div class="flex-label-data">{{ profileDetail.name }}</div>
-            </div>
-            <div class="flex-sub-item">
-              <div class="flex-label">Residential Address</div>
-              <div class="flex-label-data">{{ profileDetail.residentialAddress }}</div>
-            </div>
-          </div>
-          <div class="flex-item">
-            <div class="flex-sub-item">
-              <div class="flex-label">Date of Birth</div>
-              <div class="flex-label-data">{{ profileDetail.dateOfBirth }}</div>
-            </div>
-            <div class="flex-sub-item">
-              <div class="flex-label">Business Address</div>
-              <div class="flex-label-data">{{ profileDetail.businessAddress }}</div>
-            </div>
-          </div>
-          <div class="flex-item">
-            <div class="flex-sub-item">
-              <div class="flex-label">Email</div>
-              <div class="flex-label-data">{{ profileDetail.emailAddress }}</div>
-            </div>
-            <div class="flex-sub-item">
-              <div class="flex-label">County</div>
-              <div class="flex-label-data">{{ profileDetail.countyName }}</div>
-            </div>
-          </div>
-          <div class="flex-item">
-            <div class="flex-sub-item">
-              <div class="flex-label">Primary Phone</div>
-              <div class="flex-label-data">{{ profileDetail.phone1 }}</div>
-            </div>
-            <div class="flex-sub-item">
-              <div class="flex-label">District</div>
-              <div class="flex-label-data">{{ profileDetail.districtName }}</div>
-            </div>
-          </div>
-          <div class="flex-item">
-            <div class="flex-sub-item">
-              <div class="flex-label">Secondary Phone</div>
-              <div class="flex-label-data">{{ profileDetail.phone2 }}</div>
-            </div>
-            <div class="flex-sub-item">
-              <div class="flex-label">Date of Death</div>
-              <div class="flex-label-data">{{ profileDetail.dateOfDeath }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="notary-account-details">
-        <h3 class="notary-account-details-header">Notary Account Details</h3>
-        <div class="flex-item-wrapper">
-          <div class="flex-item">
-            <div class="flex-sub-item">
-              <div class="flex-label">Notary ID</div>
-              <div class="flex-label-data">{{ accountDetail?.notaryId }}</div>
-            </div>
-          </div>
-          <div class="flex-item">
-            <div class="flex-sub-item">
-              <div class="flex-label">Status</div>
-              <div class="flex-label-data">{{ accountDetail?.status }}</div>
-            </div>
-          </div>
-          <div class="flex-item">
-            <div class="flex-sub-item">
-              <div class="flex-label">Approval Date</div>
-              <div class="flex-label-data"> {{ accountDetail?.commissionDate }}</div>
-            </div>
-          </div>
-          <div class="flex-item">
-            <div class="flex-sub-item">
-              <div class="flex-label">Expiration Date</div>
-              <div class="flex-label-data">{{ accountDetail?.expirationDate }}</div>
-            </div>
-          </div>
-          <div class="flex-item">
-            <div class="flex-sub-item">
-              <div class="flex-label">Has Resigned</div>
-              <div class="flex-label-data">{{ accountDetail?.hasResigned }}</div>
-            </div>
-          </div>
-          <div class="flex-item">
-            <div class="flex-sub-item">
-              <div class="flex-label">Remote Enabled</div>
-              <div class="flex-label-data">{{ accountDetail?.remoteEnabled }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="notary-application-details">
-        <app-notary-application-details *ngIf="applicationDetail" [applicationDetail]="applicationDetail"></app-notary-application-details>
-      </div>
-    </div>
-    <div class="grids-section">
-      <kendo-expansionpanel title="Notary account history"
-                            [svgExpandIcon]="plusIcon"
-                            [svgCollapseIcon]="minusIcon"
-                            (expand)="onAccountHistoryExpand()">
-        <kendo-grid [data]="gridView" [pageable]="true" [skip]="skip" [pageSize]="pageSize" (pageChange)="pageChange($event)">
-          <kendo-grid-column field="accountStatus" title="Account Status"></kendo-grid-column>
-          <kendo-grid-column field="approvalDate" title="Approval Date"></kendo-grid-column>
-          <kendo-grid-column field="expirationDate" title="Expiration Date"></kendo-grid-column>
-          <kendo-grid-column field="resignationDate" title="Resignation Date"></kendo-grid-column>
-          <kendo-grid-column field="paymentDate" title="Payment Date"></kendo-grid-column>
-          <kendo-grid-column field="qualifiedDate" title="Qualified Date"></kendo-grid-column>
-          <kendo-grid-column field="hasResigned" title="Has Resigned"></kendo-grid-column>
-          <kendo-grid-column field="isRemoteEnabled" title="Remote Enabled"></kendo-grid-column>
-        </kendo-grid>
-      </kendo-expansionpanel>
-      <kendo-expansionpanel title="Notes history" [svgExpandIcon]="plusIcon" [svgCollapseIcon]="minusIcon" (expand)="onNotesExpand()">
-        <kendo-grid [data]="notesHistory">
-          <kendo-grid-column field="createdOn" title="Date"></kendo-grid-column>
-          <kendo-grid-column field="createdByUser" title="Added by"></kendo-grid-column>
-          <kendo-grid-column field="notes" title="Notes"></kendo-grid-column>
-        </kendo-grid>
-      </kendo-expansionpanel>
-      <kendo-expansionpanel title="Name history" [svgExpandIcon]="plusIcon" [svgCollapseIcon]="minusIcon" (expand)="onNameExpand()">
-        <kendo-grid [data]="nameHistory">
-          <kendo-grid-column title="Date">
-            <ng-template kendoGridCellTemplate let-dataItem>
-              {{dataItem.updatedOn !== '---' ? (dataItem.updatedOn | date:'MM/dd/yyyy') : '---'}}
-            </ng-template>
-          </kendo-grid-column>
-          <!-- Name column -->
-          <kendo-grid-column title="Name">
-            <ng-template kendoGridCellTemplate let-dataItem>
-              {{ formatFullName(dataItem) }}
-            </ng-template>
-          </kendo-grid-column>
-
-          <!-- DOB column -->
-          <kendo-grid-column title="DOB">
-            <ng-template kendoGridCellTemplate let-dataItem>
-              {{dataItem.dateOfBirth !== '---' ? (dataItem.dateOfBirth | date:'MM/dd/yyyy') : '---'}}
-            </ng-template>
-          </kendo-grid-column>
-
-          <!-- Type of Change column -->
-          <kendo-grid-column title="Type of Change">
-            <ng-template kendoGridCellTemplate let-dataItem>
-              {{ formatChangeType(dataItem) }}
-            </ng-template>
-          </kendo-grid-column>
-        </kendo-grid>
-      </kendo-expansionpanel>
-      <kendo-expansionpanel title="Address history" [svgExpandIcon]="plusIcon" [svgCollapseIcon]="minusIcon" (expand)="onAddressExpand()">
-        <kendo-grid [data]="addressHistory">
-          <kendo-grid-column title="Date">
-            <ng-template kendoGridCellTemplate let-dataItem>
-              {{dataItem.updatedOn !== '---' ? (dataItem.updatedOn | date:'MM/dd/yyyy') : '---'}}
-            </ng-template>
-          </kendo-grid-column>
-
-          <!-- Address -->
-          <kendo-grid-column title="Address">
-            <ng-template kendoGridCellTemplate let-dataItem>
-              {{ formatFullAddress(dataItem) }}
-            </ng-template>
-          </kendo-grid-column>
-
-          <!-- Address Type -->
-          <kendo-grid-column field="addressType" title="Address Type">
-          </kendo-grid-column>
-
-          <!-- Type of Change -->
-          <kendo-grid-column title="Type of Change">
-            <ng-template kendoGridCellTemplate let-dataItem>
-              {{ formatAddressChangeType(dataItem) }}
-            </ng-template>
-          </kendo-grid-column>
-        </kendo-grid>
-      </kendo-expansionpanel>
-      <kendo-expansionpanel title="Complaint history" [svgExpandIcon]="plusIcon" [svgCollapseIcon]="minusIcon" (expand)="onComplaintExpand()">
-        <kendo-grid [data]="complaintHistory">
+Goal: to console log the data that is being passed from the notary-profile into the update-complaint.component 
+Explanation: I am passing the buildUpdateComplaintObject as state data from notary-profile component to the update-complaint component and 
+want to pick up the state data and console log it in either constructor or ngoninit whichever is best. Later on I will be using the data 
+from that state to do some stuff. 
+ask any clarifying questions before you give me any code.
+here is relevant section of notary-profile.component.html file: 
           <kendo-grid-column title="Complaint #">
             <ng-template kendoGridCellTemplate let-item>
-              {{ item.complaintId ? item.complaintId : '---' }}
+              <button kendoButton
+                      fillMode="link"
+                      class="notary-id-link complaint-link"
+                      (click)="onComplaintIdClick(item)"
+                      [disabled]="!item?.complaintId || item.complaintId === 0 || !buildEditObject"
+                      [state]="{ buildUpdateComplaintObject:buildUpdateComplaintObject }"
+                      [routerLink]="['/update-complaint', accountDetail?.notaryId]">
+                {{ item?.complaintId ? item.complaintId : '---' }}
+              </button>
             </ng-template>
           </kendo-grid-column>
-
-          <!-- Date of Complaint -->
-          <kendo-grid-column title="Date of Complaint">
-            <ng-template kendoGridCellTemplate let-item>
-              {{item.dateOfComplaint !== '---' ? (item.dateOfComplaint | date:'MM/dd/yyyy') : '---'}}
-            </ng-template>
-          </kendo-grid-column>
-
-          <!-- Complaint Details -->
-          <kendo-grid-column title="Complaint Details">
-            <ng-template kendoGridCellTemplate let-item>
-              {{ item.complaintDetails?.trim() ? item.complaintDetails : '---' }}
-            </ng-template>
-          </kendo-grid-column>
-
-          <!-- RON Complaint -->
-          <kendo-grid-column title="RON Complaint">
-            <ng-template kendoGridCellTemplate let-item>
-              {{item.isRoncomplaint ? formatYesNo(item.isRoncomplaint) : '---' }}
-            </ng-template>
-          </kendo-grid-column>
-
-          <!-- Resolved -->
-          <kendo-grid-column title="Resolved">
-            <ng-template kendoGridCellTemplate let-item>
-              {{item.complaintId ? formatYesNo(item.isResolved) : '---'}}
-            </ng-template>
-          </kendo-grid-column>
-
-          <!-- Resolution Details -->
-          <kendo-grid-column title="Resolution Details">
-            <ng-template kendoGridCellTemplate let-item>
-              {{item.resolutionNotes?.trim() ? item.resolutionNotes : '---' }}
-            </ng-template>
-          </kendo-grid-column>
-        </kendo-grid>
-      </kendo-expansionpanel>
-      <kendo-expansionpanel title="Certificate history"
-                            [svgExpandIcon]="plusIcon"
-                            [svgCollapseIcon]="minusIcon"
-                            (expand)="onCertificateHistoryExpand()">
-        <kendo-grid [data]="certificateHistory">
-          <kendo-grid-column field="accountId" title="Account Id"></kendo-grid-column>
-          <kendo-grid-column field="cetificateType" title="Certificate Type"></kendo-grid-column>
-          <kendo-grid-column field="certificateNumber" title="Certificate Number"></kendo-grid-column>
-          <kendo-grid-column field="validationStartDate" title="Validation Start Date"></kendo-grid-column>
-          <kendo-grid-column field="validationEndDate" title="Validation End Date"></kendo-grid-column>
-          <kendo-grid-column field="createdOn" title="Date of Creation"></kendo-grid-column>
-          <kendo-grid-column field="createdByUser" title="Created By"></kendo-grid-column>
-        </kendo-grid>
-      </kendo-expansionpanel>
-    </div>
-    <div class="bottom-back-link">
-      <a (click)="returnToSearch()" class="notary-id-link">
-        <<< Return to search results
-      </a>
-    </div>
-  </div>
-  <div class="actions-section">
-    <div class="horizontal-line"></div>
-    <div class="action-buttons-section">
-      <button kendoButton
-              fillMode="clear"
-              class="action-button"
-              [routerLink]="['/update-notary-profile-information', accountDetail?.notaryId]"
-              [state]="{ buildEditObject: buildEditObject}">
-      Update profile information</button>
-      <button kendoButton
-              fillMode="clear"
-              class="action-button"
-              [routerLink]="['/update-notary-details', accountDetail?.notaryId]"
-              [state]="{ buildEditObject: buildEditObject}">
-      Update notary details</button>
-    </div>
-  </div>
-</div>
-
-<ng-template #notFoundTpl>
-  <p style="color: red;">
-    No notary record found for ID = {{ notaryId }}.
-  </p>
-</ng-template>
-
-Here is the component.ts file: 
+here is the notary-profile.component.ts file: 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import mockData from '../../../../mockdata/mock2.json';
@@ -395,22 +129,39 @@ export class NotaryProfileComponent implements OnInit {
 
   }
 
-  private mapToEditComplaintObject(resp: any): UpdateComplaint {
-    const pid = resp.personalInfoDetails;
-    const cid = this.complaintHistory;
+  private buildUpdateComplaintFor(item: ComplaintHistory): UpdateComplaint {
+    const pid = this.buildEditObject?.personalInfoDetails;
+    if (!pid) {
+      throw new Error('buildEditObject.personalInfoDetails is not ready yet.');
+    }
+
+    const accountId = pid.accountId;
+
     return {
+      // person/account fields
       firstName: pid.firstName,
       middleName: pid.middleName,
       lastName: pid.lastName,
       applicantId: pid.applicantId,
-      accountId: resp.accountDetails?.accountId,
-      complaintId: cid?.complaintId,
-      dateOfComplaint: cid?.dateOfComplaint,
-      isRoncomplaint:cid?.isRoncomplaint,
-      complaintDetails:cid?.complaintDetails,
-      isResolved:cid?.isResolved,
-      resolutionNotes:cid?.resolutionNotes,
-      resolutionDate: cid?.resolutionDate
+      accountId: pid.accountId,
+
+      // complaint-specific fields (raw values)
+      complaintId: item.complaintId,
+      dateOfComplaint: item.dateOfComplaint,
+      isRoncomplaint: item.isRoncomplaint,
+      complaintDetails: item.complaintDetails,
+      isResolved: item.isResolved,
+      resolutionNotes: item.resolutionNotes,
+      resolutionDate: item.resolutionDate
+    };
+  }
+
+  public onComplaintIdClick(item: ComplaintHistory): void {
+    try {
+      this.buildUpdateComplaintObject = this.buildUpdateComplaintFor(item);
+      console.log('buildUpdateComplaintObject:', this.buildUpdateComplaintObject);
+    } catch (e) {
+      console.error(e);
     }
   }
 
@@ -900,13 +651,29 @@ export class NotaryProfileComponent implements OnInit {
     this.router.navigate(['/notary-records']);
   }
 }
-here is the code in ref-items.model.ts file: 
-export interface ComplaintHistory {
+here is the update-complaint.model.ts file that you can use in the update-complaint.component: 
+export interface UpdateComplaint {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  applicantId: number;
+  accountId: number;
   complaintId: number;
   dateOfComplaint: string;
-  complaintDetails: string;
   isRoncomplaint: string;
+  complaintDetails: string;
   isResolved: boolean;
   resolutionNotes: string;
   resolutionDate: string;
+}
+here is the update-complaint.component.ts file: 
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-update-complaint',
+  templateUrl: './update-complaint.component.html',
+  styleUrl: './update-complaint.component.css'
+})
+export class UpdateComplaintComponent {
+
 }
