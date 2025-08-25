@@ -1,679 +1,1060 @@
-Goal: to console log the data that is being passed from the notary-profile into the update-complaint.component 
-Explanation: I am passing the buildUpdateComplaintObject as state data from notary-profile component to the update-complaint component and 
-want to pick up the state data and console log it in either constructor or ngoninit whichever is best. Later on I will be using the data 
-from that state to do some stuff. 
-ask any clarifying questions before you give me any code.
-here is relevant section of notary-profile.component.html file: 
-          <kendo-grid-column title="Complaint #">
-            <ng-template kendoGridCellTemplate let-item>
-              <button kendoButton
-                      fillMode="link"
-                      class="notary-id-link complaint-link"
-                      (click)="onComplaintIdClick(item)"
-                      [disabled]="!item?.complaintId || item.complaintId === 0 || !buildEditObject"
-                      [state]="{ buildUpdateComplaintObject:buildUpdateComplaintObject }"
-                      [routerLink]="['/update-complaint', accountDetail?.notaryId]">
-                {{ item?.complaintId ? item.complaintId : '---' }}
-              </button>
-            </ng-template>
-          </kendo-grid-column>
-here is the notary-profile.component.ts file: 
+Goal: To do a simple lift of the complaints section from the update-notary component and add it to the update-complaint section. 
+In more depth: There is an update-notary-details section which contains the add-complaints component. This component allows the user (the one using the application)
+to add complaint about other users.. This add complaint flow inside the update-notary-details component contains several important fields like date of complaint, isRemoteNOtary complaint
+complaint details, resolution notes, isResolved flag and a hidden resolution date.. datepicker. This is the ADD COMPLAINT FLOW. The general idea is that.. the UPDATE COMPLAINT
+flow should be EXACTLY similar to the add-complaints flow.. but with patched values.. since the complaint details are aleady available. 
+For example: We are in the notary-profile page.. and when and we expanded the complaint history expansion-panel which has a complaint for the user. Then we go ahead and click on the 
+complaint number of a corresponding complaint it navigates us to the update-complaint page. HERE, the flow and the UI of it should be EXACTLY same as the previous add-complaint 
+flow.. with all the bells and whistles and validations, and checkbox flag guarding etc etc.. BUT THE CAVEAT HERE IS that it will use the already available component data 
+to patch the values such that when the update-complaint page loads.. it loads with values for each of the input items. Remember.. in the update-complaint flow.. there will be 
+no way to enable the save button unless the user makes a change to any of the input fields. One more important implementation change from add-complaint flow is that the update-complaint
+flow will not have the master checkbox(add complaint checkbox) that the add-complaint flow has. 
+
+Ask me all clarifying questions BEFORE you start implementation. 
+
+notary-profile.component.html file: 
+<div *ngIf="profileDetail; else msgToUser" class="page-wrapper">
+    <div class="information-section">
+        <div class="top-back-link">
+            <a (click)="returnToSearch()" class="notary-id-link">
+                <<< Return to search results
+            </a>
+        </div>
+        <div class="display-section">
+            <div class="notary-detail-information">
+                <div class="notary-detail-header-active-complaint">
+                    <h3 class="notary-detail-information-header">Notary Detail Information</h3>
+                    <div *ngIf="activeComplaints" class="active-complaint-div"> Active Complaint</div>
+                </div>
+                <div class="flex-item-wrapper">
+                    <div class="flex-item">
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Name</div>
+                            <div class="flex-label-data">{{ profileDetail.name }}</div>
+                        </div>
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Residential Address</div>
+                            <div class="flex-label-data">{{ profileDetail.residentialAddress }}</div>
+                        </div>
+                    </div>
+                    <div class="flex-item">
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Date of Birth</div>
+                            <div class="flex-label-data">{{ (profileDetail.dateOfBirth  | date:'MM/dd/yyyy') || '---' }}</div>
+                        </div>
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Business Address</div>
+                            <div class="flex-label-data">{{ profileDetail.businessAddress }}</div>
+                        </div>
+                    </div>
+                    <div class="flex-item">
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Email</div>
+                            <div class="flex-label-data">{{ profileDetail.emailAddress }}</div>
+                        </div>
+                        <div class="flex-sub-item">
+                            <div class="flex-label">County</div>
+                            <div class="flex-label-data">{{ profileDetail.countyName }}</div>
+                        </div>
+                    </div>
+                    <div class="flex-item">
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Primary Phone</div>
+                            <div class="flex-label-data">{{ profileDetail.phone1 }}</div>
+                        </div>
+                        <div class="flex-sub-item">
+                            <div class="flex-label">District</div>
+                            <div class="flex-label-data">{{ profileDetail.districtName }}</div>
+                        </div>
+                    </div>
+                    <div class="flex-item">
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Secondary Phone</div>
+                            <div class="flex-label-data">{{ profileDetail.phone2 }}</div>
+                        </div>
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Date of Death</div>
+                            <div class="flex-label-data">{{ (profileDetail.dateOfDeath  | date:'MM/dd/yyyy') || '---'}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="notary-account-details">
+                <h3 class="notary-account-details-header">Notary Account Details</h3>
+                <div class="flex-item-wrapper">
+                    <div class="flex-item">
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Notary ID</div>
+                            <div class="flex-label-data">{{ accountDetail?.notaryId }}</div>
+                        </div>
+                    </div>
+                    <div class="flex-item">
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Status</div>
+                            <div class="flex-label-data">{{ accountDetail?.status }}</div>
+                        </div>
+                    </div>
+                    <div class="flex-item">
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Approval Date</div>
+                            <div class="flex-label-data"> {{ (accountDetail?.commissionDate | date:'MM/dd/yyyy') || '---' }}</div>
+                        </div>
+                    </div>
+                    <div class="flex-item">
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Expiration Date</div>
+                            <div class="flex-label-data">{{ (accountDetail?.expirationDate  | date:'MM/dd/yyyy') || '---'}}</div>
+                        </div>
+                    </div>
+                    <div class="flex-item">
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Has Resigned</div>
+                            <div class="flex-label-data">{{ accountDetail?.hasResigned }}</div>
+                        </div>
+                    </div>
+                    <div class="flex-item">
+                        <div class="flex-sub-item">
+                            <div class="flex-label">Remote Enabled</div>
+                            <div class="flex-label-data">{{ accountDetail?.remoteEnabled }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="notary-application-details">
+                <app-notary-application-details *ngIf="applicationDetail" [applicationDetail]="applicationDetail"></app-notary-application-details>
+            </div>
+        </div>
+        <div class="grids-section">
+            <kendo-expansionpanel title="Notary account history"
+                                  [svgExpandIcon]="plusIcon"
+                                  [svgCollapseIcon]="minusIcon"
+                                  (expand)="onAccountHistoryExpand()">
+                <kendo-grid [data]="gridView" [pageable]="true" [skip]="skip" [pageSize]="pageSize" (pageChange)="pageChange($event)">
+                    <kendo-grid-column field="accountStatus" title="Account Status"></kendo-grid-column>
+                    <kendo-grid-column field="approvalDate" title="Approval Date"></kendo-grid-column>
+                    <kendo-grid-column field="expirationDate" title="Expiration Date"></kendo-grid-column>
+                    <kendo-grid-column field="resignationDate" title="Resignation Date"></kendo-grid-column>
+                    <kendo-grid-column field="paymentDate" title="Payment Date"></kendo-grid-column>
+                    <kendo-grid-column field="qualifiedDate" title="Qualified Date"></kendo-grid-column>
+                    <kendo-grid-column field="hasResigned" title="Has Resigned"></kendo-grid-column>
+                    <kendo-grid-column field="isRemoteEnabled" title="Remote Enabled"></kendo-grid-column>
+                </kendo-grid>
+            </kendo-expansionpanel>
+            <kendo-expansionpanel title="Notes history" [svgExpandIcon]="plusIcon" [svgCollapseIcon]="minusIcon" (expand)="onNotesExpand()">
+                <kendo-grid [data]="notesHistory">
+                    <kendo-grid-column field="createdOn" title="Date"></kendo-grid-column>
+                    <kendo-grid-column field="createdByUser" title="Added by"></kendo-grid-column>
+                    <kendo-grid-column field="notes" title="Notes"></kendo-grid-column>
+                </kendo-grid>
+            </kendo-expansionpanel>
+            <kendo-expansionpanel title="Name history" [svgExpandIcon]="plusIcon" [svgCollapseIcon]="minusIcon" (expand)="onNameExpand()">
+                <kendo-grid [data]="nameHistory">
+                    <kendo-grid-column title="Date">
+                        <ng-template kendoGridCellTemplate let-dataItem>
+                            {{dataItem.updatedOn !== '' ? (dataItem.updatedOn | date:'MM/dd/yyyy') : '---'}}
+                        </ng-template>
+                    </kendo-grid-column>
+                    <!-- Name column -->
+                    <kendo-grid-column title="Name">
+                        <ng-template kendoGridCellTemplate let-dataItem>
+                            {{ formatFullName(dataItem) }}
+                        </ng-template>
+                    </kendo-grid-column>
+
+                    <!-- DOB column -->
+                    <kendo-grid-column title="DOB">
+                        <ng-template kendoGridCellTemplate let-dataItem>
+                            {{dataItem.dateOfBirth !== '' ? (dataItem.dateOfBirth | date:'MM/dd/yyyy') : '---'}}
+                        </ng-template>
+                    </kendo-grid-column>
+
+                    <!-- Type of Change column -->
+                    <kendo-grid-column title="Type of Change">
+                        <ng-template kendoGridCellTemplate let-dataItem>
+                            {{ formatChangeType(dataItem) }}
+                        </ng-template>
+                    </kendo-grid-column>
+                </kendo-grid>
+            </kendo-expansionpanel>
+            <kendo-expansionpanel title="Address history" [svgExpandIcon]="plusIcon" [svgCollapseIcon]="minusIcon" (expand)="onAddressExpand()">
+                <kendo-grid [data]="addressHistory">
+                    <kendo-grid-column title="Date">
+                        <ng-template kendoGridCellTemplate let-dataItem>
+                            {{dataItem.updatedOn !== '' ? (dataItem.updatedOn | date:'MM/dd/yyyy') : '---'}}
+                        </ng-template>
+                    </kendo-grid-column>
+
+                    <!-- Address -->
+                    <kendo-grid-column title="Address">
+                        <ng-template kendoGridCellTemplate let-dataItem>
+                            {{ formatFullAddress(dataItem) }}
+                        </ng-template>
+                    </kendo-grid-column>
+
+                    <!-- Address Type -->
+                    <kendo-grid-column field="addressType" title="Address Type">
+                    </kendo-grid-column>
+
+                    <!-- Type of Change -->
+                    <kendo-grid-column title="Type of Change">
+                        <ng-template kendoGridCellTemplate let-dataItem>
+                            {{ formatAddressChangeType(dataItem) }}
+                        </ng-template>
+                    </kendo-grid-column>
+                </kendo-grid>
+            </kendo-expansionpanel>
+            <kendo-expansionpanel title="Complaint history" [svgExpandIcon]="plusIcon" [svgCollapseIcon]="minusIcon" (expand)="onComplaintExpand()">
+                <kendo-grid [data]="complaintHistory">
+                    <kendo-grid-column title="Complaint #">
+                        <ng-template kendoGridCellTemplate let-item>
+                            <button kendoButton
+                                    fillMode="link"
+                                    class="notary-id-link complaint-link"
+                                    (click)="onComplaintIdClick(item)"
+                                    [disabled]="!item?.complaintId || item.complaintId === 0 || !buildEditObject"
+                                    [state]="{ buildUpdateComplaintObject:buildUpdateComplaintObject }"
+                                    [routerLink]="['/update-complaint', accountDetail?.notaryId]">
+                                {{ item?.complaintId ? item.complaintId : '---' }}
+                            </button>
+                        </ng-template>
+                    </kendo-grid-column>
+
+                    <!-- Date of Complaint -->
+                    <kendo-grid-column title="Date of Complaint">
+                        <ng-template kendoGridCellTemplate let-item>
+                            {{item.dateOfComplaint !== '' ? (item.dateOfComplaint | date:'MM/dd/yyyy') : '---'}}
+                        </ng-template>
+                    </kendo-grid-column>
+
+                    <!-- Complaint Details -->
+                    <kendo-grid-column title="Complaint Details">
+                        <ng-template kendoGridCellTemplate let-item>
+                            {{ item.complaintDetails?.trim() ? item.complaintDetails : '---' }}
+                        </ng-template>
+                    </kendo-grid-column>
+
+                    <!-- RON Complaint -->
+                    <kendo-grid-column title="RON Complaint">
+                        <ng-template kendoGridCellTemplate let-item>
+                            {{item.isRoncomplaint ? formatYesNo(item.isRoncomplaint) : '---' }}
+                        </ng-template>
+                    </kendo-grid-column>
+
+                    <!-- Resolved -->
+                    <kendo-grid-column title="Resolved">
+                        <ng-template kendoGridCellTemplate let-item>
+                            {{item.complaintId ? formatYesNo(item.isResolved) : '---'}}
+                        </ng-template>
+                    </kendo-grid-column>
+
+                    <!-- Resolution Details -->
+                    <kendo-grid-column title="Resolution Details">
+                        <ng-template kendoGridCellTemplate let-item>
+                            {{item.resolutionNotes?.trim() ? item.resolutionNotes : '---' }}
+                        </ng-template>
+                    </kendo-grid-column>
+                </kendo-grid>
+            </kendo-expansionpanel>
+            <kendo-expansionpanel title="Certificate history"
+                                  [svgExpandIcon]="plusIcon"
+                                  [svgCollapseIcon]="minusIcon"
+                                  (expand)="onCertificateHistoryExpand()">
+                <kendo-grid [data]="certificateHistory">
+                    <kendo-grid-column field="accountId" title="Account Id"></kendo-grid-column>
+                    <kendo-grid-column field="cetificateType" title="Certificate Type"></kendo-grid-column>
+                    <kendo-grid-column field="certificateNumber" title="Certificate Number"></kendo-grid-column>
+                    <kendo-grid-column field="validationStartDate" title="Validation Start Date"></kendo-grid-column>
+                    <kendo-grid-column field="validationEndDate" title="Validation End Date"></kendo-grid-column>
+                    <kendo-grid-column field="createdOn" title="Date of Creation"></kendo-grid-column>
+                    <kendo-grid-column field="createdByUser" title="Created By"></kendo-grid-column>
+                </kendo-grid>
+            </kendo-expansionpanel>
+        </div>
+        <div class="bottom-back-link">
+            <a (click)="returnToSearch()" class="notary-id-link">
+                <<< Return to search results
+            </a>
+        </div>
+    </div>
+    <div class="actions-section">
+        <div class="horizontal-line"></div>
+        <div class="action-buttons-section">
+            <button kendoButton
+                    fillMode="clear"
+                    class="action-button"
+                    [routerLink]="['/update-notary-profile-information', accountDetail?.notaryId]"
+                    [state]="{ buildEditObject: buildEditObject}">
+                Update profile information
+            </button>
+            <button kendoButton
+                    fillMode="clear"
+                    class="action-button"
+                    [routerLink]="['/update-notary-details', accountDetail?.notaryId]"
+                    [state]="{ buildEditObject: buildEditObject}">
+                Update notary details
+            </button>
+        </div>
+    </div>
+</div>
+
+<ng-template #msgToUser>
+    <p class="information-section" style="color: red;">
+        {{messageToUser}}
+    </p>
+</ng-template>
+update-notary-details.component.html:
+<div class="page-wrapper">
+    <div class="heading-and-asterisk">
+        <h2 class="notary-title">
+            Update Notary Details - {{ temp }}
+        </h2>
+        <div class="required-indicator">
+            <div class="asterisk">*</div>
+            <div class="required-indicator-text"> - Required fields</div>
+        </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-class" novalidate>
+        <!-- ADD NOTES -->
+        <div class="notes-section" formGroupName="addNotes">
+            <div class="div-header-section">
+                <input type="checkbox"
+                       kendoCheckBox
+                       formControlName="enabled"
+                       class="checkbox-override" />
+                <div class="checkbox-header-level">Add Notes</div>
+            </div>
+
+            <div class="div-content-section">
+                <kendo-formfield class="full-width">
+                    <label kendoLabel for="notes">
+                        Notes <span class="text-danger asterisk padding-exception">*</span>
+                    </label>
+                    <!-- Disabled until checkbox is checked; value is preserved -->
+                    <textarea kendoTextArea
+                              id="notes"
+                              formControlName="notes"
+                              rows="6"
+                              maxlength="5000"></textarea>
+                    <kendo-formerror *ngIf="notesCtrl?.touched && notesCtrl?.errors?.['required']">
+                        Notes are required.
+                    </kendo-formerror>
+                    <kendo-formerror *ngIf="notesCtrl?.touched && notesCtrl?.errors?.['maxlength']">
+                        Max 500 characters.
+                    </kendo-formerror>
+                </kendo-formfield>
+            </div>
+        </div>
+        <div class="appointment-section" formGroupName="updateAppointment">
+            <div class="div-header-section">
+                <input type="checkbox"
+                       kendoCheckBox
+                       formControlName="enabled"
+                       class="checkbox-override" />
+                <div class="checkbox-header-level">Update Notary Appointment</div>
+            </div>
+
+            <div class="div-content-section">
+                <div class="form-column">
+                    <div class="flex-item">
+                        <div class="label-with-toggle">
+                            <input type="checkbox" kendoCheckBox formControlName="renewalSelected" class="mini-checkbox" />
+                            <label kendoLabel for="renewalDate">Renewal Date <span class="text-danger asterisk">*</span></label>
+                        </div>
+                        <kendo-formfield>
+                            <kendo-datepicker id="renewalDate" formControlName="renewalDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY" [min]="renewalMin" [max]="renewalMax">
+                            </kendo-datepicker>
+                        </kendo-formfield>
+                    </div>
+
+                    <div class="flex-item">
+                        <div class="label-with-toggle">
+                            <input type="checkbox" kendoCheckBox formControlName="paidSelected" class="mini-checkbox" />
+                            <label kendoLabel for="paidDate">Paid Date <span class="text-danger asterisk">*</span></label>
+                        </div>
+                        <kendo-formfield>
+                            <kendo-datepicker id="paidDate" formControlName="paidDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY" [min]="paidMin" [max]="paidMax">
+                            </kendo-datepicker>
+                        </kendo-formfield>
+                    </div>
+
+                    <div class="flex-item">
+                        <div class="label-with-toggle">
+                            <input type="checkbox" kendoCheckBox formControlName="qualifiedSelected" class="mini-checkbox" />
+                            <label kendoLabel for="qualifiedDate">Qualified Date <span class="text-danger asterisk">*</span></label>
+                        </div>
+                        <kendo-formfield>
+                            <kendo-datepicker id="qualifiedDate" formControlName="qualifiedDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY">
+                            </kendo-datepicker>
+                        </kendo-formfield>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="valid-certificate-section" formGroupName="validCertificate">
+            <div class="div-header-section">
+                <input type="checkbox"
+                       kendoCheckBox
+                       formControlName="enabled"
+                       class="checkbox-override" />
+                <div class="checkbox-header-level">Valid Certificate</div>
+            </div>
+
+            <div class="div-content-section">
+                <div class="form-column">
+                    <kendo-formfield class="flex-item">
+                        <label kendoLabel for="validationCertificate">
+                            Validation Certificate #
+                        </label>
+                        <input kendoTextBox
+                               id="validationCertificate"
+                               formControlName="validationCertificate"
+                               maxlength="10"
+                               inputmode="numeric"
+                               pattern="[0-9]*"
+                               (keypress)="digitsOnly($event)" />
+                        <kendo-formerror *ngIf="validationCertificateCtrl?.touched && validationCertificateCtrl?.errors?.['maxlength']">
+                            Max 10 digits.
+                        </kendo-formerror>
+                        <kendo-formerror *ngIf="validationCertificateCtrl?.touched && validationCertificateCtrl?.errors?.['pattern']">
+                            Numbers only.
+                        </kendo-formerror>
+                    </kendo-formfield>
+
+                    <kendo-formfield class="flex-item">
+                        <label kendoLabel for="validationStartDate">
+                            Validation Start Date <span class="text-danger asterisk">*</span>
+                        </label>
+                        <kendo-datepicker id="validationStartDate"
+                                          formControlName="validationStartDate"
+                                          [format]="'MM/dd/yyyy'"
+                                          placeholder="MM/DD/YYYY">
+                        </kendo-datepicker>
+                    </kendo-formfield>
+
+                    <kendo-formfield class="flex-item">
+                        <label kendoLabel for="validationEndDate">
+                            Validation End Date <span class="text-danger asterisk">*</span>
+                        </label>
+                        <kendo-datepicker id="validationEndDate"
+                                          formControlName="validationEndDate"
+                                          [format]="'MM/dd/yyyy'"
+                                          placeholder="MM/DD/YYYY">
+                        </kendo-datepicker>
+                    </kendo-formfield>
+                </div>
+            </div>
+        </div>
+        <div class="add-complaint-section" formGroupName="addComplaint">
+            <div class="div-header-section">
+                <input type="checkbox"
+                       kendoCheckBox
+                       formControlName="enabled"
+                       class="checkbox-override" />
+                <div class="checkbox-header-level">Add Complaint</div>
+            </div>
+
+            <div class="div-content-section">
+                <div class="form-column row-one">
+                    <!-- Date of Complaint -->
+                    <kendo-formfield class="flex-item">
+                        <label kendoLabel for="dateOfComplaint">
+                            Date of Complaint <span class="text-danger asterisk">*</span>
+                        </label>
+                        <kendo-datepicker id="dateOfComplaint"
+                                          formControlName="dateOfComplaint"
+                                          [format]="'MM/dd/yyyy'"
+                                          placeholder="MM/DD/YYYY">
+                        </kendo-datepicker>
+                        <kendo-formerror *ngIf="dateOfComplaintCtrl?.touched && dateOfComplaintCtrl?.errors?.['required']">
+                            Date of complaint is required.
+                        </kendo-formerror>
+                    </kendo-formfield>
+
+                    <!-- Is RON Complaint -->
+                    <kendo-formfield class="flex-item checkbox-option">
+                        <input type="checkbox"
+                               kendoCheckBox
+                               id="isRoncomplaint"
+                               formControlName="isRoncomplaint" />
+                        <label kendoLabel for="isRoncomplaint" id="is-ron-complaint">Remote Online Complaint?</label>
+                    </kendo-formfield>
+                </div>
+
+                <div class="form-column">
+                    <!-- Complaint Details -->
+                    <kendo-formfield class="full-width">
+                        <label kendoLabel for="complaintDetails">
+                            Complaint Details <span class="text-danger asterisk">*</span>
+                        </label>
+                        <textarea kendoTextArea
+                                  id="complaintDetails"
+                                  formControlName="complaintDetails"
+                                  rows="4"
+                                  maxlength="200"></textarea>
+                        <kendo-formerror *ngIf="complaintDetailsCtrl?.touched && complaintDetailsCtrl?.errors?.['required']">
+                            Complaint details are required.
+                        </kendo-formerror>
+                        <kendo-formerror *ngIf="complaintDetailsCtrl?.touched && complaintDetailsCtrl?.errors?.['maxlength']">
+                            Max 200 characters.
+                        </kendo-formerror>
+                    </kendo-formfield>
+                </div>
+
+                <div class="form-column">
+                    <!-- Resolution Notes -->
+                    <kendo-formfield class="full-width resolution-override height-override">
+                        <label kendoLabel *ngIf="isResolvedCtrl.value" for="resolutionNotes">
+                            Resolution Notes <span class="text-danger asterisk">*</span>
+                        </label>
+                        <label kendoLabel *ngIf="!isResolvedCtrl.value" for="resolutionNotes">
+                            Resolution Notes <span class="text-normal asterisk">*</span>
+                        </label>
+                        <textarea kendoTextArea
+                                  id="resolutionNotes"
+                                  formControlName="resolutionNotes"
+                                  rows="4"
+                                  maxlength="200"></textarea>
+                        <kendo-formerror *ngIf="resolutionNotesCtrl?.touched && resolutionNotesCtrl?.errors?.['required']">
+                            Resolution notes are required when resolved.
+                        </kendo-formerror>
+                        <kendo-formerror *ngIf="resolutionNotesCtrl?.touched && resolutionNotesCtrl?.errors?.['maxlength']">
+                            Max 200 characters.
+                        </kendo-formerror>
+                    </kendo-formfield>
+                    <div class="resolved-and-date">
+                        <kendo-formfield class="flex-item checkbox-option">
+                            <label kendoLabel for="isResolved" id="is-ron-complaint">Resolved?</label>
+                            <input type="checkbox"
+                                   kendoCheckBox
+                                   id="isResolved"
+                                   formControlName="isResolved" />
+                        </kendo-formfield>
+
+                        <kendo-formfield class="flex-item" *ngIf="isResolvedCtrl.value">
+                            <label kendoLabel for="resolutionDate">
+                                Resolution Date <span class="text-danger asterisk">*</span>
+                            </label>
+                            <kendo-datepicker id="resolutionDate"
+                                              formControlName="resolutionDate"
+                                              [format]="'MM/dd/yyyy'"
+                                              placeholder="MM/DD/YYYY">
+                            </kendo-datepicker>
+                            <kendo-formerror *ngIf="resolutionDateCtrl?.touched && resolutionDateCtrl?.errors?.['required']">
+                                Resolution date is required when resolved.
+                            </kendo-formerror>
+                        </kendo-formfield>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="buttons-row">
+            <button kendoButton
+                    themeColor="primary"
+                    type="button"
+                    class="custom-button-alt"
+                    (click)="onCancel($event)">
+                Cancel
+            </button>
+            <button kendoButton
+                    class="search-button"
+                    themeColor="primary"
+                    type="submit"
+                    [disabled]="!hasAnySectionEnabled || form.invalid">
+                Save
+            </button>
+        </div>
+    </form>
+</div>
+update-notary-details.component.ts file:
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import mockData from '../../../../mockdata/mock2.json';
-import mockProfileData from '../../../../mockdata/mock-profile-data.json';
-import expansionData from '../../../../mockdata/mock-expansion-panel-data.json';
-import { NotarySearchDataStateService } from '../../../services/helper-services/notary-search-data-state/notary-search-data-state.service';
-import { plusIcon, minusIcon, SVGIcon } from "@progress/kendo-svg-icons";
-import { NotaryDetailsService } from '../../../services/get-notary-details/notary-details.service';
-import { NotaryProfileDetailInfo } from '../../../models/notary-profile-models/notary-profile-detail/notary-profile-detail-info.model';
-import { NotaryAccountDetailInfo } from '../../../models/notary-profile-models/notary-account-detail/notary-account-detail-info.model';
-import { NotesHistoryService } from '../../../services/get-notes-history/notes-history.service';
-import { NameHistory, NoteHistory, AddressHistory, ComplaintHistory, CertificateHistory } from '../../../models/ref-items-model/ref-items.model';
-import { NameHistoryService } from '../../../services/get-name-history/name-history.service';
-import { AddressHistoryService } from '../../../services/get-address-history/address-history.service';
-import { ComplaintHistoryService } from '../../../services/get-complaint-history/complaint-history.service';
-import { NotaryApplicationDetails } from '../../../models/notary-profile-models/notary-application-detail/notary-application-details.model';
-import { AccountHistoryService } from '../../../services/get-account-history/account-history.service';
-import { GridDataResult, PageChangeEvent } from '@progress/kendo-angular-grid';
-import { CertificateHistoryService } from '../../../services/get-certificate-history/certificate-history.service';
-import { BuildEditObject, UpdatePersonalProfileInformation } from '../../../models/update-profile-info-model/update-profile-info.model';
-import { UpdateComplaint } from '../../../models/update-complaint-model/update-complaint.model';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
+import { ApprovalDate, RefGetterService } from '../../../services/helper-services/ref-get-service/ref-getter.service';
+import { BuildEditObject } from '../../../models/update-profile-info-model/update-profile-info.model';
 
 @Component({
-  selector: 'app-notary-profile',
-  templateUrl: './notary-profile.component.html',
-  styleUrls: ['./notary-profile.component.css']
+    selector: 'app-update-notary-details',
+    templateUrl: './update-notary-details.component.html',
+    styleUrl: './update-notary-details.component.css'
 })
-export class NotaryProfileComponent implements OnInit {
+export class UpdateNotaryDetailsComponent implements OnInit {
+    temp: string | null = '0';
+    form!: FormGroup;
+    approvalDates: ApprovalDate[] = [];
+    public displayData?: BuildEditObject;
+    public accountId: number = 0;
+    today = this.stripTime(new Date());
+    renewalMin = this.today;
+    renewalMax = new Date(2100, 11, 31); // Dec 31, 2100
+    paidMin = new Date(1899, 11, 31);    // Dec 31, 1899
+    paidMax = this.today;
 
-  public notaryId!: number;
-  public plusIcon: SVGIcon = plusIcon;
-  public minusIcon: SVGIcon = minusIcon;
+    constructor(
+        private router: Router,
+        private route: ActivatedRoute,
+        private fb: FormBuilder,
+        private refGetter: RefGetterService
+    ) {
+        // 1) Preferred: getCurrentNavigation (only on the initial nav)
+        const nav = this.router.getCurrentNavigation();
+        this.displayData = nav?.extras.state?.['buildEditObject'] as BuildEditObject | undefined;
 
-  public profileDetail?: NotaryProfileDetailInfo;
-  public accountDetail?: NotaryAccountDetailInfo;
-  public notesHistory: NoteHistory[] = [];      
-  private notesHistoryLoaded = false;
-  public nameHistory: NameHistory[] = [];
-  private nameHistoryLoaded = false;
-  public addressHistory: AddressHistory[] = [];
-  private addressHistoryLoaded = false;
-  public complaintHistory: ComplaintHistory[] = [];
-  private complaintHistoryLoaded = false;
-  public applicationDetail?: NotaryApplicationDetails;
-  public accountHistory: Array<{
-    accountStatus: string;
-    approvalDate: string;
-    expirationDate: string;
-    resignationDate: string;
-    paymentDate: string;
-    qualifiedDate: string;
-    hasResigned: string;
-    isRemoteEnabled: string;
-  }> = [];
-  public accountHistoryLoaded = false;
-  public gridView!: GridDataResult;
-  public pageSize = 5;
-  public skip = 0;
-  public certificateHistory: Array<{
-    accountId: number | string;
-    cetificateType: string;
-    certificateNumber: string;
-    validationStartDate: string;
-    validationEndDate: string;
-    createdOn: string;
-    createdByUser: string;
-  }> = [];
-  public certificateHistoryLoaded = false;
-  public buildEditObject!: BuildEditObject;
-  public buildUpdateComplaintObject!: UpdateComplaint;
-  public activeComplaints: boolean = false;
+        // 2) Fallback (and works after page reload):
+        if (!this.displayData && history.state?.buildEditObject) {
+            this.displayData = history.state.buildEditObject;
+        }
 
-  constructor(private route: ActivatedRoute,
-              private searchStateData: NotarySearchDataStateService,
-              private router: Router,
-              private notaryDetails: NotaryDetailsService,
-              private notesHistoryService: NotesHistoryService,
-              private nameHistoryService: NameHistoryService,
-              private addressHistoryService: AddressHistoryService,
-              private accountHistoryService: AccountHistoryService,
-              private certificateHistoryService: CertificateHistoryService,
-              private complaintHistoryService: ComplaintHistoryService) { }
+        if (this.displayData) {
+            this.accountId = this.displayData.personalInfoDetails.accountId;
+        }
 
-  ngOnInit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    if (!idParam) {
-      console.error('No "id" found in route parameters!');
-      return;
+        console.log('Received buildEditObject:', this.accountId);
     }
 
-    this.notaryId = Number(idParam);
-    if (isNaN(this.notaryId)) {
-      console.error(`Route parameter "id" is not a valid number: ${idParam}`);
-      return;
+    ngOnInit(): void {
+        this.temp = this.route.snapshot.paramMap.get('id');
+
+        // Parent form with nested section groups
+        this.form = this.fb.group({
+            addNotes: this.fb.group({
+                enabled: [false], // checkbox state (not submitted)
+                notes: [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(5000)]]
+            }),
+            updateAppointment: this.fb.group({
+                enabled: [false],
+                renewalSelected: [{ value: false, disabled: true }],
+                paidSelected: [{ value: false, disabled: true }],
+                qualifiedSelected: [{ value: false, disabled: true }],
+
+                renewalDate: [{ value: null, disabled: true }],
+                paidDate: [{ value: null, disabled: true }],
+                qualifiedDate: [{ value: null, disabled: true }]
+            }),
+            validCertificate: this.fb.group({
+                enabled: [false],
+                validationCertificate: [{ value: '', disabled: true },
+                [Validators.maxLength(10), Validators.pattern(/^\d{0,10}$/)]
+                ],
+                validationStartDate: [{ value: null, disabled: true }],
+                validationEndDate: [{ value: null, disabled: true }]
+            }),
+            addComplaint: this.fb.group({
+                enabled: [false],
+
+                dateOfComplaint: [{ value: null, disabled: true }, [Validators.required]],
+
+                isRoncomplaint: [{ value: false, disabled: true }],
+
+                complaintDetails: [{ value: '', disabled: true },
+                [Validators.required, Validators.maxLength(200)]
+                ],
+
+                isResolved: [{ value: false, disabled: true }],
+
+                // hidden until resolved; start at today (kept disabled until resolved)
+                resolutionDate: [{ value: this.today, disabled: true }],
+
+                resolutionNotes: [{ value: '', disabled: true }, [Validators.maxLength(200)]]
+            }),
+        });
+
+        // Wire the checkbox to the control's enable/disable & validators
+        this.addNotesEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
+            const notes = this.notesCtrl;
+            if (enabled) {
+                notes.enable({ emitEvent: false });
+                notes.setValidators([Validators.required, Validators.maxLength(500)]);
+            } else {
+                notes.disable({ emitEvent: false });   // value preserved, excluded from validation
+                notes.clearValidators();
+            }
+            notes.updateValueAndValidity({ emitEvent: false });
+        });
+
+        this.updateAppointmentEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
+            const g = this.updateAppointmentGroup;
+
+            // Enable/disable ONLY the perfield toggles
+            (['renewalSelected', 'paidSelected', 'qualifiedSelected'] as const).forEach(name => {
+                const c = g.get(name)!;
+                enabled ? c.enable({ emitEvent: false }) : c.disable({ emitEvent: false });
+            });
+
+            // If master is turned off, forcedisable all datepickers (preserve values)
+            if (!enabled) {
+                (['renewalDate', 'paidDate', 'qualifiedDate'] as const).forEach(name => {
+                    g.get(name)!.disable({ emitEvent: false });
+                });
+            }
+        });
+
+        this.validCertificateEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
+            const g = this.validCertificateGroup;
+            (['validationCertificate', 'validationStartDate', 'validationEndDate'] as const).forEach(name => {
+                const c = g.get(name)!;
+                enabled ? c.enable({ emitEvent: false }) : c.disable({ emitEvent: false });
+            });
+        });
+
+        this.addComplaintEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
+            const g = this.addComplaintGroup;
+            // Toggle children
+            (['dateOfComplaint', 'isRoncomplaint', 'complaintDetails', 'isResolved', 'resolutionNotes'] as const)
+                .forEach(name => {
+                    const c = g.get(name)!;
+                    enabled ? c.enable({ emitEvent: false }) : c.disable({ emitEvent: false });
+                });
+
+            // resolutionDate stays disabled until isResolved = true
+            const doc = this.dateOfComplaintCtrl;
+            // If enabling and no date set, seed with today
+            if (enabled && !doc.value) {
+                doc.setValue(this.today, { emitEvent: false });
+            }
+
+            // Required validator for dateOfComplaint only when section is enabled
+            if (enabled) {
+                doc.setValidators([Validators.required]);
+            } else {
+                doc.clearValidators();
+            }
+            doc.updateValueAndValidity({ emitEvent: false });
+        });
+
+        this.isResolvedCtrl.valueChanges.subscribe((resolved: boolean) => {
+            const rd = this.resolutionDateCtrl;
+            const rn = this.resolutionNotesCtrl;
+
+            if (resolved) {
+                // enable + require both
+                rd.enable({ emitEvent: false });
+                rn.enable({ emitEvent: false });
+
+                // seed date if empty
+                if (!rd.value) rd.setValue(this.today, { emitEvent: false });
+
+                rd.setValidators([Validators.required]);
+                rn.setValidators([Validators.required, Validators.maxLength(200)]);
+            } else {
+                // optional + disabled (hidden in UI); keep values but not validated
+                rd.disable({ emitEvent: false });
+                rn.clearValidators();              // notes optional when not resolved
+                rd.clearValidators();
+            }
+
+            rd.updateValueAndValidity({ emitEvent: false });
+            rn.updateValueAndValidity({ emitEvent: false });
+        });
+
+        this.renewalSelectedCtrl.valueChanges.subscribe((on: boolean) => {
+            on ? this.renewalCtrl.enable({ emitEvent: false })
+                : this.renewalCtrl.disable({ emitEvent: false });
+        });
+
+        this.paidSelectedCtrl.valueChanges.subscribe((on: boolean) => {
+            on ? this.paidCtrl.enable({ emitEvent: false })
+                : this.paidCtrl.disable({ emitEvent: false });
+        });
+
+        this.qualifiedSelectedCtrl.valueChanges.subscribe((on: boolean) => {
+            on ? this.qualifiedCtrl.enable({ emitEvent: false })
+                : this.qualifiedCtrl.disable({ emitEvent: false });
+        });
+
+        this.refGetter.getApprovalDates('U').subscribe({
+            next: (res) => {
+                this.approvalDates = res ?? [];
+                const first = res?.[0]?.nextApprovalDate;          // "YYYY-MM-DD"
+                const seed = this.parseAsLocalDate(first) ?? this.today;
+
+                const renewalInit = this.clampDate(seed, this.renewalMin, this.renewalMax); // Today  12/31/2100
+                const paidInit = this.clampDate(seed, this.paidMin, this.paidMax);       // 12/31/1899  Today
+                const qualifiedInit = seed;                                                    // no limits
+
+                const startInit = seed;
+                const endInit = this.addMonths(seed, 1);
+
+                this.updateAppointmentGroup.patchValue(
+                    { renewalDate: renewalInit, paidDate: paidInit, qualifiedDate: qualifiedInit },
+                    { emitEvent: false }
+                );
+
+                this.validCertificateGroup.patchValue(
+                    {
+                        validationCertificate: String(this.accountId ?? ''),
+                        validationStartDate: startInit,
+                        validationEndDate: endInit
+                    },
+                    { emitEvent: false }
+                );
+            },
+            error: (err) => {
+                console.error('Failed to fetch approval dates', err);
+            }
+        });
     }
 
-    this.notaryDetails.getNotaryProfile(Number(idParam)).subscribe({
-      next: response => {
-        this.profileDetail = this.mapToDetailInfo(response);
-        this.accountDetail = this.mapToAccountDetailInfo(response);
-        this.applicationDetail = this.mapToApplicationDetailInfo(response);
-        this.buildEditObject = this.mapToEditObject(response);
-        console.log(this.buildEditObject);
-      },
-      error: err => {
-        console.error('Error fetching notary profile:', err);
-      }
-    });
-
-  }
-
-  private buildUpdateComplaintFor(item: ComplaintHistory): UpdateComplaint {
-    const pid = this.buildEditObject?.personalInfoDetails;
-    if (!pid) {
-      throw new Error('buildEditObject.personalInfoDetails is not ready yet.');
+    get addComplaintGroup(): FormGroup {
+        return this.form.get('addComplaint') as FormGroup;
+    }
+    get renewalSelectedCtrl(): AbstractControl {
+        return this.updateAppointmentGroup.get('renewalSelected')!;
+    }
+    get paidSelectedCtrl(): AbstractControl {
+        return this.updateAppointmentGroup.get('paidSelected')!;
+    }
+    get qualifiedSelectedCtrl(): AbstractControl {
+        return this.updateAppointmentGroup.get('qualifiedSelected')!;
+    }
+    get addComplaintEnabledCtrl(): AbstractControl {
+        return this.addComplaintGroup.get('enabled')!;
+    }
+    get dateOfComplaintCtrl(): AbstractControl {
+        return this.addComplaintGroup.get('dateOfComplaint')!;
+    }
+    get isRoncomplaintCtrl(): AbstractControl {
+        return this.addComplaintGroup.get('isRoncomplaint')!;
+    }
+    get complaintDetailsCtrl(): AbstractControl {
+        return this.addComplaintGroup.get('complaintDetails')!;
+    }
+    get isResolvedCtrl(): AbstractControl {
+        return this.addComplaintGroup.get('isResolved')!;
+    }
+    get resolutionDateCtrl(): AbstractControl {
+        return this.addComplaintGroup.get('resolutionDate')!;
+    }
+    get resolutionNotesCtrl(): AbstractControl {
+        return this.addComplaintGroup.get('resolutionNotes')!;
     }
 
-    const accountId = pid.accountId;
-
-    return {
-      // person/account fields
-      firstName: pid.firstName,
-      middleName: pid.middleName,
-      lastName: pid.lastName,
-      applicantId: pid.applicantId,
-      accountId: pid.accountId,
-
-      // complaint-specific fields (raw values)
-      complaintId: item.complaintId,
-      dateOfComplaint: item.dateOfComplaint,
-      isRoncomplaint: item.isRoncomplaint,
-      complaintDetails: item.complaintDetails,
-      isResolved: item.isResolved,
-      resolutionNotes: item.resolutionNotes,
-      resolutionDate: item.resolutionDate
-    };
-  }
-
-  public onComplaintIdClick(item: ComplaintHistory): void {
-    try {
-      this.buildUpdateComplaintObject = this.buildUpdateComplaintFor(item);
-      console.log('buildUpdateComplaintObject:', this.buildUpdateComplaintObject);
-    } catch (e) {
-      console.error(e);
+    get validCertificateGroup(): FormGroup {
+        return this.form.get('validCertificate') as FormGroup;
     }
-  }
-
-  private mapToEditObject(resp: any): BuildEditObject {
-    const pid = resp.personalInfoDetails;
-    const email = resp.emailAddress;
-    const accountIdentifier = resp.accountDetails?.accountId;
-
-    return {
-      personalInfoDetails: {
-        accountId: accountIdentifier,
-        emailAddress: email,
-        salutationTypeId: pid.salutationTypeId,
-        salutationType: pid.salutationType,
-        firstName: pid.firstName,
-        middleName: pid.middleName,
-        lastName: pid.lastName,
-        suffix: pid.suffix,
-        dateOfBirth: pid.dateOfBirth,
-        applicantId: pid.applicantId,
-        notaryIdentifier: pid.notaryIdentifier,
-        dateOfDeath: pid.dateOfDeath,
-        addressDetails: pid.addressDetails.map((a: any) => ({
-          addressId: a.addressId,
-          applicantId: a.applicantId,
-          addressTypeId: a.addressTypeId,
-          addressType: a.addressType,
-          isPrefered: a.isPrefered,
-          isPoBox: a.isPoBox,
-          streetNumber: a.streetNumber,
-          streetName: a.streetName,
-          aptNumber: a.aptNumber,
-          addressLine2: a.addressLine2,
-          zipCode: a.zipCode,
-          zipPlus: a.zipPlus,
-          city: a.city,
-          county: a.county,
-          district: a.district,
-          stateId: a.stateId,
-          state: a.state,
-        })),
-        contactDetails: pid.contactDetails.map((c: any) => ({
-          contactTypeId: c.contactTypeId,
-          contactType: c.contactType,
-          contactId: c.contactId,
-          applicantId: c.applicantId,
-          contactValue: c.contactValue,
-          isPrimary: c.isPrimary,
-        })),
-      }
-    };
-  }
-
-  private mapToDetailInfo(resp: any): NotaryProfileDetailInfo {
-    const pid = resp.personalInfoDetails;
-    this.activeComplaints = resp.hasActiveComplaints;
-    const addrs = pid.addressDetails as any[];
-    const phones = pid.contactDetails as any[];
-
-    // 1) Name
-    const name = [pid.firstName, pid.middleName, pid.lastName]
-      .filter(n => !!n)
-      .join(' ');
-
-    // 2 & 10) Dates
-    const dateOfBirth = pid.dateOfBirth.split('T')[0];
-    const dateOfDeath = pid.dateOfDeath
-      ? pid.dateOfDeath.split('T')[0]
-      : '---';
-
-    // 3) Email
-    const emailAddress = resp.emailAddress!=null ? resp.emailAddress : '---';
-
-    // 4 & 5) Phones
-    const primaryPhone = phones.find(p => p.isPrimary)!.contactValue;
-    const secondary = phones.find(p => !p.isPrimary);
-    const phone1 = primaryPhone;
-    const phone2 = secondary ? secondary.contactValue : null;
-
-    // Preferred address for county & district
-    const preferred = addrs.find(a => a.isPrefered)!;
-    const countyName = preferred.county;
-    const districtName = preferred.district;
-
-    // Helper to format an address object
-    const formatAddress = (a: any) => {
-      const parts: string[] = [];
-      if (a.streetNumber) parts.push(a.streetNumber);
-      if (a.streetName) parts.push(a.streetName);
-      if (a.aptNumber) parts.push(a.aptNumber);
-      if (a.addressLine2) parts.push(a.addressLine2);
-      if (a.city) parts.push(a.city);
-      if (a.state && a.zipCode) {
-        const zp = a.zipPlus ? `-${a.zipPlus}` : '';
-        parts.push(`${a.state}-${a.zipCode}${zp}`);
-      }
-      return parts.join(',');
-    };
-
-    // 6) Residential
-    const resAddrObj = addrs.find(a => a.addressType === 'Residential');
-    const residentialAddress = resAddrObj
-      ? formatAddress(resAddrObj)
-      : '';
-
-    // 7) Business
-    const busAddrObj = addrs.find(a => a.addressType === 'Business');
-    const businessAddress = busAddrObj
-      ? formatAddress(busAddrObj)
-      : '---';
-
-    return {
-      name,
-      dateOfBirth,
-      emailAddress,
-      phone1,
-      phone2,
-      residentialAddress,
-      businessAddress,
-      countyName,
-      districtName,
-      dateOfDeath
-    };
-  }
-
-  private mapToAccountDetailInfo(resp: any): NotaryAccountDetailInfo {
-    const acct = resp.accountDetails;
-    return {
-      notaryId: acct.applicantId,
-      status: acct.accountStatus,
-      commissionDate: acct.approvalDate.split('T')[0],
-      expirationDate: acct.expirationDate.split('T')[0],
-      hasResigned: acct.hasResigned ? 'Yes' : 'No',
-      remoteEnabled: acct.isRemoteNotary ? 'Yes' : 'No'
-    };
-  }
-
-  public onNotesExpand(): void {
-    if (this.notesHistoryLoaded) {
-      return;
+    get validCertificateEnabledCtrl(): AbstractControl {
+        return this.validCertificateGroup.get('enabled')!;
+    }
+    get validationCertificateCtrl(): AbstractControl {
+        return this.validCertificateGroup.get('validationCertificate')!;
+    }
+    get validationStartCtrl(): AbstractControl {
+        return this.validCertificateGroup.get('validationStartDate')!;
+    }
+    get validationEndCtrl(): AbstractControl {
+        return this.validCertificateGroup.get('validationEndDate')!;
     }
 
-    this.notesHistoryService.getNotesHistory(this.notaryId).subscribe({
-      next: hist => {
-        if (hist.length === 0) {
-          // no history show one row of ‘---’
-          this.notesHistory = [{
-            noteId: 0,
-            accountId: this.notaryId,
-            notes: '---',
-            createdOn: '---',
-            createdByUser: '---'
-          }];
+    get updateAppointmentGroup(): FormGroup {
+        return this.form.get('updateAppointment') as FormGroup;
+    }
+    get updateAppointmentEnabledCtrl(): AbstractControl {
+        return this.updateAppointmentGroup.get('enabled')!;
+    }
+    get renewalCtrl(): AbstractControl {
+        return this.updateAppointmentGroup.get('renewalDate')!;
+    }
+    get paidCtrl(): AbstractControl {
+        return this.updateAppointmentGroup.get('paidDate')!;
+    }
+    get qualifiedCtrl(): AbstractControl {
+        return this.updateAppointmentGroup.get('qualifiedDate')!;
+    }
+
+    private stripTime(d: Date): Date {
+        const nd = new Date(d); nd.setHours(0, 0, 0, 0); return nd;
+    }
+    private parseAsLocalDate(s?: string): Date | null {
+        if (!s) return null;
+        const [y, m, d] = s.split('-').map(Number);
+        return new Date(y, (m ?? 1) - 1, d ?? 1);
+    }
+    private toSql(date?: Date | null): string | null {
+        if (!date) return null;
+        const y = date.getFullYear(), m = date.getMonth(), d = date.getDate();
+        return new Date(Date.UTC(y, m, d, 0, 0, 0)).toISOString();
+    }
+
+    private clampDate(date: Date | null, min: Date, max: Date): Date {
+        const src = date ? new Date(date) : new Date();
+        src.setHours(0, 0, 0, 0);
+        const lo = new Date(min); lo.setHours(0, 0, 0, 0);
+        const hi = new Date(max); hi.setHours(0, 0, 0, 0);
+        const t = Math.min(Math.max(src.getTime(), lo.getTime()), hi.getTime());
+        return new Date(t);
+    }
+
+    // ---- convenience getters ----
+    get addNotesGroup(): FormGroup {
+        return this.form.get('addNotes') as FormGroup;
+    }
+    get addNotesEnabledCtrl(): AbstractControl {
+        return this.addNotesGroup.get('enabled')!;
+    }
+    get notesCtrl(): AbstractControl {
+        return this.addNotesGroup.get('notes')!;
+    }
+    get hasAnySectionEnabled(): boolean {
+        // Future-proof: extend this OR across other section checkboxes
+        return !!this.addNotesEnabledCtrl.value
+            || !!this.validCertificateEnabledCtrl.value
+            || !!this.addComplaintEnabledCtrl.value
+            || (this.updateAppointmentEnabledCtrl.value && (
+                !!this.renewalSelectedCtrl.value
+                || !!this.paidSelectedCtrl.value
+                || !!this.qualifiedSelectedCtrl.value
+            ));
+    }
+
+    private addMonths(date: Date, months: number): Date {
+        const d0 = new Date(date);
+        const d = new Date(date);
+        d.setMonth(d.getMonth() + months);
+        // handle month overflow (e.g., Jan 31 + 1 month  Feb end)
+        if (d.getDate() !== d0.getDate()) d.setDate(0);
+        d.setHours(0, 0, 0, 0);
+        return d;
+    }
+
+    private sanitize(text: string | null | undefined): string {
+        if (!text) return '';
+        // strip control chars, angle/brace/semicolon brackets, collapse whitespace, trim
+        return text
+            .replace(/[\x00-\x1F\x7F]/g, '')
+            .replace(/[<>{}\[\];]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    digitsOnly(e: KeyboardEvent) {
+        const allowed = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'];
+        if (allowed.includes(e.key)) return;
+        if (!/^\d$/.test(e.key)) e.preventDefault();
+    }
+
+    onSubmit(): void {
+
+        if (!this.hasAnySectionEnabled) return;
+
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
+        }
+
+        // Build payload: only include sections that are enabled
+        const payload: { notes?: string } = {};
+        if (this.addNotesEnabledCtrl.value) {
+            payload.notes = this.notesCtrl.value;
+            console.log('SUBMIT payload:', payload);
+        }
+
+        if (this.updateAppointmentEnabledCtrl.value) {
+            if (this.renewalSelectedCtrl.value) {
+                console.log({ applicationId: this.accountId, approvalDate: this.toSql(this.renewalCtrl.value as Date | null) });
+            }
+            if (this.paidSelectedCtrl.value) {
+                console.log({ applicationId: this.accountId, payDate: this.toSql(this.paidCtrl.value as Date | null) });
+            }
+            if (this.qualifiedSelectedCtrl.value) {
+                console.log({ applicationId: this.accountId, qualifiedDate: this.toSql(this.qualifiedCtrl.value as Date | null) });
+            }
+        }
+
+        if (this.validCertificateEnabledCtrl.value) {
+            const cert = (this.validationCertificateCtrl.value ?? '').toString();
+            const start = this.validationStartCtrl.value as Date | null;
+            const end = this.validationEndCtrl.value as Date | null;
+
+            console.log({ validationCertificate: cert, accountId: this.accountId });
+            console.log({ validationStartDate: this.toSql(start), accountId: this.accountId });
+            console.log({ validationEndDate: this.toSql(end), accountId: this.accountId });
+        }
+
+        if (this.addComplaintEnabledCtrl.value) {
+            const dateOfComplaint = this.dateOfComplaintCtrl.value as Date | null;
+            const isRoncomplaint = !!this.isRoncomplaintCtrl.value;
+            const isResolved = !!this.isResolvedCtrl.value;
+            const resolutionDate = this.resolutionDateCtrl.value as Date | null;
+
+            const complaintDetails = this.sanitize(this.complaintDetailsCtrl.value as string);
+            const resolutionNotes = this.sanitize(this.resolutionNotesCtrl.value as string);
+
+            console.log({
+                accountId: this.accountId,
+                dateOfComplaint: this.toSql(dateOfComplaint),                 // Option A: UTC midnight
+                isRoncomplaint,
+                complaintDetails,
+                isResolved,
+                resolutionDate: isResolved ? this.toSql(resolutionDate) : null,
+                resolutionNotes: isResolved ? resolutionNotes || null : null
+            });
+        }
+    }
+
+    onCancel(evt?: Event): void {
+        evt?.preventDefault();
+        evt?.stopPropagation();
+        if (this.temp != null) {
+            this.router.navigate(['/notary-profile', this.temp]);
         } else {
-          this.notesHistory = hist;
+            console.error('No applicantId available to navigate back.');
         }
-        this.notesHistoryLoaded = true;
-      },
-      error: err => {
-        console.error('Error fetching notes history:', err);
-        // optionally populate the empty-state row on error as well
-        this.notesHistory = [{
-          noteId: 0,
-          accountId: this.notaryId,
-          notes: '---',
-          createdOn: '---',
-          createdByUser: '---'
-        }];
-        this.notesHistoryLoaded = true;
-      }
-    });
-  }
-
-  public formatFullName(item: NameHistory): string {
-    const parts = [item.firstName, item.middleName, item.lastName]
-      .filter(n => !!n && n.trim() !== '');
-    return parts.length ? parts.join(' ') : '---';
-  }
-
-  /** Returns 'Official' if isOfficalNameChange, 'Correction' if isNameCorrection, else '---' */
-  public formatChangeType(item: NameHistory): string {
-    if (item.isOfficialNameChange) {
-      return 'Official';
     }
-    if (item.isNameCorrection) {
-      return 'Correction';
-    }
-    return '---';
-  }
-
-  public onNameExpand(): void {
-    if (this.nameHistoryLoaded) { return; }
-
-    this.nameHistoryService.getNameHistory(this.notaryId).subscribe({
-      next: (data: NameHistory[]) => {
-        if (!data || data.length === 0) {
-          // placeholder row of all '---'
-          this.nameHistory = [{
-            updatedOn: '---',
-            firstName: '---',
-            middleName: '',
-            lastName: '',
-            dateOfBirth: '---',
-            isOfficialNameChange: false,
-            isNameCorrection: false
-          }];
-        } else {
-          this.nameHistory = data;
-        }
-        this.nameHistoryLoaded = true;
-      },
-      error: err => {
-        console.error('Error fetching name history:', err);
-        this.nameHistory = [{
-          updatedOn: '---',
-          firstName: '---',
-          middleName: '',
-          lastName: '',
-          dateOfBirth: '---',
-          isOfficialNameChange: false,
-          isNameCorrection: false
-        }];
-        this.nameHistoryLoaded = true;
-      }
-    });
-  }
-
-  public formatFullAddress(item: AddressHistory): string {
-    const parts: string[] = [];
-    if (item.streetNumber) parts.push(item.streetNumber);
-    if (item.streetName) parts.push(item.streetName);
-    if (item.aptNumber) parts.push(item.aptNumber as string);
-    if (item.addressLine2) parts.push(item.addressLine2 as string);
-    if (item.city) parts.push(item.city);
-
-    if (item.zipPlus != null && `${item.zipPlus}`.trim() !== '') {
-      if (item.state) parts.push(item.state);
-      parts.push(`${item.zipCode}-${item.zipPlus}`);
-    } else if (item.state) {
-      parts.push(`${item.state} - ${item.zipCode}`);
-    }
-
-    return parts.join(', ');
-  }
-
-  /** Official vs Correction vs --- */
-  public formatAddressChangeType(item: AddressHistory): string {
-    if (item.isOfficalAddressChange) return 'Official';
-    if (item.isAddressCorrection) return 'Correction';
-    return '---';
-  }
-
-  public onAddressExpand(): void {
-    if (this.addressHistoryLoaded) { return; }
-
-    this.addressHistoryService.getAddressHistory(this.notaryId).subscribe({
-      next: (data: AddressHistory[]) => {
-        if (!data || data.length === 0) {
-          // one row of all '---'
-          this.addressHistory = [{
-            updatedOn: '---',
-            streetNumber: '',
-            streetName: '---',
-            aptNumber: '',
-            addressLine2: '',
-            city: '',
-            state: '',
-            zipCode: '',
-            zipPlus: '',
-            addressType: '---',
-            isOfficalAddressChange: false,
-            isAddressCorrection: false
-          }];
-        } else {
-          this.addressHistory = data;
-        }
-        this.addressHistoryLoaded = true;
-      },
-      error: err => {
-        console.error('Error fetching address history:', err);
-        this.addressHistory = [{
-          updatedOn: '---',
-          streetNumber: '---',
-          streetName: '---',
-          aptNumber: '---',
-          addressLine2: '---',
-          city: '---',
-          state: '---',
-          zipCode: '---',
-          zipPlus: '',
-          addressType: '---',
-          isOfficalAddressChange: false,
-          isAddressCorrection: false
-        }];
-        this.addressHistoryLoaded = true;
-      }
-    });
-  }
-
-  public formatYesNo(value: boolean | string): string {
-    if (typeof value === 'boolean') {
-      return value ? 'Yes' : 'No';
-    }
-    // treat string 'true'/'false'
-    return value === 'true' ? 'Yes' : 'No';
-  }
-
-  public onComplaintExpand(): void {
-    if (this.complaintHistoryLoaded) { return; }
-
-    this.complaintHistoryService.getComplaintHistory(this.notaryId)
-      .subscribe({
-        next: (data: ComplaintHistory[]) => {
-          if (!data || data.length === 0) {
-            this.complaintHistory = [{
-              complaintId: 0,
-              dateOfComplaint: '---',
-              complaintDetails: '---',
-              isRoncomplaint: '',
-              isResolved: false,
-              resolutionNotes: '---',
-              resolutionDate: '---'
-            }];
-          } else {
-            this.complaintHistory = data;
-          }
-          this.complaintHistoryLoaded = true;
-        },
-        error: err => {
-          console.error('Error fetching complaint history:', err);
-          this.complaintHistory = [{
-            complaintId: 0,
-            dateOfComplaint: '---',
-            complaintDetails: '---',
-            isRoncomplaint: '',
-            isResolved: false,
-            resolutionNotes: '---',
-            resolutionDate: '---'
-          }];
-          this.complaintHistoryLoaded = true;
-        }
-      });
-  }
-
-  private formatDate(dateStr?: string | null): string {
-    if (!dateStr) {
-      return '---';
-    }
-    // split off any time portion, then MM/DD/YYYY
-    const [datePart] = dateStr.split('T');
-    const [year, month, day] = datePart.split('-');
-    return `${month}/${day}/${year}`;
-  }
-
-  private mapToApplicationDetailInfo(resp: any): NotaryApplicationDetails {
-    const app = resp.applicationDetails || {};
-
-    return {
-      applicationDate: this.formatDate(app.applicationDate),
-      applicationStatus: app.applicationStatus ?? '---',
-      applicationStatusDate: this.formatDate(app.applicationStatusDate),
-      approvalDate: this.formatDate(app.approvalDate),
-      dueDate: this.formatDate(app.dueDate),
-      applicationNextStep: app.applicationNextStep=='' ? '---' : app.applicationNextStep,
-      applicationStatusToolTip: app.applicationStatusToolTip ?? '---'
-    };
-  }
-
-  public onAccountHistoryExpand(): void {
-    if (this.accountHistoryLoaded) {
-      return;
-    }
-
-    this.accountHistoryService.getAccountHistory(this.notaryId).subscribe({
-      next: data => {
-        if (!data || data.length === 0) {
-          this.accountHistory = [{
-            accountStatus: '---',
-            approvalDate: '---',
-            expirationDate: '---',
-            resignationDate: '---',
-            paymentDate: '---',
-            qualifiedDate: '---',
-            hasResigned: '---',
-            isRemoteEnabled: '---'
-          }];
-        } else {
-          this.accountHistory = data.map(item => ({
-            // string fields: blank/null  ‘---’
-            accountStatus: item.accountStatus?.trim() ? item.accountStatus : '---',
-            // all dates  MM/DD/YYYY
-            approvalDate: this.formatDate(item.approvalDate),
-            expirationDate: this.formatDate(item.expirationDate),
-            resignationDate: this.formatDate(item.resignationDate),
-            paymentDate: this.formatDate(item.paymentDate),
-            qualifiedDate: this.formatDate(item.qualifiedDate),
-            // booleans  Yes/No
-            hasResigned: this.formatYesNo(item.hasResigned),
-            isRemoteEnabled: this.formatYesNo(item.isRemoteEnabled),
-          }));
-        }
-        this.accountHistoryLoaded = true;
-        this.loadGrid(); 
-      },
-      error: err => {
-        console.error('Error fetching account history:', err);
-        // on error, same “all ---” row
-        this.accountHistory = [{
-          accountStatus: '---',
-          approvalDate: '---',
-          expirationDate: '---',
-          resignationDate: '---',
-          paymentDate: '---',
-          qualifiedDate: '---',
-          hasResigned: '---',
-          isRemoteEnabled: '---'
-        }];
-        this.accountHistoryLoaded = true;
-        this.loadGrid(); 
-      }
-    });
-  }
-
-  private loadGrid(): void {
-    this.gridView = {
-      data: this.accountHistory.slice(this.skip, this.skip + this.pageSize),
-      total: this.accountHistory.length
-    };
-  }
-
-  public pageChange(event: PageChangeEvent): void {
-    this.skip = event.skip;
-    this.loadGrid();
-  }
-
-  public onCertificateHistoryExpand(): void {
-    if (this.certificateHistoryLoaded) {
-      return;
-    }
-
-    this.certificateHistoryService
-      .getAddressHistory(this.notaryId)   // (yes, the method is named getAddressHistory)
-      .subscribe({
-        next: data => {
-          if (!data || data.length === 0) {
-            // one all-‘---’ placeholder row
-            this.certificateHistory = [{
-              accountId: '---',
-              cetificateType: '---',
-              certificateNumber: '---',
-              validationStartDate: '---',
-              validationEndDate: '---',
-              createdOn: '---',
-              createdByUser: '---'
-            }];
-          } else {
-            this.certificateHistory = data.map(item => ({
-              accountId: item.accountId,
-              cetificateType: item.cetificateType?.trim() ? item.cetificateType : '---',
-              certificateNumber: item.certificateNumber?.trim() ? item.certificateNumber : '---',
-              validationStartDate: this.formatDate(item.validationStartDate),
-              validationEndDate: this.formatDate(item.validationEndDate),
-              createdOn: this.formatDate(item.createdOn),
-              createdByUser: item.createdByUser?.trim() ? item.createdByUser : '---',
-            }));
-          }
-          this.certificateHistoryLoaded = true;
-        },
-        error: err => {
-          console.error('Error fetching certificate history:', err);
-          this.certificateHistoryLoaded = true;
-          this.certificateHistory = [{
-            accountId: '---',
-            cetificateType: '---',
-            certificateNumber: '---',
-            validationStartDate: '---',
-            validationEndDate: '---',
-            createdOn: '---',
-            createdByUser: '---'
-          }];
-        }
-      });
-  }
-
-
-  public returnToSearch(): void {
-    this.router.navigate(['/notary-records']);
-  }
 }
-here is the update-complaint.model.ts file that you can use in the update-complaint.component: 
-export interface UpdateComplaint {
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  applicantId: number;
-  accountId: number;
-  complaintId: number;
-  dateOfComplaint: string;
-  isRoncomplaint: string;
-  complaintDetails: string;
-  isResolved: boolean;
-  resolutionNotes: string;
-  resolutionDate: string;
-}
-here is the update-complaint.component.ts file: 
-import { Component } from '@angular/core';
+update-complaint.component.html file: 
+<div class="page-wrapper">
+  <div class="heading-asterisk-complaint">
+    <div class="heading-and-asterisk">
+      <h2 class="notary-title">
+        Update Complaint Details –
+        {{ updateComplaintData?.firstName }} {{ updateComplaintData?.lastName }}
+        ({{ updateComplaintData?.applicantId }})
+      </h2>
+      <div class="required-indicator">
+        <div class="asterisk">*</div>
+        <div class="required-indicator-text"> – Required fields</div>
+      </div>
+    </div>
+    <h3 class="complaint-number-line">
+      Complaint - {{ updateComplaintData?.complaintId}}
+    </h3>
+  </div>
+</div>
+update-complaint.component.ts file: 
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { UpdateComplaint } from '../../../models/update-complaint-model/update-complaint.model';
 
 @Component({
   selector: 'app-update-complaint',
   templateUrl: './update-complaint.component.html',
-  styleUrl: './update-complaint.component.css'
+  styleUrls: ['./update-complaint.component.css']
 })
-export class UpdateComplaintComponent {
+export class UpdateComplaintComponent implements OnInit {
+  public updateComplaintData?: UpdateComplaint;
 
+  constructor(private router: Router) { }
+
+  ngOnInit(): void {
+    const nav = this.router.getCurrentNavigation();
+    const fromState = nav?.extras?.state?.['buildUpdateComplaintObject'] as UpdateComplaint | undefined;
+    if (fromState) {
+      this.updateComplaintData = fromState;
+      // Keep the latest for refreshes
+      sessionStorage.setItem('updateComplaint', JSON.stringify(fromState));
+    } else {
+      // Fallback for reloads / direct hits
+      const cached = sessionStorage.getItem('updateComplaint');
+      if (cached) {
+        try {
+          this.updateComplaintData = JSON.parse(cached) as UpdateComplaint;
+        } catch {
+          console.warn('update-complaint: failed to parse cached updateComplaint');
+        }
+      }
+    }
+    console.log('update-complaint: received data', this.updateComplaintData);
+  }
 }
