@@ -1,18 +1,24 @@
-Goal: To do a simple lift of the complaints section from the update-notary component and add it to the update-complaint section. 
-In more depth: There is an update-notary-details section which contains the add-complaints component. This component allows the user (the one using the application)
-to add complaint about other users.. This add complaint flow inside the update-notary-details component contains several important fields like date of complaint, isRemoteNOtary complaint
-complaint details, resolution notes, isResolved flag and a hidden resolution date.. datepicker. This is the ADD COMPLAINT FLOW. The general idea is that.. the UPDATE COMPLAINT
-flow should be EXACTLY similar to the add-complaints flow.. but with patched values.. since the complaint details are aleady available. 
-For example: We are in the notary-profile page.. and when and we expanded the complaint history expansion-panel which has a complaint for the user. Then we go ahead and click on the 
-complaint number of a corresponding complaint it navigates us to the update-complaint page. HERE, the flow and the UI of it should be EXACTLY same as the previous add-complaint 
-flow.. with all the bells and whistles and validations, and checkbox flag guarding etc etc.. BUT THE CAVEAT HERE IS that it will use the already available component data 
-to patch the values such that when the update-complaint page loads.. it loads with values for each of the input items. Remember.. in the update-complaint flow.. there will be 
-no way to enable the save button unless the user makes a change to any of the input fields. One more important implementation change from add-complaint flow is that the update-complaint
-flow will not have the master checkbox(add complaint checkbox) that the add-complaint flow has. 
+Goal: To resolve a bug.. wherein downstream flows are getting effected by not properly processing (or idk what is the issue) applicantId field. 
+More clearly: if a user creates a new record via the add-new-record flow.. and we route the user to internal-profile page 
+using the applicantId (that we recive in the code section of the response for add-new-record).. the applicantId is appearing on the url as null 
+for the downstream flows and the downstream update-personal-information and update-notary-details flow which HEAVILY depend on the 
+applicantId are getting disturbed as well. Essentially.. any new record I create I am not able to do update-personal-information beacuse 
+when I land on that page.. the form IS broken. 
+My suspicions: I suspect that in my notary-profile.component.html I have<button kendoButton
+                    fillMode="clear"
+                    class="action-button"
+                    [routerLink]="['/update-notary-profile-information', accountDetail?.notaryId]"
+                    [state]="{ buildEditObject: buildEditObject}">
+                Update profile information
+            </button>
+which has the accountDetail?.notaryId where ? is a null coaelescing operator. But, if I remove the ? operator from my HTML code and run 
+the app again it throws error saying Object is possibly be undefined.
+The thing I don't understand: Why is this working for already existing records where I navigate to the notary-profile page via the notary-records 
+view.. and everyting works as expected. 
 
-Ask me all clarifying questions BEFORE you start implementation. 
+Ask me any clarifying questions you have before you suggest changes. 
 
-notary-profile.component.html file: 
+notary-profile.component.html: 
 <div *ngIf="profileDetail; else msgToUser" class="page-wrapper">
     <div class="information-section">
         <div class="top-back-link">
@@ -302,759 +308,1890 @@ notary-profile.component.html file:
         {{messageToUser}}
     </p>
 </ng-template>
-update-notary-details.component.html:
-<div class="page-wrapper">
-    <div class="heading-and-asterisk">
-        <h2 class="notary-title">
-            Update Notary Details - {{ temp }}
-        </h2>
-        <div class="required-indicator">
-            <div class="asterisk">*</div>
-            <div class="required-indicator-text"> - Required fields</div>
-        </div>
-    </div>
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-class" novalidate>
-        <!-- ADD NOTES -->
-        <div class="notes-section" formGroupName="addNotes">
-            <div class="div-header-section">
-                <input type="checkbox"
-                       kendoCheckBox
-                       formControlName="enabled"
-                       class="checkbox-override" />
-                <div class="checkbox-header-level">Add Notes</div>
-            </div>
-
-            <div class="div-content-section">
-                <kendo-formfield class="full-width">
-                    <label kendoLabel for="notes">
-                        Notes <span class="text-danger asterisk padding-exception">*</span>
-                    </label>
-                    <!-- Disabled until checkbox is checked; value is preserved -->
-                    <textarea kendoTextArea
-                              id="notes"
-                              formControlName="notes"
-                              rows="6"
-                              maxlength="5000"></textarea>
-                    <kendo-formerror *ngIf="notesCtrl?.touched && notesCtrl?.errors?.['required']">
-                        Notes are required.
-                    </kendo-formerror>
-                    <kendo-formerror *ngIf="notesCtrl?.touched && notesCtrl?.errors?.['maxlength']">
-                        Max 500 characters.
-                    </kendo-formerror>
-                </kendo-formfield>
-            </div>
-        </div>
-        <div class="appointment-section" formGroupName="updateAppointment">
-            <div class="div-header-section">
-                <input type="checkbox"
-                       kendoCheckBox
-                       formControlName="enabled"
-                       class="checkbox-override" />
-                <div class="checkbox-header-level">Update Notary Appointment</div>
-            </div>
-
-            <div class="div-content-section">
-                <div class="form-column">
-                    <div class="flex-item">
-                        <div class="label-with-toggle">
-                            <input type="checkbox" kendoCheckBox formControlName="renewalSelected" class="mini-checkbox" />
-                            <label kendoLabel for="renewalDate">Renewal Date <span class="text-danger asterisk">*</span></label>
-                        </div>
-                        <kendo-formfield>
-                            <kendo-datepicker id="renewalDate" formControlName="renewalDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY" [min]="renewalMin" [max]="renewalMax">
-                            </kendo-datepicker>
-                        </kendo-formfield>
-                    </div>
-
-                    <div class="flex-item">
-                        <div class="label-with-toggle">
-                            <input type="checkbox" kendoCheckBox formControlName="paidSelected" class="mini-checkbox" />
-                            <label kendoLabel for="paidDate">Paid Date <span class="text-danger asterisk">*</span></label>
-                        </div>
-                        <kendo-formfield>
-                            <kendo-datepicker id="paidDate" formControlName="paidDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY" [min]="paidMin" [max]="paidMax">
-                            </kendo-datepicker>
-                        </kendo-formfield>
-                    </div>
-
-                    <div class="flex-item">
-                        <div class="label-with-toggle">
-                            <input type="checkbox" kendoCheckBox formControlName="qualifiedSelected" class="mini-checkbox" />
-                            <label kendoLabel for="qualifiedDate">Qualified Date <span class="text-danger asterisk">*</span></label>
-                        </div>
-                        <kendo-formfield>
-                            <kendo-datepicker id="qualifiedDate" formControlName="qualifiedDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY">
-                            </kendo-datepicker>
-                        </kendo-formfield>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="valid-certificate-section" formGroupName="validCertificate">
-            <div class="div-header-section">
-                <input type="checkbox"
-                       kendoCheckBox
-                       formControlName="enabled"
-                       class="checkbox-override" />
-                <div class="checkbox-header-level">Valid Certificate</div>
-            </div>
-
-            <div class="div-content-section">
-                <div class="form-column">
-                    <kendo-formfield class="flex-item">
-                        <label kendoLabel for="validationCertificate">
-                            Validation Certificate #
-                        </label>
-                        <input kendoTextBox
-                               id="validationCertificate"
-                               formControlName="validationCertificate"
-                               maxlength="10"
-                               inputmode="numeric"
-                               pattern="[0-9]*"
-                               (keypress)="digitsOnly($event)" />
-                        <kendo-formerror *ngIf="validationCertificateCtrl?.touched && validationCertificateCtrl?.errors?.['maxlength']">
-                            Max 10 digits.
-                        </kendo-formerror>
-                        <kendo-formerror *ngIf="validationCertificateCtrl?.touched && validationCertificateCtrl?.errors?.['pattern']">
-                            Numbers only.
-                        </kendo-formerror>
-                    </kendo-formfield>
-
-                    <kendo-formfield class="flex-item">
-                        <label kendoLabel for="validationStartDate">
-                            Validation Start Date <span class="text-danger asterisk">*</span>
-                        </label>
-                        <kendo-datepicker id="validationStartDate"
-                                          formControlName="validationStartDate"
-                                          [format]="'MM/dd/yyyy'"
-                                          placeholder="MM/DD/YYYY">
-                        </kendo-datepicker>
-                    </kendo-formfield>
-
-                    <kendo-formfield class="flex-item">
-                        <label kendoLabel for="validationEndDate">
-                            Validation End Date <span class="text-danger asterisk">*</span>
-                        </label>
-                        <kendo-datepicker id="validationEndDate"
-                                          formControlName="validationEndDate"
-                                          [format]="'MM/dd/yyyy'"
-                                          placeholder="MM/DD/YYYY">
-                        </kendo-datepicker>
-                    </kendo-formfield>
-                </div>
-            </div>
-        </div>
-        <div class="add-complaint-section" formGroupName="addComplaint">
-            <div class="div-header-section">
-                <input type="checkbox"
-                       kendoCheckBox
-                       formControlName="enabled"
-                       class="checkbox-override" />
-                <div class="checkbox-header-level">Add Complaint</div>
-            </div>
-
-            <div class="div-content-section">
-                <div class="form-column row-one">
-                    <!-- Date of Complaint -->
-                    <kendo-formfield class="flex-item">
-                        <label kendoLabel for="dateOfComplaint">
-                            Date of Complaint <span class="text-danger asterisk">*</span>
-                        </label>
-                        <kendo-datepicker id="dateOfComplaint"
-                                          formControlName="dateOfComplaint"
-                                          [format]="'MM/dd/yyyy'"
-                                          placeholder="MM/DD/YYYY">
-                        </kendo-datepicker>
-                        <kendo-formerror *ngIf="dateOfComplaintCtrl?.touched && dateOfComplaintCtrl?.errors?.['required']">
-                            Date of complaint is required.
-                        </kendo-formerror>
-                    </kendo-formfield>
-
-                    <!-- Is RON Complaint -->
-                    <kendo-formfield class="flex-item checkbox-option">
-                        <input type="checkbox"
-                               kendoCheckBox
-                               id="isRoncomplaint"
-                               formControlName="isRoncomplaint" />
-                        <label kendoLabel for="isRoncomplaint" id="is-ron-complaint">Remote Online Complaint?</label>
-                    </kendo-formfield>
-                </div>
-
-                <div class="form-column">
-                    <!-- Complaint Details -->
-                    <kendo-formfield class="full-width">
-                        <label kendoLabel for="complaintDetails">
-                            Complaint Details <span class="text-danger asterisk">*</span>
-                        </label>
-                        <textarea kendoTextArea
-                                  id="complaintDetails"
-                                  formControlName="complaintDetails"
-                                  rows="4"
-                                  maxlength="200"></textarea>
-                        <kendo-formerror *ngIf="complaintDetailsCtrl?.touched && complaintDetailsCtrl?.errors?.['required']">
-                            Complaint details are required.
-                        </kendo-formerror>
-                        <kendo-formerror *ngIf="complaintDetailsCtrl?.touched && complaintDetailsCtrl?.errors?.['maxlength']">
-                            Max 200 characters.
-                        </kendo-formerror>
-                    </kendo-formfield>
-                </div>
-
-                <div class="form-column">
-                    <!-- Resolution Notes -->
-                    <kendo-formfield class="full-width resolution-override height-override">
-                        <label kendoLabel *ngIf="isResolvedCtrl.value" for="resolutionNotes">
-                            Resolution Notes <span class="text-danger asterisk">*</span>
-                        </label>
-                        <label kendoLabel *ngIf="!isResolvedCtrl.value" for="resolutionNotes">
-                            Resolution Notes <span class="text-normal asterisk">*</span>
-                        </label>
-                        <textarea kendoTextArea
-                                  id="resolutionNotes"
-                                  formControlName="resolutionNotes"
-                                  rows="4"
-                                  maxlength="200"></textarea>
-                        <kendo-formerror *ngIf="resolutionNotesCtrl?.touched && resolutionNotesCtrl?.errors?.['required']">
-                            Resolution notes are required when resolved.
-                        </kendo-formerror>
-                        <kendo-formerror *ngIf="resolutionNotesCtrl?.touched && resolutionNotesCtrl?.errors?.['maxlength']">
-                            Max 200 characters.
-                        </kendo-formerror>
-                    </kendo-formfield>
-                    <div class="resolved-and-date">
-                        <kendo-formfield class="flex-item checkbox-option">
-                            <label kendoLabel for="isResolved" id="is-ron-complaint">Resolved?</label>
-                            <input type="checkbox"
-                                   kendoCheckBox
-                                   id="isResolved"
-                                   formControlName="isResolved" />
-                        </kendo-formfield>
-
-                        <kendo-formfield class="flex-item" *ngIf="isResolvedCtrl.value">
-                            <label kendoLabel for="resolutionDate">
-                                Resolution Date <span class="text-danger asterisk">*</span>
-                            </label>
-                            <kendo-datepicker id="resolutionDate"
-                                              formControlName="resolutionDate"
-                                              [format]="'MM/dd/yyyy'"
-                                              placeholder="MM/DD/YYYY">
-                            </kendo-datepicker>
-                            <kendo-formerror *ngIf="resolutionDateCtrl?.touched && resolutionDateCtrl?.errors?.['required']">
-                                Resolution date is required when resolved.
-                            </kendo-formerror>
-                        </kendo-formfield>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="buttons-row">
-            <button kendoButton
-                    themeColor="primary"
-                    type="button"
-                    class="custom-button-alt"
-                    (click)="onCancel($event)">
-                Cancel
-            </button>
-            <button kendoButton
-                    class="search-button"
-                    themeColor="primary"
-                    type="submit"
-                    [disabled]="!hasAnySectionEnabled || form.invalid">
-                Save
-            </button>
-        </div>
-    </form>
-</div>
-update-notary-details.component.ts file:
+notary-profile.component.ts:
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
-import { ApprovalDate, RefGetterService } from '../../../services/helper-services/ref-get-service/ref-getter.service';
-import { BuildEditObject } from '../../../models/update-profile-info-model/update-profile-info.model';
-
-@Component({
-    selector: 'app-update-notary-details',
-    templateUrl: './update-notary-details.component.html',
-    styleUrl: './update-notary-details.component.css'
-})
-export class UpdateNotaryDetailsComponent implements OnInit {
-    temp: string | null = '0';
-    form!: FormGroup;
-    approvalDates: ApprovalDate[] = [];
-    public displayData?: BuildEditObject;
-    public accountId: number = 0;
-    today = this.stripTime(new Date());
-    renewalMin = this.today;
-    renewalMax = new Date(2100, 11, 31); // Dec 31, 2100
-    paidMin = new Date(1899, 11, 31);    // Dec 31, 1899
-    paidMax = this.today;
-
-    constructor(
-        private router: Router,
-        private route: ActivatedRoute,
-        private fb: FormBuilder,
-        private refGetter: RefGetterService
-    ) {
-        // 1) Preferred: getCurrentNavigation (only on the initial nav)
-        const nav = this.router.getCurrentNavigation();
-        this.displayData = nav?.extras.state?.['buildEditObject'] as BuildEditObject | undefined;
-
-        // 2) Fallback (and works after page reload):
-        if (!this.displayData && history.state?.buildEditObject) {
-            this.displayData = history.state.buildEditObject;
-        }
-
-        if (this.displayData) {
-            this.accountId = this.displayData.personalInfoDetails.accountId;
-        }
-
-        console.log('Received buildEditObject:', this.accountId);
-    }
-
-    ngOnInit(): void {
-        this.temp = this.route.snapshot.paramMap.get('id');
-
-        // Parent form with nested section groups
-        this.form = this.fb.group({
-            addNotes: this.fb.group({
-                enabled: [false], // checkbox state (not submitted)
-                notes: [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(5000)]]
-            }),
-            updateAppointment: this.fb.group({
-                enabled: [false],
-                renewalSelected: [{ value: false, disabled: true }],
-                paidSelected: [{ value: false, disabled: true }],
-                qualifiedSelected: [{ value: false, disabled: true }],
-
-                renewalDate: [{ value: null, disabled: true }],
-                paidDate: [{ value: null, disabled: true }],
-                qualifiedDate: [{ value: null, disabled: true }]
-            }),
-            validCertificate: this.fb.group({
-                enabled: [false],
-                validationCertificate: [{ value: '', disabled: true },
-                [Validators.maxLength(10), Validators.pattern(/^\d{0,10}$/)]
-                ],
-                validationStartDate: [{ value: null, disabled: true }],
-                validationEndDate: [{ value: null, disabled: true }]
-            }),
-            addComplaint: this.fb.group({
-                enabled: [false],
-
-                dateOfComplaint: [{ value: null, disabled: true }, [Validators.required]],
-
-                isRoncomplaint: [{ value: false, disabled: true }],
-
-                complaintDetails: [{ value: '', disabled: true },
-                [Validators.required, Validators.maxLength(200)]
-                ],
-
-                isResolved: [{ value: false, disabled: true }],
-
-                // hidden until resolved; start at today (kept disabled until resolved)
-                resolutionDate: [{ value: this.today, disabled: true }],
-
-                resolutionNotes: [{ value: '', disabled: true }, [Validators.maxLength(200)]]
-            }),
-        });
-
-        // Wire the checkbox to the control's enable/disable & validators
-        this.addNotesEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
-            const notes = this.notesCtrl;
-            if (enabled) {
-                notes.enable({ emitEvent: false });
-                notes.setValidators([Validators.required, Validators.maxLength(500)]);
-            } else {
-                notes.disable({ emitEvent: false });   // value preserved, excluded from validation
-                notes.clearValidators();
-            }
-            notes.updateValueAndValidity({ emitEvent: false });
-        });
-
-        this.updateAppointmentEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
-            const g = this.updateAppointmentGroup;
-
-            // Enable/disable ONLY the perfield toggles
-            (['renewalSelected', 'paidSelected', 'qualifiedSelected'] as const).forEach(name => {
-                const c = g.get(name)!;
-                enabled ? c.enable({ emitEvent: false }) : c.disable({ emitEvent: false });
-            });
-
-            // If master is turned off, forcedisable all datepickers (preserve values)
-            if (!enabled) {
-                (['renewalDate', 'paidDate', 'qualifiedDate'] as const).forEach(name => {
-                    g.get(name)!.disable({ emitEvent: false });
-                });
-            }
-        });
-
-        this.validCertificateEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
-            const g = this.validCertificateGroup;
-            (['validationCertificate', 'validationStartDate', 'validationEndDate'] as const).forEach(name => {
-                const c = g.get(name)!;
-                enabled ? c.enable({ emitEvent: false }) : c.disable({ emitEvent: false });
-            });
-        });
-
-        this.addComplaintEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
-            const g = this.addComplaintGroup;
-            // Toggle children
-            (['dateOfComplaint', 'isRoncomplaint', 'complaintDetails', 'isResolved', 'resolutionNotes'] as const)
-                .forEach(name => {
-                    const c = g.get(name)!;
-                    enabled ? c.enable({ emitEvent: false }) : c.disable({ emitEvent: false });
-                });
-
-            // resolutionDate stays disabled until isResolved = true
-            const doc = this.dateOfComplaintCtrl;
-            // If enabling and no date set, seed with today
-            if (enabled && !doc.value) {
-                doc.setValue(this.today, { emitEvent: false });
-            }
-
-            // Required validator for dateOfComplaint only when section is enabled
-            if (enabled) {
-                doc.setValidators([Validators.required]);
-            } else {
-                doc.clearValidators();
-            }
-            doc.updateValueAndValidity({ emitEvent: false });
-        });
-
-        this.isResolvedCtrl.valueChanges.subscribe((resolved: boolean) => {
-            const rd = this.resolutionDateCtrl;
-            const rn = this.resolutionNotesCtrl;
-
-            if (resolved) {
-                // enable + require both
-                rd.enable({ emitEvent: false });
-                rn.enable({ emitEvent: false });
-
-                // seed date if empty
-                if (!rd.value) rd.setValue(this.today, { emitEvent: false });
-
-                rd.setValidators([Validators.required]);
-                rn.setValidators([Validators.required, Validators.maxLength(200)]);
-            } else {
-                // optional + disabled (hidden in UI); keep values but not validated
-                rd.disable({ emitEvent: false });
-                rn.clearValidators();              // notes optional when not resolved
-                rd.clearValidators();
-            }
-
-            rd.updateValueAndValidity({ emitEvent: false });
-            rn.updateValueAndValidity({ emitEvent: false });
-        });
-
-        this.renewalSelectedCtrl.valueChanges.subscribe((on: boolean) => {
-            on ? this.renewalCtrl.enable({ emitEvent: false })
-                : this.renewalCtrl.disable({ emitEvent: false });
-        });
-
-        this.paidSelectedCtrl.valueChanges.subscribe((on: boolean) => {
-            on ? this.paidCtrl.enable({ emitEvent: false })
-                : this.paidCtrl.disable({ emitEvent: false });
-        });
-
-        this.qualifiedSelectedCtrl.valueChanges.subscribe((on: boolean) => {
-            on ? this.qualifiedCtrl.enable({ emitEvent: false })
-                : this.qualifiedCtrl.disable({ emitEvent: false });
-        });
-
-        this.refGetter.getApprovalDates('U').subscribe({
-            next: (res) => {
-                this.approvalDates = res ?? [];
-                const first = res?.[0]?.nextApprovalDate;          // "YYYY-MM-DD"
-                const seed = this.parseAsLocalDate(first) ?? this.today;
-
-                const renewalInit = this.clampDate(seed, this.renewalMin, this.renewalMax); // Today  12/31/2100
-                const paidInit = this.clampDate(seed, this.paidMin, this.paidMax);       // 12/31/1899  Today
-                const qualifiedInit = seed;                                                    // no limits
-
-                const startInit = seed;
-                const endInit = this.addMonths(seed, 1);
-
-                this.updateAppointmentGroup.patchValue(
-                    { renewalDate: renewalInit, paidDate: paidInit, qualifiedDate: qualifiedInit },
-                    { emitEvent: false }
-                );
-
-                this.validCertificateGroup.patchValue(
-                    {
-                        validationCertificate: String(this.accountId ?? ''),
-                        validationStartDate: startInit,
-                        validationEndDate: endInit
-                    },
-                    { emitEvent: false }
-                );
-            },
-            error: (err) => {
-                console.error('Failed to fetch approval dates', err);
-            }
-        });
-    }
-
-    get addComplaintGroup(): FormGroup {
-        return this.form.get('addComplaint') as FormGroup;
-    }
-    get renewalSelectedCtrl(): AbstractControl {
-        return this.updateAppointmentGroup.get('renewalSelected')!;
-    }
-    get paidSelectedCtrl(): AbstractControl {
-        return this.updateAppointmentGroup.get('paidSelected')!;
-    }
-    get qualifiedSelectedCtrl(): AbstractControl {
-        return this.updateAppointmentGroup.get('qualifiedSelected')!;
-    }
-    get addComplaintEnabledCtrl(): AbstractControl {
-        return this.addComplaintGroup.get('enabled')!;
-    }
-    get dateOfComplaintCtrl(): AbstractControl {
-        return this.addComplaintGroup.get('dateOfComplaint')!;
-    }
-    get isRoncomplaintCtrl(): AbstractControl {
-        return this.addComplaintGroup.get('isRoncomplaint')!;
-    }
-    get complaintDetailsCtrl(): AbstractControl {
-        return this.addComplaintGroup.get('complaintDetails')!;
-    }
-    get isResolvedCtrl(): AbstractControl {
-        return this.addComplaintGroup.get('isResolved')!;
-    }
-    get resolutionDateCtrl(): AbstractControl {
-        return this.addComplaintGroup.get('resolutionDate')!;
-    }
-    get resolutionNotesCtrl(): AbstractControl {
-        return this.addComplaintGroup.get('resolutionNotes')!;
-    }
-
-    get validCertificateGroup(): FormGroup {
-        return this.form.get('validCertificate') as FormGroup;
-    }
-    get validCertificateEnabledCtrl(): AbstractControl {
-        return this.validCertificateGroup.get('enabled')!;
-    }
-    get validationCertificateCtrl(): AbstractControl {
-        return this.validCertificateGroup.get('validationCertificate')!;
-    }
-    get validationStartCtrl(): AbstractControl {
-        return this.validCertificateGroup.get('validationStartDate')!;
-    }
-    get validationEndCtrl(): AbstractControl {
-        return this.validCertificateGroup.get('validationEndDate')!;
-    }
-
-    get updateAppointmentGroup(): FormGroup {
-        return this.form.get('updateAppointment') as FormGroup;
-    }
-    get updateAppointmentEnabledCtrl(): AbstractControl {
-        return this.updateAppointmentGroup.get('enabled')!;
-    }
-    get renewalCtrl(): AbstractControl {
-        return this.updateAppointmentGroup.get('renewalDate')!;
-    }
-    get paidCtrl(): AbstractControl {
-        return this.updateAppointmentGroup.get('paidDate')!;
-    }
-    get qualifiedCtrl(): AbstractControl {
-        return this.updateAppointmentGroup.get('qualifiedDate')!;
-    }
-
-    private stripTime(d: Date): Date {
-        const nd = new Date(d); nd.setHours(0, 0, 0, 0); return nd;
-    }
-    private parseAsLocalDate(s?: string): Date | null {
-        if (!s) return null;
-        const [y, m, d] = s.split('-').map(Number);
-        return new Date(y, (m ?? 1) - 1, d ?? 1);
-    }
-    private toSql(date?: Date | null): string | null {
-        if (!date) return null;
-        const y = date.getFullYear(), m = date.getMonth(), d = date.getDate();
-        return new Date(Date.UTC(y, m, d, 0, 0, 0)).toISOString();
-    }
-
-    private clampDate(date: Date | null, min: Date, max: Date): Date {
-        const src = date ? new Date(date) : new Date();
-        src.setHours(0, 0, 0, 0);
-        const lo = new Date(min); lo.setHours(0, 0, 0, 0);
-        const hi = new Date(max); hi.setHours(0, 0, 0, 0);
-        const t = Math.min(Math.max(src.getTime(), lo.getTime()), hi.getTime());
-        return new Date(t);
-    }
-
-    // ---- convenience getters ----
-    get addNotesGroup(): FormGroup {
-        return this.form.get('addNotes') as FormGroup;
-    }
-    get addNotesEnabledCtrl(): AbstractControl {
-        return this.addNotesGroup.get('enabled')!;
-    }
-    get notesCtrl(): AbstractControl {
-        return this.addNotesGroup.get('notes')!;
-    }
-    get hasAnySectionEnabled(): boolean {
-        // Future-proof: extend this OR across other section checkboxes
-        return !!this.addNotesEnabledCtrl.value
-            || !!this.validCertificateEnabledCtrl.value
-            || !!this.addComplaintEnabledCtrl.value
-            || (this.updateAppointmentEnabledCtrl.value && (
-                !!this.renewalSelectedCtrl.value
-                || !!this.paidSelectedCtrl.value
-                || !!this.qualifiedSelectedCtrl.value
-            ));
-    }
-
-    private addMonths(date: Date, months: number): Date {
-        const d0 = new Date(date);
-        const d = new Date(date);
-        d.setMonth(d.getMonth() + months);
-        // handle month overflow (e.g., Jan 31 + 1 month  Feb end)
-        if (d.getDate() !== d0.getDate()) d.setDate(0);
-        d.setHours(0, 0, 0, 0);
-        return d;
-    }
-
-    private sanitize(text: string | null | undefined): string {
-        if (!text) return '';
-        // strip control chars, angle/brace/semicolon brackets, collapse whitespace, trim
-        return text
-            .replace(/[\x00-\x1F\x7F]/g, '')
-            .replace(/[<>{}\[\];]/g, '')
-            .replace(/\s+/g, ' ')
-            .trim();
-    }
-
-    digitsOnly(e: KeyboardEvent) {
-        const allowed = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'];
-        if (allowed.includes(e.key)) return;
-        if (!/^\d$/.test(e.key)) e.preventDefault();
-    }
-
-    onSubmit(): void {
-
-        if (!this.hasAnySectionEnabled) return;
-
-        if (this.form.invalid) {
-            this.form.markAllAsTouched();
-            return;
-        }
-
-        // Build payload: only include sections that are enabled
-        const payload: { notes?: string } = {};
-        if (this.addNotesEnabledCtrl.value) {
-            payload.notes = this.notesCtrl.value;
-            console.log('SUBMIT payload:', payload);
-        }
-
-        if (this.updateAppointmentEnabledCtrl.value) {
-            if (this.renewalSelectedCtrl.value) {
-                console.log({ applicationId: this.accountId, approvalDate: this.toSql(this.renewalCtrl.value as Date | null) });
-            }
-            if (this.paidSelectedCtrl.value) {
-                console.log({ applicationId: this.accountId, payDate: this.toSql(this.paidCtrl.value as Date | null) });
-            }
-            if (this.qualifiedSelectedCtrl.value) {
-                console.log({ applicationId: this.accountId, qualifiedDate: this.toSql(this.qualifiedCtrl.value as Date | null) });
-            }
-        }
-
-        if (this.validCertificateEnabledCtrl.value) {
-            const cert = (this.validationCertificateCtrl.value ?? '').toString();
-            const start = this.validationStartCtrl.value as Date | null;
-            const end = this.validationEndCtrl.value as Date | null;
-
-            console.log({ validationCertificate: cert, accountId: this.accountId });
-            console.log({ validationStartDate: this.toSql(start), accountId: this.accountId });
-            console.log({ validationEndDate: this.toSql(end), accountId: this.accountId });
-        }
-
-        if (this.addComplaintEnabledCtrl.value) {
-            const dateOfComplaint = this.dateOfComplaintCtrl.value as Date | null;
-            const isRoncomplaint = !!this.isRoncomplaintCtrl.value;
-            const isResolved = !!this.isResolvedCtrl.value;
-            const resolutionDate = this.resolutionDateCtrl.value as Date | null;
-
-            const complaintDetails = this.sanitize(this.complaintDetailsCtrl.value as string);
-            const resolutionNotes = this.sanitize(this.resolutionNotesCtrl.value as string);
-
-            console.log({
-                accountId: this.accountId,
-                dateOfComplaint: this.toSql(dateOfComplaint),                 // Option A: UTC midnight
-                isRoncomplaint,
-                complaintDetails,
-                isResolved,
-                resolutionDate: isResolved ? this.toSql(resolutionDate) : null,
-                resolutionNotes: isResolved ? resolutionNotes || null : null
-            });
-        }
-    }
-
-    onCancel(evt?: Event): void {
-        evt?.preventDefault();
-        evt?.stopPropagation();
-        if (this.temp != null) {
-            this.router.navigate(['/notary-profile', this.temp]);
-        } else {
-            console.error('No applicantId available to navigate back.');
-        }
-    }
-}
-update-complaint.component.html file: 
-<div class="page-wrapper">
-  <div class="heading-asterisk-complaint">
-    <div class="heading-and-asterisk">
-      <h2 class="notary-title">
-        Update Complaint Details –
-        {{ updateComplaintData?.firstName }} {{ updateComplaintData?.lastName }}
-        ({{ updateComplaintData?.applicantId }})
-      </h2>
-      <div class="required-indicator">
-        <div class="asterisk">*</div>
-        <div class="required-indicator-text"> – Required fields</div>
-      </div>
-    </div>
-    <h3 class="complaint-number-line">
-      Complaint - {{ updateComplaintData?.complaintId}}
-    </h3>
-  </div>
-</div>
-update-complaint.component.ts file: 
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import mockData from '../../../../mockdata/mock2.json';
+import mockProfileData from '../../../../mockdata/mock-profile-data.json';
+import expansionData from '../../../../mockdata/mock-expansion-panel-data.json';
+import { NotarySearchDataStateService } from '../../../services/helper-services/notary-search-data-state/notary-search-data-state.service';
+import { plusIcon, minusIcon, SVGIcon } from "@progress/kendo-svg-icons";
+import { NotaryDetailsService } from '../../../services/get-notary-details/notary-details.service';
+import { NotaryProfileDetailInfo } from '../../../models/notary-profile-models/notary-profile-detail/notary-profile-detail-info.model';
+import { NotaryAccountDetailInfo } from '../../../models/notary-profile-models/notary-account-detail/notary-account-detail-info.model';
+import { NotesHistoryService } from '../../../services/get-notes-history/notes-history.service';
+import { NameHistory, NoteHistory, AddressHistory, ComplaintHistory, CertificateHistory } from '../../../models/ref-items-model/ref-items.model';
+import { NameHistoryService } from '../../../services/get-name-history/name-history.service';
+import { AddressHistoryService } from '../../../services/get-address-history/address-history.service';
+import { ComplaintHistoryService } from '../../../services/get-complaint-history/complaint-history.service';
+import { NotaryApplicationDetails } from '../../../models/notary-profile-models/notary-application-detail/notary-application-details.model';
+import { AccountHistoryService } from '../../../services/get-account-history/account-history.service';
+import { GridDataResult, PageChangeEvent } from '@progress/kendo-angular-grid';
+import { CertificateHistoryService } from '../../../services/get-certificate-history/certificate-history.service';
+import { BuildEditObject, UpdatePersonalProfileInformation } from '../../../models/update-profile-info-model/update-profile-info.model';
 import { UpdateComplaint } from '../../../models/update-complaint-model/update-complaint.model';
 
 @Component({
-  selector: 'app-update-complaint',
-  templateUrl: './update-complaint.component.html',
-  styleUrls: ['./update-complaint.component.css']
+    selector: 'app-notary-profile',
+    templateUrl: './notary-profile.component.html',
+    styleUrls: ['./notary-profile.component.css']
 })
-export class UpdateComplaintComponent implements OnInit {
-  public updateComplaintData?: UpdateComplaint;
+export class NotaryProfileComponent implements OnInit {
 
-  constructor(private router: Router) { }
+    public notaryId!: number;
+    public plusIcon: SVGIcon = plusIcon;
+    public minusIcon: SVGIcon = minusIcon;
+
+    public profileDetail?: NotaryProfileDetailInfo;
+    public accountDetail?: NotaryAccountDetailInfo;
+    public notesHistory: NoteHistory[] = [];
+    private notesHistoryLoaded = false;
+    public nameHistory: NameHistory[] = [];
+    private nameHistoryLoaded = false;
+    public addressHistory: AddressHistory[] = [];
+    private addressHistoryLoaded = false;
+    public complaintHistory: ComplaintHistory[] = [];
+    private complaintHistoryLoaded = false;
+    public applicationDetail?: NotaryApplicationDetails;
+    public accountHistory: Array<{
+        accountStatus: string;
+        approvalDate: string;
+        expirationDate: string;
+        resignationDate: string;
+        paymentDate: string;
+        qualifiedDate: string;
+        hasResigned: string;
+        isRemoteEnabled: string;
+    }> = [];
+    public accountHistoryLoaded = false;
+    public gridView!: GridDataResult;
+    public pageSize = 5;
+    public skip = 0;
+    public certificateHistory: Array<{
+        accountId: number | string;
+        cetificateType: string;
+        certificateNumber: string;
+        validationStartDate: string;
+        validationEndDate: string;
+        createdOn: string;
+        createdByUser: string;
+    }> = [];
+    public certificateHistoryLoaded = false;
+    public buildEditObject!: BuildEditObject;
+    public buildUpdateComplaintObject!: UpdateComplaint;
+    public activeComplaints: boolean = false;
+
+    messageToUser: string = "Searching for Notary ID ";
+    constructor(private route: ActivatedRoute,
+        private searchStateData: NotarySearchDataStateService,
+        private router: Router,
+        private notaryDetails: NotaryDetailsService,
+        private notesHistoryService: NotesHistoryService,
+        private nameHistoryService: NameHistoryService,
+        private addressHistoryService: AddressHistoryService,
+        private accountHistoryService: AccountHistoryService,
+        private certificateHistoryService: CertificateHistoryService,
+        private complaintHistoryService: ComplaintHistoryService) { }
+
+    ngOnInit(): void {
+        const idParam = this.route.snapshot.paramMap.get('id');
+        if (!idParam) {
+            console.error('No "id" found in route parameters!');
+            this.messageToUser = "No notary ID provided for profile search";
+            return;
+        }
+
+        this.notaryId = Number(idParam);
+        if (isNaN(this.notaryId)) {
+            console.error(`Route parameter "id" is not a valid number: ${idParam}`);
+            this.messageToUser = "No valid notary ID provided for profile search";
+            return;
+        }
+        this.messageToUser = this.messageToUser + idParam;
+
+        this.notaryDetails.getNotaryProfile(Number(idParam)).subscribe({
+            next: response => {
+                this.profileDetail = this.mapToDetailInfo(response);
+                this.accountDetail = this.mapToAccountDetailInfo(response);
+                this.applicationDetail = this.mapToApplicationDetailInfo(response);
+                this.buildEditObject = this.mapToEditObject(response);
+                console.log(this.buildEditObject);
+            },
+            error: err => {
+                this.messageToUser = "There was an error finding notary profile with ID " + idParam;
+                console.error('Error fetching notary profile:', err);
+            }
+        });
+
+    }
+
+    private buildUpdateComplaintFor(item: ComplaintHistory): UpdateComplaint {
+        const pid = this.buildEditObject?.personalInfoDetails;
+        if (!pid) {
+            throw new Error('buildEditObject.personalInfoDetails is not ready yet.');
+        }
+
+        const accountId = pid.accountId;
+
+        return {
+            // person/account fields
+            firstName: pid.firstName,
+            middleName: pid.middleName,
+            lastName: pid.lastName,
+            applicantId: pid.applicantId,
+            accountId: pid.accountId,
+
+            // complaint-specific fields (raw values)
+            complaintId: item.complaintId,
+            dateOfComplaint: item.dateOfComplaint,
+            isRoncomplaint: item.isRoncomplaint,
+            complaintDetails: item.complaintDetails,
+            isResolved: item.isResolved,
+            resolutionNotes: item.resolutionNotes,
+            resolutionDate: item.resolutionDate
+        };
+    }
+
+    public onComplaintIdClick(item: ComplaintHistory): void {
+        try {
+            sessionStorage.removeItem('updateComplaint');
+            this.buildUpdateComplaintObject = this.buildUpdateComplaintFor(item);
+
+            // Persist for reloads
+            sessionStorage.setItem(
+                'updateComplaint',
+                JSON.stringify(this.buildUpdateComplaintObject)
+            );
+
+            //console.log('buildUpdateComplaintObject:', this.buildUpdateComplaintObject);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    private mapToEditObject(resp: any): BuildEditObject {
+        const pid = resp.personalInfoDetails;
+        const email = resp.emailAddress;
+        const accountIdentifier = resp.accountDetails?.accountId;
+        const acctDetails = resp.accountDetails;
+        return {
+            personalInfoDetails: {
+                accountId: accountIdentifier,
+                emailAddress: email,
+                salutationTypeId: pid.salutationTypeId,
+                salutationType: pid.salutationType,
+                firstName: pid.firstName,
+                middleName: pid.middleName,
+                lastName: pid.lastName,
+                suffix: pid.suffix,
+                dateOfBirth: pid.dateOfBirth,
+                applicantId: pid.applicantId,
+                notaryIdentifier: pid.notaryIdentifier,
+                dateOfDeath: pid.dateOfDeath,
+                dateOfResignation: acctDetails.resignationDate,
+                addressDetails: pid.addressDetails.map((a: any) => ({
+                    addressId: a.addressId,
+                    applicantId: a.applicantId,
+                    addressTypeId: a.addressTypeId,
+                    addressType: a.addressType,
+                    isPrefered: a.isPrefered,
+                    isPoBox: a.isPoBox,
+                    streetNumber: a.streetNumber,
+                    streetName: a.streetName,
+                    aptNumber: a.aptNumber,
+                    addressLine2: a.addressLine2,
+                    zipCode: a.zipCode,
+                    zipPlus: a.zipPlus,
+                    city: a.city,
+                    county: a.county,
+                    district: a.district,
+                    stateId: a.stateId,
+                    state: a.state,
+                })),
+                contactDetails: pid.contactDetails.map((c: any) => ({
+                    contactTypeId: c.contactTypeId,
+                    contactType: c.contactType,
+                    contactId: c.contactId,
+                    applicantId: c.applicantId,
+                    contactValue: c.contactValue,
+                    isPrimary: c.isPrimary,
+                })),
+            }
+        };
+    }
+
+    private mapToDetailInfo(resp: any): NotaryProfileDetailInfo {
+        const pid = resp.personalInfoDetails;
+        this.activeComplaints = resp.hasActiveComplaints;
+        const addrs = pid.addressDetails as any[];
+        const phones = pid.contactDetails as any[];
+
+        // 1) Name
+        const name = [pid.firstName, pid.middleName, pid.lastName, pid.suffix]
+            .filter(n => !!n)
+            .join(' ');
+
+        // 2 & 10) Dates
+        const dateOfBirth = pid.dateOfBirth.split('T')[0];
+        const dateOfDeath = pid.dateOfDeath
+            ? pid.dateOfDeath.split('T')[0]
+            : '';
+
+        // 3) Email
+        const emailAddress = resp.emailAddress != null ? resp.emailAddress : '---';
+
+        // 4 & 5) Phones
+
+        const primaryPhone = phones.length > 0
+            ? phones.find(p => p.isPrimary)?.contactValue
+            : "";
+
+        const secondary = phones.length > 0
+            ? phones.find(p => !p.isPrimary)
+            : ""
+        const phone1 = primaryPhone;
+        const phone2 = secondary ? secondary.contactValue : null;
+
+        // Preferred address for county & district
+        const preferred = addrs.find(a => a.isPrefered)!;
+        const countyName = preferred.county;
+        const districtName = preferred.district;
+
+        // Helper to format an address object
+        const formatAddress = (a: any) => {
+            let parts: string = "";
+            parts = a.streetNumber + " " + a.streetName;
+            
+            if (a.aptNumber !== "")
+                parts = parts + " " + a.aptNumber;
+
+            if (a.addressLine2 != null)
+                parts = parts + " " + a.addressLine2;
+            parts = parts + ", ";
+
+            parts = parts + a.city + ", " + a.state + " " + a.zipCode;
+            if (a.zipPlus != null) {
+                parts = parts + "-" + a.zipPlus;
+                
+            }
+            return parts;
+        };
+
+        // 6) Residential
+        const resAddrObj = addrs.find(a => a.addressType === 'Residential');
+        const residentialAddress = resAddrObj
+            ? formatAddress(resAddrObj)
+            : '';
+
+        // 7) Business
+        const busAddrObj = addrs.find(a => a.addressType === 'Business');
+        const businessAddress = busAddrObj
+            ? formatAddress(busAddrObj)
+            : '---';
+
+        return {
+            name,
+            dateOfBirth,
+            emailAddress,
+            phone1,
+            phone2,
+            residentialAddress,
+            businessAddress,
+            countyName,
+            districtName,
+            dateOfDeath
+        };
+    }
+
+    private mapToAccountDetailInfo(resp: any): NotaryAccountDetailInfo {
+        const acct = resp.accountDetails;
+        return {
+            notaryId: acct.applicantId,
+            status: acct.accountStatus,
+            commissionDate: acct.approvalDate.split('T')[0],
+            expirationDate: acct.expirationDate.split('T')[0],
+            resignationDate: acct.resignationDate ? acct.resignationDate.split('T')[0] : null,
+            hasResigned: acct.hasResigned ? 'Yes' : 'No',
+            remoteEnabled: acct.isRemoteNotary ? 'Yes' : 'No'
+        };
+    }
+
+    public onNotesExpand(): void {
+        if (this.notesHistoryLoaded) {
+            return;
+        }
+
+        this.notesHistoryService.getNotesHistory(this.notaryId).subscribe({
+            next: hist => {
+                if (hist.length === 0) {
+                    // no history show one row of ‘---’
+                    this.notesHistory = [{
+                        noteId: 0,
+                        accountId: this.notaryId,
+                        notes: '---',
+                        createdOn: '',
+                        createdByUser: '---'
+                    }];
+                } else {
+                    this.notesHistory = hist;
+                }
+                this.notesHistoryLoaded = true;
+            },
+            error: err => {
+                console.error('Error fetching notes history:', err);
+                // optionally populate the empty-state row on error as well
+                this.notesHistory = [{
+                    noteId: 0,
+                    accountId: this.notaryId,
+                    notes: '---',
+                    createdOn: '',
+                    createdByUser: '---'
+                }];
+                this.notesHistoryLoaded = true;
+            }
+        });
+    }
+
+    public formatFullName(item: NameHistory): string {
+        const parts = [item.firstName, item.middleName, item.lastName]
+            .filter(n => !!n && n.trim() !== '');
+        return parts.length ? parts.join(' ') : '---';
+    }
+
+    /** Returns 'Official' if isOfficalNameChange, 'Correction' if isNameCorrection, else '---' */
+    public formatChangeType(item: NameHistory): string {
+        if (item.isOfficialNameChange) {
+            return 'Official';
+        }
+        if (item.isNameCorrection) {
+            return 'Correction';
+        }
+        return '---';
+    }
+
+    public onNameExpand(): void {
+        if (this.nameHistoryLoaded) { return; }
+
+        this.nameHistoryService.getNameHistory(this.notaryId).subscribe({
+            next: (data: NameHistory[]) => {
+                if (!data || data.length === 0) {
+                    // placeholder row of all '---'
+                    this.nameHistory = [{
+                        updatedOn: '',
+                        firstName: '---',
+                        middleName: '',
+                        lastName: '',
+                        dateOfBirth: '',
+                        isOfficialNameChange: false,
+                        isNameCorrection: false
+                    }];
+                } else {
+                    this.nameHistory = data;
+                }
+                this.nameHistoryLoaded = true;
+            },
+            error: err => {
+                console.error('Error fetching name history:', err);
+                this.nameHistory = [{
+                    updatedOn: '',
+                    firstName: '---',
+                    middleName: '',
+                    lastName: '',
+                    dateOfBirth: '',
+                    isOfficialNameChange: false,
+                    isNameCorrection: false
+                }];
+                this.nameHistoryLoaded = true;
+            }
+        });
+    }
+
+    public formatFullAddress(item: AddressHistory): string {
+        const parts: string[] = [];
+        if (item.streetNumber) parts.push(item.streetNumber);
+        if (item.streetName) parts.push(item.streetName);
+        if (item.aptNumber) parts.push(item.aptNumber as string);
+        if (item.addressLine2) parts.push(item.addressLine2 as string);
+        if (item.city) parts.push(item.city);
+
+        if (item.zipPlus != null && `${item.zipPlus}`.trim() !== '') {
+            if (item.state) parts.push(item.state);
+            parts.push(`${item.zipCode}-${item.zipPlus}`);
+        } else if (item.state) {
+            parts.push(`${item.state} - ${item.zipCode}`);
+        }
+
+        return parts.join(', ');
+    }
+
+    /** Official vs Correction vs --- */
+    public formatAddressChangeType(item: AddressHistory): string {
+        if (item.isOfficalAddressChange) return 'Official';
+        if (item.isAddressCorrection) return 'Correction';
+        return '';
+    }
+
+    public onAddressExpand(): void {
+        if (this.addressHistoryLoaded) { return; }
+
+        this.addressHistoryService.getAddressHistory(this.notaryId).subscribe({
+            next: (data: AddressHistory[]) => {
+                if (!data || data.length === 0) {
+                    // one row of all '---'
+                    this.addressHistory = [{
+                        updatedOn: '',
+                        streetNumber: '',
+                        streetName: '---',
+                        aptNumber: '',
+                        addressLine2: '',
+                        city: '',
+                        state: '',
+                        zipCode: '',
+                        zipPlus: '',
+                        addressType: '---',
+                        isOfficalAddressChange: false,
+                        isAddressCorrection: false
+                    }];
+                } else {
+                    this.addressHistory = data;
+                }
+                this.addressHistoryLoaded = true;
+            },
+            error: err => {
+                console.error('Error fetching address history:', err);
+                this.addressHistory = [{
+                    updatedOn: '',
+                    streetNumber: '---',
+                    streetName: '---',
+                    aptNumber: '---',
+                    addressLine2: '---',
+                    city: '---',
+                    state: '---',
+                    zipCode: '---',
+                    zipPlus: '',
+                    addressType: '---',
+                    isOfficalAddressChange: false,
+                    isAddressCorrection: false
+                }];
+                this.addressHistoryLoaded = true;
+            }
+        });
+    }
+
+    public formatYesNo(value: boolean | string): string {
+        if (typeof value === 'boolean') {
+            return value ? 'Yes' : 'No';
+        }
+        // treat string 'true'/'false'
+        return value === 'true' ? 'Yes' : 'No';
+    }
+
+    public onComplaintExpand(): void {
+        if (this.complaintHistoryLoaded) { return; }
+
+        this.complaintHistoryService.getComplaintHistory(this.notaryId)
+            .subscribe({
+                next: (data: ComplaintHistory[]) => {
+                    if (!data || data.length === 0) {
+                        this.complaintHistory = [{
+                            complaintId: 0,
+                            dateOfComplaint: '',
+                            complaintDetails: '---',
+                            isRoncomplaint: '',
+                            isResolved: false,
+                            resolutionNotes: '---',
+                            resolutionDate: '---'
+                        }];
+                    } else {
+                        this.complaintHistory = data;
+                    }
+                    this.complaintHistoryLoaded = true;
+                },
+                error: err => {
+                    console.error('Error fetching complaint history:', err);
+                    this.complaintHistory = [{
+                        complaintId: 0,
+                        dateOfComplaint: '',
+                        complaintDetails: '---',
+                        isRoncomplaint: '',
+                        isResolved: false,
+                        resolutionNotes: '---',
+                        resolutionDate: '---'
+                    }];
+                    this.complaintHistoryLoaded = true;
+                }
+            });
+    }
+
+    private formatDate(dateStr?: string | null): string {
+        if (!dateStr) {
+            return '';
+        }
+        // split off any time portion, then MM/DD/YYYY
+        const [datePart] = dateStr.split('T');
+        const [year, month, day] = datePart.split('-');
+        return `${month}/${day}/${year}`;
+    }
+
+    private mapToApplicationDetailInfo(resp: any): NotaryApplicationDetails {
+        const app = resp.applicationDetails || {};
+
+        return {
+            applicationDate: this.formatDate(app.applicationDate),
+            applicationStatus: app.applicationStatus ?? '---',
+            applicationStatusDate: this.formatDate(app.applicationStatusDate),
+            approvalDate: this.formatDate(app.approvalDate),
+            dueDate: this.formatDate(app.dueDate),
+            applicationNextStep: app.applicationNextStep == '' ? '---' : app.applicationNextStep,
+            applicationStatusToolTip: app.applicationStatusToolTip ?? '---'
+        };
+    }
+
+    public onAccountHistoryExpand(): void {
+        if (this.accountHistoryLoaded) {
+            return;
+        }
+
+        this.accountHistoryService.getAccountHistory(this.notaryId).subscribe({
+            next: data => {
+                if (!data || data.length === 0) {
+                    this.accountHistory = [{
+                        accountStatus: '---',
+                        approvalDate: '',
+                        expirationDate: '',
+                        resignationDate: '',
+                        paymentDate: '',
+                        qualifiedDate: '',
+                        hasResigned: '---',
+                        isRemoteEnabled: '---'
+                    }];
+                } else {
+                    this.accountHistory = data.map(item => ({
+                        // string fields: blank/null  ‘---’
+                        accountStatus: item.accountStatus?.trim() ? item.accountStatus : '---',
+                        // all dates  MM/DD/YYYY
+                        approvalDate: this.formatDate(item.approvalDate),
+                        expirationDate: this.formatDate(item.expirationDate),
+                        resignationDate: this.formatDate(item.resignationDate),
+                        paymentDate: this.formatDate(item.paymentDate),
+                        qualifiedDate: this.formatDate(item.qualifiedDate),
+                        // booleans  Yes/No
+                        hasResigned: this.formatYesNo(item.hasResigned),
+                        isRemoteEnabled: this.formatYesNo(item.isRemoteEnabled),
+                    }));
+                }
+                this.accountHistoryLoaded = true;
+                this.loadGrid();
+            },
+            error: err => {
+                console.error('Error fetching account history:', err);
+                // on error, same “all ---” row
+                this.accountHistory = [{
+                    accountStatus: '---',
+                    approvalDate: '',
+                    expirationDate: '',
+                    resignationDate: '',
+                    paymentDate: '',
+                    qualifiedDate: '',
+                    hasResigned: '---',
+                    isRemoteEnabled: '---'
+                }];
+                this.accountHistoryLoaded = true;
+                this.loadGrid();
+            }
+        });
+    }
+
+    private loadGrid(): void {
+        this.gridView = {
+            data: this.accountHistory.slice(this.skip, this.skip + this.pageSize),
+            total: this.accountHistory.length
+        };
+    }
+
+    public pageChange(event: PageChangeEvent): void {
+        this.skip = event.skip;
+        this.loadGrid();
+    }
+
+    public onCertificateHistoryExpand(): void {
+        if (this.certificateHistoryLoaded) {
+            return;
+        }
+
+        this.certificateHistoryService
+            .getAddressHistory(this.notaryId)   // (yes, the method is named getAddressHistory)
+            .subscribe({
+                next: data => {
+                    if (!data || data.length === 0) {
+                        // one all-‘---’ placeholder row
+                        this.certificateHistory = [{
+                            accountId: '---',
+                            cetificateType: '---',
+                            certificateNumber: '---',
+                            validationStartDate: '---',
+                            validationEndDate: '---',
+                            createdOn: '---',
+                            createdByUser: '---'
+                        }];
+                    } else {
+                        this.certificateHistory = data.map(item => ({
+                            accountId: item.accountId,
+                            cetificateType: item.cetificateType?.trim() ? item.cetificateType : '---',
+                            certificateNumber: item.certificateNumber?.trim() ? item.certificateNumber : '---',
+                            validationStartDate: this.formatDate(item.validationStartDate),
+                            validationEndDate: this.formatDate(item.validationEndDate),
+                            createdOn: this.formatDate(item.createdOn),
+                            createdByUser: item.createdByUser?.trim() ? item.createdByUser : '---',
+                        }));
+                    }
+                    this.certificateHistoryLoaded = true;
+                },
+                error: err => {
+                    console.error('Error fetching certificate history:', err);
+                    this.certificateHistoryLoaded = true;
+                    this.certificateHistory = [{
+                        accountId: '---',
+                        cetificateType: '---',
+                        certificateNumber: '---',
+                        validationStartDate: '',
+                        validationEndDate: '',
+                        createdOn: '',
+                        createdByUser: '---'
+                    }];
+                }
+            });
+    }
+
+
+    public returnToSearch(): void {
+        this.router.navigate(['/notary-records']);
+    }
+}
+add-new-record.component.ts file: 
+import { Component, OnInit } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  FormControl,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+  ValidatorFn
+} from '@angular/forms';
+import { RefGetterService } from '../../../services/helper-services/ref-get-service/ref-getter.service';
+import { CityCountyRef, SalutationRef, StateRef } from '../../../models/ref-items-model/ref-items.model';
+import { AddNewRecordRequest, AddressDto, ContactDto, PersonalInfo } from '../../../models/add-new-record-model/add-new-record-request.model';
+import { take } from 'rxjs/operators';
+import { AddNotaryResponse, NewNotaryRecordService } from '../../../services/new-record/new-notary-record.service';
+import { NotarySearchService } from '../../../services/search/notary-search.service';
+import { GeneralSearchRequest, LiveSearchWrapper } from '../../../models/live-search-model/live-search.model';
+import { Router } from '@angular/router';
+
+
+@Component({
+  selector: 'app-add-new-record',
+  templateUrl: './add-new-record.component.html',
+  styleUrls: ['./add-new-record.component.css']
+})
+export class AddNewRecordComponent implements OnInit {
+  public form!: FormGroup;
+  public addressForm!: FormGroup;
+  public submitted = false;
+  public submittedAddress = false;
+  public stateOptions: string[] = [];
+  //public cityOptions: string[] = [];
+  public cityOptions: CityCountyRef[] = [];
+  //public countyValue: string = '';
+  public salutationOptions: string[] = [];
+
+  // Only letters, spaces, hyphens or slashes
+  private namePattern = /^[A-Za-z\s\-\/]+$/;
+
+  private suffixPattern = /^[A-Za-z0-9\s\-\/\.]+$/;;
+
+  //to call once and cache
+  private allCityCountyData: CityCountyRef[] = [];
+
+  public salutations: SalutationRef[] = [];
+  public stateRefs: StateRef[] = [];
+
+  public existingNotaries: any;
+  public showExistingRecords: boolean = false;
+  private pendingRequest: AddNewRecordRequest | null = null;
+  public isSubmitting = false;
+
+  showAddressSection: boolean = false;
+  viewHeading: string = 'Personal Information'
+
+  constructor(private fb: FormBuilder,
+              private refGetter: RefGetterService,
+              private newNotaryService: NewNotaryRecordService,
+              private router: Router,
+              private notarySearch: NotarySearchService) { }
 
   ngOnInit(): void {
-    const nav = this.router.getCurrentNavigation();
-    const fromState = nav?.extras?.state?.['buildUpdateComplaintObject'] as UpdateComplaint | undefined;
-    if (fromState) {
-      this.updateComplaintData = fromState;
-      // Keep the latest for refreshes
-      sessionStorage.setItem('updateComplaint', JSON.stringify(fromState));
+    this.buildPersonalForm();
+    this.buildAddressForm();
+    this.getSalutationsForDropDown();
+    this.getStatesForDropDown();
+    this.cacheCityCountyData();
+
+    // watch the two state controls:
+    const resState = this.addressForm.get('residenceAddress.state')!;
+    const busState = this.addressForm.get('businessAddress.state')!;
+
+    resState.valueChanges.subscribe(() => {
+      const resAddressGroup = this.addressForm.get('residenceAddress');
+      resAddressGroup?.get('cityTown')!.reset();
+      this.updateCityOptions();
+    });
+
+    busState.valueChanges.subscribe(() => {
+      const busAddressGroup = this.addressForm.get('businessAddress');
+      busAddressGroup?.get('cityTown')!.reset();
+      this.updateCityOptions();
+    });
+  }
+
+  private getStatesForDropDown(): void {
+    this.refGetter.getStates().subscribe(
+      (all: StateRef[]) => {
+        this.stateRefs = all;
+        this.stateOptions = all.map(s => s.value);
+      },
+      err => console.error('Failed to load states', err)
+    );
+  }
+
+  private getSalutationsForDropDown(): void {
+    this.refGetter.getSalutations().subscribe(
+      (all: SalutationRef[]) => {
+        this.salutations = all;
+        this.salutationOptions = all.map(x => x.value);
+      },
+      err => console.error('Failed to load salutations', err)
+    );
+  }
+
+  private cacheCityCountyData(): void {
+    this.refGetter.getCityCounty().pipe(take(1)).subscribe(
+      (all: CityCountyRef[]) => {
+        this.allCityCountyData = all;
+      },
+      err => console.error('Failed to load city/county', err)
+    );
+  }
+
+  private updateCityOptions() {
+    const resStateValue = this.addressForm.get('residenceAddress.state')!.value;
+    const busStateValue = this.addressForm.get('businessAddress.state')!.value;
+
+    if (resStateValue === 'Massachusetts' || busStateValue === 'Massachusetts') {
+      this.cityOptions = this.allCityCountyData;
     } else {
-      // Fallback for reloads / direct hits
-      const cached = sessionStorage.getItem('updateComplaint');
-      if (cached) {
-        try {
-          this.updateComplaintData = JSON.parse(cached) as UpdateComplaint;
-        } catch {
-          console.warn('update-complaint: failed to parse cached updateComplaint');
+      this.cityOptions = []; // Clear the list only if NEITHER is Massachusetts
+    }
+  }
+
+  public get preferred(): 'Residence' | 'Business' {
+    return this.addressForm.get('preferredAddress')!.value;
+  }
+
+  private buildPersonalForm() {
+    this.form = this.fb.group({
+      salutation: ['', Validators.required],
+      firstName: ['', [Validators.required, Validators.pattern(this.namePattern)]],
+      middleName: ['', Validators.pattern(this.namePattern)],
+      lastName: ['', [Validators.required, Validators.pattern(this.namePattern)]],
+      suffix: ['', Validators.pattern(this.suffixPattern)],
+      dateOfBirth: [null, Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      primaryPhone1: ['', [Validators.required, Validators.pattern(/^\d{3}$/)]],
+      primaryPhone2: ['', [Validators.required, Validators.pattern(/^\d{3}$/)]],
+      primaryPhone3: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
+      secondaryPhone1: ['', Validators.pattern(/^\d{3}$/)],
+      secondaryPhone2: ['', Validators.pattern(/^\d{3}$/)],
+      secondaryPhone3: ['', Validators.pattern(/^\d{4}$/)],
+    });
+  }
+
+  private buildAddressForm() {
+    this.addressForm = this.fb.group({
+      preferredAddress: ['Residence', Validators.required],
+
+      // Residence sub‐group
+      residenceAddress: this.fb.group({
+        street1: [''],  // required: at least one of street1/2/3
+        street2: [''],
+        street3: [''],
+        street4: [''],
+        state: [''],
+        isPoBox: [false],
+        zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+        zipPlus: ['', Validators.pattern(/^$|^\d{2,4}$/)],
+        cityTown: ['']
+      }, { validators: this.streetValidator() }),
+
+      // Business sub‐group
+      businessAddress: this.fb.group({
+        street1: [''],
+        street2: [''],
+        street3: [''],
+        street4: [''],
+        state: [''],
+        isPoBox: [false],
+        zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+        zipPlus: ['', Validators.pattern(/^$|^\d{2,4}$/)],
+        cityTown: ['']
+      }, { validators: this.streetValidator() })
+    });
+
+    const busGroup = this.addressForm.get('businessAddress') as FormGroup;
+    busGroup.get('isPoBox')!
+      .valueChanges
+      .subscribe(isPo => this.onBusinessPoBoxToggle(isPo));
+
+    // whenever the radio changes, re‐apply validators
+    this.addressForm.get('preferredAddress')!
+      .valueChanges
+      .subscribe(pref => this.updateAddressValidators(pref));
+    // initialize validators for Residence default
+    this.updateAddressValidators('Residence');
+  }
+
+  get busPoBox() {
+    return this.addressForm.get('businessAddress.isPoBox')!.value;
+  }
+
+  private onBusinessPoBoxToggle(isPoBox: boolean) {
+    const bus = this.addressForm.get('businessAddress') as FormGroup;
+    const s1 = bus.get('street1')!;
+    const s2 = bus.get('street2')!;
+    const s3 = bus.get('street3')!;
+
+    if (isPoBox) {
+      s1.reset(); s2.reset();
+      s1.disable(); s2.disable();
+      s3.setValidators([Validators.required]);
+    } else {
+      s1.enable(); s2.enable();
+      s3.clearValidators();
+    }
+    [s1, s2, s3].forEach(c => c.updateValueAndValidity({ onlySelf: true }));
+    bus.clearValidators();
+    if (isPoBox) {
+      bus.setValidators(this.optionalGroupValidator('businessAddress'));
+    } else {
+      bus.setValidators(this.streetValidator());
+    }
+    bus.updateValueAndValidity({ onlySelf: true });
+  }
+
+  private streetValidator(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const g = group as FormGroup;
+      const s1 = g.get('street1')!.value;
+      const s2 = g.get('street2')!.value;
+      return (!s1 && !s2) ? { noStreet: true } : null;
+    };
+  }
+
+  private optionalGroupValidator(prefix: 'residenceAddress' | 'businessAddress'): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const g = group as FormGroup;
+      const vals = Object.values(g.value).some(v => !!v);
+      if (!vals) {
+        return null; // completely empty is OK
+      }
+      // now enforce: streetValidator + required on state/zipCode/cityTown
+      const streetErr = this.streetValidator()(g);
+      if (streetErr) {
+        return { noStreet: true };
+      }
+      for (const field of ['state', 'zipCode', 'cityTown']) {
+        if (!g.get(field)!.value) {
+          return { [`${field}Req`]: true };
         }
       }
+      return null;
+    };
+  }
+
+  private updateAddressValidators(pref: 'Residence' | 'Business') {
+    const resGroup = this.addressForm.get('residenceAddress') as FormGroup;
+    const busGroup = this.addressForm.get('businessAddress') as FormGroup;
+
+    for (const grp of [resGroup, busGroup]) {
+      // clear group‐level validators
+      grp.clearValidators();
+      Object.values(grp.controls).forEach(ctrl => {
+        ctrl.clearValidators();
+        // re‐run validation so old errors go away
+        ctrl.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+      });
     }
-    console.log('update-complaint: received data', this.updateComplaintData);
+
+    if (pref === 'Residence') {
+      resGroup.setValidators(this.streetValidator());
+      resGroup.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+
+      ['state', 'zipCode', 'cityTown'].forEach(name => {
+        const c = resGroup.get(name)!;
+        if (name === 'zipCode') {
+          // required AND exactly 5 digits
+          c.setValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
+        } else if(name === 'cityTown') { 
+            c.setValidators([Validators.required, Validators.pattern(/^[A-Za-z0-9 '.,\/;:\-#&]+$/)]);
+        } else {
+          c.setValidators(Validators.required);
+        }
+        c.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+      });
+
+      // re-apply pattern to zipPlus (optional but must be 2–4 digits if entered)
+      const zp = resGroup.get('zipPlus')!;
+      zp.setValidators(Validators.pattern(/^$|^\d{2,4}$/));
+      zp.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+
+      // 2b) Business is fully optional (only validate if user types something)
+      busGroup.setValidators(this.optionalGroupValidator('businessAddress'));
+      busGroup.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    }
+    else {
+      // 3a) Business is required:
+      busGroup.setValidators(this.streetValidator());
+      busGroup.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+
+      ['state', 'zipCode', 'cityTown'].forEach(name => {
+        const c = busGroup.get(name)!;
+        if (name === 'zipCode') {
+          c.setValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
+        } else if(name === 'cityTown') { 
+            c.setValidators([Validators.required, Validators.pattern(/^[A-Za-z0-9 '.,\/;:\-#&]+$/)]);
+        } else {
+          c.setValidators(Validators.required);
+        }
+        c.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+      });
+
+      const zpBus = busGroup.get('zipPlus')!;
+      zpBus.setValidators(Validators.pattern(/^$|^\d{2,4}$/));
+      zpBus.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+
+      // 3b) Residence is optional
+      resGroup.setValidators(this.optionalGroupValidator('residenceAddress'));
+      resGroup.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    }
+  }
+
+  public onSubmit(): void {
+    this.submitted = true;
+    this.form.markAllAsTouched();
+    if (this.form.invalid) {return;}
+    this.triggerAddressSection();
+  }
+
+  public onAddressSubmit(): void {
+    this.submittedAddress = true;
+    this.addressForm.markAllAsTouched();
+    if (this.addressForm.invalid) { return; }
+
+    // helper: turn '' or all-whitespace into null
+    const nullOr = (s: string | undefined | null): string | null =>
+      s?.trim() ? s.trim() : null;
+
+    const pv = this.form.value;         // personal form values
+    const av = this.addressForm.value;  // address form values
+    const cityTown = av.preferredAddress === 'Business'
+                   ? av.businessAddress.cityTown
+                   : av.residenceAddress.cityTown;
+
+    // 1) build ContactDto[]
+    const primaryPhone = pv.primaryPhone1 + pv.primaryPhone2 + pv.primaryPhone3;
+    const secondaryPhone = (pv.secondaryPhone1 && pv.secondaryPhone2 && pv.secondaryPhone3)
+      ? pv.secondaryPhone1 + pv.secondaryPhone2 + pv.secondaryPhone3
+      : null;
+    const contacts: ContactDto[] = [
+      { contactTypeId: 1, contactValue: primaryPhone, isPrimary: true },
+      ...(secondaryPhone
+        ? [{ contactTypeId: 1, contactValue: secondaryPhone, isPrimary: false }]
+        : []),
+      { contactTypeId: 2, contactValue: pv.email, isPrimary: false }
+    ];
+
+    // 2) build AddressDto[]
+    const makeAddress = (grp: any, typeId: number, preferred: boolean): AddressDto => {
+      const isPo = grp.isPoBox === true;
+      const stateName = grp.state;
+      const stateRef = this.stateRefs.find(s => s.value === stateName);
+      if (!stateRef) {
+        console.error('Unknow Statet')
+      }
+      const stateId = stateRef?.stateId ?? 0;
+      return {
+        addressTypeId: typeId,
+        isPrefered: preferred,
+        isPoBox: isPo,
+        streetNumber: isPo ? null : nullOr(grp.street1),
+        streetName: isPo ? 'PO Box' : nullOr(grp.street2),
+        aptNumber: nullOr(grp.street3),
+        addressLine2: nullOr(grp.street4),
+        zipCode: grp.zipCode,
+        zipPlus: nullOr(grp.zipPlus),
+        city: grp.cityTown,
+        stateId: stateId
+      };
+    };
+
+    // always include the preferred “Residence” address
+    const addresses: AddressDto[] = [
+      makeAddress(
+        av.residenceAddress,
+        1,
+        av.preferredAddress === 'Residence'
+      )
+    ];
+
+    // check if the user actually entered any BUSINESS fields (ignore the isPoBox boolean)
+    const { isPoBox, ...restBusiness } = av.businessAddress;
+    const hasBusinessData = Object
+      .values(restBusiness)
+      .some(val =>
+        typeof val === 'string' &&
+        val.trim().length > 0
+      );
+
+    if (hasBusinessData) {
+      addresses.push(
+        makeAddress(
+          av.businessAddress,
+          2,
+          av.preferredAddress === 'Business'
+        )
+      );
+    }
+
+    // 3) map salutation ID
+    const salId = this.salutations
+      .find(s => s.value === pv.salutation)!
+      .salutationTypeId;
+
+    // 4) assemble PersonalInfo payload
+    const personalInfo: PersonalInfo = {
+      salutationTypeId: salId,
+      firstName: pv.firstName,
+      middleName: nullOr(pv.middleName),
+      lastName: pv.lastName,
+      suffix: nullOr(pv.suffix),
+      dateOfBirth: this.formatDate(pv.dateOfBirth),
+      contactsDto: contacts,
+      addressDto: addresses
+    };
+
+    // 5) final request
+    const request: AddNewRecordRequest = { personalInfoDto: personalInfo };
+    this.pendingRequest = request;
+    console.log(request);
+    const gs: GeneralSearchRequest = {
+      applicantId: null,
+      firstName: this.form.value.firstName,
+      lastName: this.form.value.lastName,
+      cityTown: cityTown || '',
+      approvalDate: null,
+      dateOfBirth: this.formatDate(this.form.value.dateOfBirth),
+      remoteNotaryOnly: false
+    };
+    const searchWrapper: LiveSearchWrapper = { generalSearch: gs };
+
+    this.notarySearch.searchNotaries(searchWrapper)
+      .subscribe(
+        res => {
+          const msg = res.message || '';
+
+          if (msg.includes('Below are the 0 record(s) that match your search criteria')) {
+            // 1) no existing match: go ahead and add
+            this.newNotaryService.addNewNotaryRecord(request)
+              .subscribe(
+                addRes => {
+                  const rawCode: string = addRes.code || '';
+                  const parts = rawCode.split(':');
+                  if (parts.length > 1) {
+                    const idStr = parts[1].trim();
+                    const applicantId = Number(idStr);
+                    if (!isNaN(applicantId)) {
+                      // 3) navigate with the numeric ID
+                      this.router.navigate(['/notary-profile', applicantId]);
+                    } else {
+                      console.error('Unable to parse applicantId from code:', rawCode);
+                      alert('Unexpected response format; cannot navigate to profile.');
+                      this.router.navigate(['/']);
+                    }
+                  } else {
+                    console.error('Unexpected code format:', rawCode);
+                    alert('Unexpected response format; cannot navigate to profile.');
+                    this.router.navigate(['/']);
+                  }
+                },
+                addErr => {
+                  console.error('Failed to add notary record', addErr);
+                  alert('There was an issue trying to create the new record.');
+                  this.router.navigate(['/']);
+                }
+              );
+          } else {
+            // found one or more matches—log them and skip creation
+            this.existingNotaries = res.notarySearchResultsInternalDto;
+            console.log(this.existingNotaries);
+            this.showExistingRecords = true;
+          }
+        },
+        searchErr => {
+          console.error('Notary search failed', searchErr);
+          alert('There was an issue searching for existing records.');
+        }
+      );
+  }
+
+  triggerAddressSection(): void {
+    this.showAddressSection = true;
+    this.viewHeading = 'Address Information';
+  }
+
+  private formatDate(input: Date | string | null): string {
+    if (!input) {
+      return '';
+    }
+    // if it’s already a Date use it, otherwise coerce
+    const d = input instanceof Date ? input : new Date(input);
+    if (isNaN(d.getTime())) {
+      return '';
+    }
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  public onCancel(): void {
+    // e.g. navigate back or to another route
+    window.history.back();
+  }
+
+  public onPhoneInput(
+    curr: HTMLInputElement,
+    next?: HTMLInputElement
+  ): void {
+    if (next && curr.value.length === curr.maxLength) {
+      next.focus();
+    }
+  }
+
+  public onPhoneKeydown(
+    evt: KeyboardEvent,
+    curr: HTMLInputElement,
+    prev: HTMLInputElement | null
+  ): void {
+    if (evt.key === 'Backspace' && curr.value.length === 0 && prev) {
+      evt.preventDefault();
+      prev.focus();
+      // place caret at end
+      const len = prev.value.length;
+      prev.setSelectionRange(len, len);
+    }
+  }
+
+  public onPhonePaste(
+    evt: ClipboardEvent,
+    inputs: HTMLInputElement[]
+  ): void {
+    evt.preventDefault();
+    const text = evt.clipboardData
+      ?.getData('text/plain')
+      .replace(/\D/g, '') || '';
+    let rest = text;
+
+    inputs.forEach((inp) => {
+      const ml = inp.maxLength;
+      const chunk = rest.slice(0, ml);
+      rest = rest.slice(ml);
+
+      inp.value = chunk;
+      // update the FormControl too
+      const name = inp.getAttribute('formControlName');
+      if (name) {
+        this.form.get(name)!.setValue(chunk);
+      }
+    });
+
+    // focus the first not-full box, or the last one if all are full
+    const next = inputs.find(i => i.value.length < i.maxLength) || inputs[inputs.length - 1];
+    next.focus();
+    next.setSelectionRange(next.value.length, next.value.length);
+  }
+
+  public allowOnlyNumbers(event: KeyboardEvent): void {
+    // Allow navigation keys (backspace, tab, arrows):
+    if (event.key.length === 1 && !/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  public onZipPaste(event: ClipboardEvent, controlPath: string): void {
+    event.preventDefault();
+    const text = event.clipboardData?.getData('text/plain') || '';
+    const digits = text.replace(/\D/g, '');
+    const ctrl = this.addressForm.get(controlPath);
+    if (ctrl) {
+      ctrl.setValue(digits);
+    }
+  }
+
+  public onEdit(): void {
+    this.showAddressSection = false;
+  }
+
+  public onDuplicateEdit(): void {
+    this.showExistingRecords = false;
+    this.showAddressSection = false;
+  }
+
+  public onDuplicateIgnore(): void {
+    if (!this.pendingRequest) { return; }
+
+    this.isSubmitting = true;
+    this.newNotaryService.addNewNotaryRecord(this.pendingRequest)
+      .subscribe(
+        addRes => this.handleAddSuccess(addRes),
+        addErr => {
+          console.error('Failed to add notary record', addErr);
+          this.isSubmitting = false;
+          alert('There was an issue trying to create the new record.');
+          this.router.navigate(['/']);
+        }
+      );
+  }
+  private createAndNavigate(request: AddNewRecordRequest) {
+    this.isSubmitting = true;
+    this.newNotaryService.addNewNotaryRecord(request)
+      .subscribe(
+        addRes => this.handleAddSuccess(addRes),
+        addErr => {
+          console.error('Failed to add notary record', addErr);
+          this.isSubmitting = false;
+          alert('There was an issue trying to create the new record.');
+          this.router.navigate(['/']);
+        }
+      );
+  }
+
+  /** parse `addRes.code`, pull the numeric ID, navigate  */
+  private handleAddSuccess(addRes: any) {
+    const rawCode = addRes.code || '';
+    const parts = rawCode.split(':');
+    if (parts.length > 1) {
+      const id = Number(parts[1].trim());
+      if (!isNaN(id)) {
+        this.router.navigate(['/notary-profile', id]);
+        return;
+      }
+    }
+    // fallback on any unexpected format
+    console.error('Unexpected code format:', rawCode);
+    alert('Unexpected response format; cannot navigate to profile.');
+    this.router.navigate(['/']);
+  }
+
+  public testDupeMatchDialog(): void {
+    this.showExistingRecords = true;
+    this.existingNotaries = [
+      {
+        "applicantId": 1460,
+        "approvalDate": "2004-11-10",
+        "cityTown": "Attleboro",
+        "county": "Bristol",
+        "createdDate": "2004-10-28",
+        "dateOfBirth": "1974-07-31",
+        "firstName": "Jennifer",
+        "isRemoteNotary": false,
+        "lastName": "Savini",
+        "middleName": "Lee",
+        "newRenewal": "Renew"
+      }
+    ];
+  }
+}
+The notary-records flow using which it is working currently notary-records.component.html:
+<div class="page-wrapper">
+  <div class="instructions-and-search-wrapper">
+    <h2 class="notary-title">Find Notary Record</h2>
+    <!-- Simple Focussed Search -->
+    <kendo-expansionpanel title="Notary search" [expanded]="isNotaryExpanded" (expand)="handleNotaryExpand()" (collapse)="handleNotaryCollapse()">
+      <form class="notary-form">
+        <!-- Row 1: First name, Last name and Remote Notaries Only -->
+        <div class="form-row">
+          <kendo-formfield>
+            <label for="firstName">First Name</label>
+            <kendo-textbox id="firstName"
+                           [(ngModel)]="firstName"
+                           name="firstName"
+                           placeholder="John"
+                           class="custom-input">
+            </kendo-textbox>
+          </kendo-formfield>
+
+          <kendo-formfield>
+            <label for="lastName">Last Name</label>
+            <kendo-textbox id="lastName"
+                           [(ngModel)]="lastName"
+                           name="lastName"
+                           placeholder="Appleseed"
+                           class="custom-input">
+            </kendo-textbox>
+          </kendo-formfield>
+
+          <kendo-formfield>
+            <label for="cityTown">City / Town</label>
+            <kendo-textbox id="cityTown"
+                           [(ngModel)]="cityTown"
+                           name="cityTown"
+                           placeholder="Amherst"
+                           class="custom-input">
+            </kendo-textbox>
+          </kendo-formfield>
+
+        </div>
+
+        <!-- Row 2: City/Town and Approval Date -->
+        <div class="form-row">
+          <div class="approval-range-group">
+            <kendo-formfield>
+              <label for="fromApprovalDate">Approval Date</label>
+              <kendo-datepicker id="fromApprovalDate"
+                                [(ngModel)]="fromApprovalDate"
+                                name="fromApprovalDate"
+                                class="custom-input"
+                                placeholder="MM/DD/YYYY">
+              </kendo-datepicker>
+            </kendo-formfield>
+            <kendo-formfield>
+              <label for="dateOfBirth">Date of birth</label>
+              <kendo-datepicker id="dateOfBirth"
+                                [(ngModel)]="dateOfBirth"
+                                name="dateOfBirth"
+                                class="custom-input"
+                                placeholder="MM/DD/YYYY">
+              </kendo-datepicker>
+            </kendo-formfield>
+          </div>
+        </div>
+
+        <!-- Row 3: Notary ID -->
+        <div class="form-row">
+          <kendo-formfield>
+            <label for="notaryId">Notary ID #</label>
+            <kendo-textbox id="notaryId"
+                           [(ngModel)]="notaryId"
+                           name="notaryId"
+                           placeholder="123456"
+                           class="custom-input"
+                           
+                           (keypress)="allowOnlyNumbers($event)"
+                           (input)="onNotaryIdInput($event)"
+                           (blur)="validateNotaryId()">
+            </kendo-textbox>
+            <div *ngIf="notaryIdError" class="error-message">{{ notaryIdError }}</div>
+          </kendo-formfield>
+          <kendo-formfield>
+            <div class="notary-category-group">
+              <label for="remoteNotariesOnly" class="remoteNotariesLabel">Filter Remote Notaries Only</label>
+              <kendo-checkbox id="remoteNotariesOnly"
+                              [(ngModel)]="remoteNotariesOnly"
+                              name="remoteNotariesOnly">
+              </kendo-checkbox>
+            </div>
+          </kendo-formfield>
+        </div>
+      </form>
+    </kendo-expansionpanel>
+    <!-- Advanced Date Range Search -->
+    <kendo-expansionpanel title="Date range search" [expanded]="isDateRangeExpanded" (expand)="handleDateRangeExpand()" (collapse)="handleDateRangeCollapse()">
+      <div class="approval-range-group date-range-special">
+        <div class="date-range-and-dash">
+          <kendo-formfield>
+            <label for="fromApprovalDate">Approval Date From</label>
+            <kendo-datepicker id="fromApprovalDate"
+                              [(ngModel)]="fromApprovalDate"
+                              name="fromApprovalDate"
+                              class="custom-input"
+                              placeholder="MM/DD/YYYY">
+            </kendo-datepicker>
+          </kendo-formfield>
+          <span class="dash">-</span>
+          <kendo-formfield>
+            <label for="fromApprovalDate">Approval Date To</label>
+            <kendo-datepicker id="toApprovalDate"
+                              [(ngModel)]="toApprovalDate"
+                              [disabled]="!fromApprovalDate"
+                              name="toApprovalDate"
+                              class="custom-input"
+                              placeholder="MM/DD/YYYY">
+            </kendo-datepicker>
+          </kendo-formfield>
+        </div>
+        <div class="type-options">
+          <kendo-formfield>
+            <label>New</label>
+            <kendo-radiobutton name="recordType"
+                               [(ngModel)]="recordType"
+                               id="type-new"
+                               value="1">
+            </kendo-radiobutton>
+          </kendo-formfield>
+
+          <kendo-formfield>
+            <label>Renewal</label>
+            <kendo-radiobutton name="recordType"
+                               [(ngModel)]="recordType"
+                               id="type-renewed"
+                               value="2">
+            </kendo-radiobutton>
+          </kendo-formfield>
+
+          <kendo-formfield>
+            <label>Both</label>
+            <kendo-radiobutton name="recordType"
+                               [(ngModel)]="recordType"
+                               id="type-both"
+                               value="3">
+            </kendo-radiobutton>
+          </kendo-formfield>
+        </div>
+      </div>
+    </kendo-expansionpanel>
+    <div class="form-row button-row">
+      <button kendoButton
+              (click)="onSearch()"
+              [primary]="true"
+              class="search-button"
+              [disabled]="isFormEmpty()">
+        Search
+      </button>
+      <button kendoButton (click)="onClear()" class="custom-button-alt">
+        Clear
+      </button>
+      <button kendoButton (click)="onReset()" class="custom-button-alt">
+        Reset
+      </button>
+      <button *ngIf="toggleSearchGrid" kendoButton routerLink="/notary-records/add-new-record" class="custom-button-alt">
+        Add New Record
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Results Grid -->
+  <div *ngIf="toggleSearchGrid" class="search-results-grid">
+    <div class="matched-records-text">
+      {{displayMessage}}
+    </div>
+
+    <kendo-grid [kendoGridBinding]="searchResults"
+                [pageSize]="pageSize"
+                [style.height]="enableSimple ? null : (searchResults.length > 0 ? '30.69rem' : null)"
+                [skip]="skip"
+                [pageable]="enableSimple"
+                [sortable]="{ allowUnsort: true, mode: 'multiple' }"
+                [reorderable]="true"
+                (pageChange)="pageChange($event)"
+                [scrollable]="enableSimple ? 'none' : 'scrollable'"
+                class="custom-grid">
+      <!-- Columns -->
+      <kendo-grid-column field="applicantId" title="Notary ID">
+        <ng-template kendoGridCellTemplate let-dataItem>
+          <a [routerLink]="['/notary-profile', dataItem.applicantId]" class="notary-id-link">
+            {{ dataItem.applicantId }}
+          </a>
+        </ng-template>
+      </kendo-grid-column>
+      <kendo-grid-column field="newRenewal" title="New/Renew"></kendo-grid-column>
+      <kendo-grid-column field="lastName" title="Last Name"></kendo-grid-column>
+      <kendo-grid-column field="firstName" title="First Name" [sortable]="true"></kendo-grid-column>
+      <kendo-grid-column field="middleName" title="Middle Name"></kendo-grid-column>
+      <kendo-grid-column field="cityTown" title="City / Town"></kendo-grid-column>
+      <kendo-grid-column field="dateOfBirth" title="Date of Birth">
+        <ng-template kendoGridCellTemplate let-dataItem>
+          {{ dataItem.dateOfBirth | date:'MM/dd/yyyy' }}
+        </ng-template>
+      </kendo-grid-column>
+      <kendo-grid-column field="county" title="County"></kendo-grid-column>
+      <kendo-grid-column field="approvalDate" title="Approval Date">
+        <ng-template kendoGridCellTemplate let-dataItem>
+          {{ dataItem.approvalDate | date:'MM/dd/yyyy' }}
+        </ng-template>
+      </kendo-grid-column>
+      <kendo-grid-column field="createdDate" title="Created Date">
+        <ng-template kendoGridCellTemplate let-dataItem>
+          {{ dataItem.createdDate  | date:'MM/dd/yyyy' }}
+        </ng-template>
+      </kendo-grid-column>
+      <!--No Created Date Available-->
+      <kendo-grid-column field="isRemoteNotary" title="RON Status">
+        <ng-template kendoGridCellTemplate let-dataItem>
+          {{ dataItem.isRemoteNotary ? 'Yes' : 'No' }}
+        </ng-template>
+      </kendo-grid-column>
+    </kendo-grid>
+  </div>
+</div>
+notary-records.component.ts file this flow also workss but sharing just in case:
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { NotarySearchService } from '../../../services/search/notary-search.service';
+import { PageChangeEvent } from '@progress/kendo-angular-grid';
+import { Router } from '@angular/router';
+import { NotarySearchDataStateService } from '../../../services/helper-services/notary-search-data-state/notary-search-data-state.service';
+import { LiveSearchWrapper } from '../../../models/live-search-model/live-search.model';
+
+@Component({
+  selector: 'app-notary-records',
+  templateUrl: './notary-records.component.html',
+  styleUrls: ['./notary-records.component.css']
+})
+export class NotaryRecordsComponent implements OnInit {
+  notaryId: string = '';
+  cityTown: string = '';
+  remoteNotariesOnly: boolean = false;
+  firstName: string = '';
+  lastName: string = '';
+  // For Approval Date Range – we are using two date pickers.
+  fromApprovalDate: Date | null = null;
+  toApprovalDate: Date | null = null;
+
+  // Validation error
+  public notaryIdError: string = '';
+
+  // Properties for storing the response data
+  displayMessage: string = '';
+  searchResults: any[] = [];
+
+  // Grid properties
+  toggleSearchGrid: boolean = false;
+  public pageSize = 10;
+  public skip = 0;
+
+  //Accordion enabling
+  enableSimple: boolean = true;
+  enableDateRange: boolean = false;
+
+  //Record types
+  public recordType: "1"|"2"|"3" = "3";
+
+  //expansion panel
+  expandedPanel: boolean = true;
+  public isNotaryExpanded = true;
+  public isDateRangeExpanded = false;
+
+  //min and max dates for datepickers
+  public max!: Date;
+  public min!: Date;
+
+  //to check if simple fields were cleared
+  public hasClearedSimpleFields = false;
+
+  public dateOfBirth: Date | null = null;
+
+  constructor(private search: NotarySearchService, private router: Router, private searchStateData: NotarySearchDataStateService) {
+    const today = new Date();
+
+    this.max = new Date(
+      today.getFullYear() - 18,
+      today.getMonth(),
+      today.getDate()
+    );
+    this.min = new Date(
+      today.getFullYear() - 80,
+      today.getMonth(),
+      today.getDate()
+    );
+  }
+
+  ngOnInit(): void {
+    this.checkForRehydration();
+  }
+
+  private checkForRehydration(): void {
+    const crit = this.searchStateData.lastCriteria;
+    if (!crit) { return; }
+
+    //getting back the panels to prev state
+    if (crit.generalSearch) {
+      const g = crit.generalSearch;
+      this.notaryId = g.applicantId != null ? g.applicantId.toString() : '';
+      this.firstName = g.firstName;
+      this.lastName = g.lastName;
+      this.cityTown = g.cityTown;
+      this.remoteNotariesOnly = g.remoteNotaryOnly;
+
+      this.fromApprovalDate = g.approvalDate ? this.parseLocalDate(g.approvalDate) : null;
+
+      this.enableSimple = true;
+      this.enableDateRange = false;
+      this.isNotaryExpanded = true;
+      this.isDateRangeExpanded = false;
+    }
+    else if (crit.dateRangeSearch) {
+      const d = crit.dateRangeSearch;
+      this.fromApprovalDate = d.approvalDateFrom ? this.parseLocalDate(d.approvalDateFrom) : null;
+      this.toApprovalDate = d.approvalDateTo ? this.parseLocalDate(d.approvalDateTo) : null;
+      //this.recordType = d.searchType as "1"|"2"|"3";
+
+      this.enableSimple = false;
+      this.enableDateRange = true;
+      this.isNotaryExpanded = false;
+      this.isDateRangeExpanded = true;
+    }
+
+    //make a fresh new call
+    this.fetchResults(crit);
+  }
+
+  /** to hit the api */
+  private fetchResults(wrapper: LiveSearchWrapper): void {
+    //general or daterange
+    if (wrapper.generalSearch) {
+      this.search.searchNotaries(wrapper).subscribe({
+        next: (response) => {
+          this.applyResults(response);
+        },
+        error: (err) => console.error('Re-fetch general search failed', err)
+      });
+    }
+    else if (wrapper.dateRangeSearch) {
+      this.search.searchNotariesWithDateRange(wrapper).subscribe({
+        next: (response) => {
+          this.applyResults(response);
+        },
+        error: (err) => console.error('Re-fetch date-range failed', err)
+      });
+    }
+  }
+
+  /** Shared logic for applying and persisting results */
+  private applyResults(response: { message: string; notarySearchResultsInternalDto: any[] }): void {
+    this.searchResults = response.notarySearchResultsInternalDto.map(item => ({
+      ...item,
+      approvalDate: item.approvalDate ? this.parseLocalDate(item.approvalDate) : null,
+      createdDate: item.createdDate ? this.parseLocalDate(item.createdDate) : null
+    }));
+    this.skip = 0;
+    this.displayMessage = response.message;
+    this.toggleSearchGrid = true;
+    this.pageSize = this.displayMessage.includes('between') ? this.searchResults.length : 10;
+    //this.pageSize = this.searchResults.length;
+
+    this.searchStateData.lastResults = this.searchResults.slice();
+  }
+
+  onSearch(): void {
+    if (this.enableSimple) {
+      const wrapper = {
+        generalSearch: {
+          applicantId: this.notaryId.trim()
+            ? parseInt(this.notaryId.trim(), 10)
+            : null,
+          firstName: this.firstName.trim(),
+          lastName: this.lastName.trim(),
+          cityTown: this.cityTown.trim(),
+          approvalDate: this.fromApprovalDate
+            ? this.formatDate(this.fromApprovalDate)
+            : null,
+          dateOfBirth: this.dateOfBirth
+            ? this.formatDate(this.dateOfBirth)
+            : null,
+          remoteNotaryOnly: this.remoteNotariesOnly
+        }
+      };
+
+      this.search.searchNotaries(wrapper).subscribe({
+        next: (response) => {
+          this.displayMessage = response.message;
+          this.searchResults = response.notarySearchResultsInternalDto;
+          this.toggleSearchGrid = true;
+          this.skip = 0;
+          //to persist the data
+          this.searchStateData.lastCriteria = wrapper;
+          this.searchStateData.lastResults = response.notarySearchResultsInternalDto?.slice();
+        },
+        error: (error) => console.error('Error:', error)
+      });
+      return;
+    }
+    if (this.enableDateRange) {
+      console.log(this.enableDateRange);
+      if (this.fromApprovalDate && !this.toApprovalDate) {
+        this.toApprovalDate = new Date();
+      }
+
+      const wrapper = {
+        dateRangeSearch: {
+          approvalDateFrom: this.fromApprovalDate
+            ? this.formatDate(this.fromApprovalDate)
+            : null,
+          approvalDateTo: this.toApprovalDate
+            ? this.formatDate(this.toApprovalDate)
+            : null,
+          searchType: Number(this.recordType)
+        }
+      }
+
+      this.search.searchNotariesWithDateRange(wrapper)
+        .subscribe(response => {
+          console.log("Here");
+          const raw = response.notarySearchResultsInternalDto;
+          this.searchResults = raw
+            .map((item: any) => ({                   
+              ...item,
+              approvalDate: item.approvalDate
+                ? new Date(item.approvalDate)
+                : null,
+              createdDate: item.createdDate
+                ? new Date(item.createdDate)
+                : null
+            }));
+            
+          this.displayMessage = response.message;
+          this.pageSize = response.length;
+          this.toggleSearchGrid = true;
+          //this.skip = 0;
+          //this.pageSize = this.searchResults.length;
+          //this.toggleSearchGrid = true;
+          //to persist data
+          this.searchStateData.lastCriteria = wrapper;
+          this.searchStateData.lastResults = response.notarySearchResultsInternalDto?.slice();
+        },
+          err => {
+            console.error(err);
+          }
+        );
+      return;
+    }
+  }
+
+  public onNotaryIdInput(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    if (!this.hasClearedSimpleFields && val.length === 1) {
+      this.firstName = '';
+      this.lastName = '';
+      this.cityTown = '';
+      this.remoteNotariesOnly = false;
+      this.fromApprovalDate = null;
+      this.toApprovalDate = null;
+      this.hasClearedSimpleFields = true;
+    }
+  }
+
+  onClear(): void {
+    // Reset all form fields.
+    this.notaryId = '';
+    this.cityTown = '';
+    this.remoteNotariesOnly = false;
+    this.firstName = '';
+    this.lastName = '';
+    this.fromApprovalDate = null;
+    this.dateOfBirth = null;
+    this.toApprovalDate = null;
+    this.notaryIdError = '';
+    this.hasClearedSimpleFields = false; 
+  }
+
+  onReset(): void {
+    this.toggleSearchGrid = false;
+    this.onClear();
+  }
+
+  onAddNewRecord(): void {
+    this.router.navigate(['add-new-record']);
+  }
+
+  // Determines whether all input fields are empty.
+  isFormEmpty(): boolean {
+    return (
+      !this.notaryId.trim() &&
+      !this.firstName.trim() &&
+      !this.lastName.trim() &&
+      !this.cityTown.trim() &&
+      !this.dateOfBirth &&
+      !this.fromApprovalDate
+    );
+  }
+
+  // Validates Notary ID on blur. Clears the field and sets an error if not exactly 3 digits.
+  validateNotaryId(): void {
+    if (this.notaryId && this.notaryId.length < 6) {
+      this.notaryIdError = "Notary ID search parameter must be a minimum of 6 digits";
+      this.notaryId = '';
+    } else {
+      this.notaryIdError = "";
+    }
+  }
+
+  // Restricts key presses to numbers only.
+  allowOnlyNumbers(event: KeyboardEvent): void {
+    const charCode = event.which ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+      event.preventDefault();
+    }
+  }
+
+  // Helper function to format a Date object as "YYYY-MM-DD"
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private parseLocalDate(dateStr: string): Date {
+    const [year, month, day] = dateStr
+      .split('-')
+      .map(part => parseInt(part, 10));
+    return new Date(year, month - 1, day);
+  }
+
+  public pageChange(event: PageChangeEvent): void {
+    this.skip = event.skip;
+    this.pageSize = event.take;
+  }
+
+  public handleNotaryExpand(): void {
+    this.isNotaryExpanded = true;
+    this.isDateRangeExpanded = false;
+    this.enableDateRange = false;
+    this.enableSimple = true;
+    this.onReset();
+  }
+
+  public handleNotaryCollapse(): void {
+    this.isNotaryExpanded = false;
+    this.isDateRangeExpanded = true;
+    this.enableDateRange = true;
+    this.enableSimple = false;
+    this.onReset();
+  }
+
+  public handleDateRangeExpand(): void {
+    this.isDateRangeExpanded = true;
+    this.isNotaryExpanded = false;
+    this.enableDateRange = true;
+    this.enableSimple = false;
+    this.recordType = "3";
+    this.onReset();
+  }
+
+  public handleDateRangeCollapse(): void {
+    this.isDateRangeExpanded = false;
+    this.isNotaryExpanded = true;
+    this.enableDateRange = false;
+    this.enableSimple = true;
+    this.onReset();
   }
 }
