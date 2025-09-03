@@ -1,18 +1,20 @@
-Goal: To integrate the interfaces available in my model.ts file with the data in the update-notary-details.component.ts file
-such that.. when the save button is clicked.. the data that gets console.logged is exactly of the shape of the interfaces
-present in the model file. 
-MOre Details: Up until now.. we console.logged the data in any format we could.. going forward when the save button is 
-clicked and data is console.logged I want the data to follow the interfaces present in the model file. 
-1. For add notes section use the AddNotesRequest interface 
-2. For Update notary appointment's renewal date.. use the RenewalDateRequest
-3. For update notary appointment's paid date.. use the PaidDateRequest
-4. For update notary appointment's qualified date.. use the QualifiedDateRequest
-5. For valid certificate section use ValidCertificateRequest
-6. For Add complaint section use AddComplaint interface. 
-
-So when I click save and something gets console.logged it should follow the interface. 
-Before you continue add all clarifying questions/doubts. 
-update-notary-details.model.ts file:
+Goal: To give code to an angular service called update-notary-details.service.ts file that has multiple methods each for each endpoint 
+and master checkboxes with the interfaces derived from the update-notary-details.model.ts file 
+More Details: The update-notary-details.component has few sections of data which the user can enable and enter data by clicking 
+on the master checkbox. Base on what are the current user selections.. I want to use that method in the service to post data to the api. 
+More CLearly: 
+1. Add NOtes section should use its own method in the service to post it to the endpoint /api/InternalUser/AddNotes
+2. Valid Certificate section should use its own method in the service to post it to the endpoint /api/InternalUser/UpdateValidationCertificate
+3. Add Complaint section should use its own method in the service to post it to the endpoint /api/InternalUser/AddComplaint
+4. The Renewal Date field is guarded by the renewal date checkbox and then a master checkbox called update notary appointment
+which should have its own method in the service to post it to the endpoint /api/InternalUser/UpdateRenewalDate
+5. The Paid Date field is guarded by the paid date checkbox and then a master checkbox called update notary appointment
+which should have its own method in the service to post it to the endpoint /api/InternalUser/UpdatePaidDate
+6. The Qualified Date field is guarded by the qualified date checkbox and then a master checkbox called update notary appointment
+which should have its own method in the service to post it to the endpoint /api/InternalUser/UpdateQualifiedDate
+Naturally, each of them will have the corresponding interfaces from the model file. 
+Ask me any clarifying questions you have before you get started. 
+update-notary-details.model.ts file: 
 export interface AddNotesRequest {
     accountId: number | null;
     notes: string;
@@ -51,8 +53,18 @@ export interface AddComplaint {
     isRoncomplaint: boolean;
     complaintDetails: string;
     isResolved: boolean;
-    resolutionDate: string;
-    resolutionNotes: string;
+    resolutionDate: string | null;
+    resolutionNotes: string | null;
+}
+update-notary-details.service.ts file:
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UpdateNotaryDetailsService {
+
+  constructor() { }
 }
 update-notary-details.component.ts file:
 import { Component, OnInit } from '@angular/core';
@@ -60,7 +72,14 @@ import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/fo
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { ApprovalDate, RefGetterService } from '../../../services/helper-services/ref-get-service/ref-getter.service';
 import { BuildEditObject } from '../../../models/update-profile-info-model/update-profile-info.model';
-import { AddNotesRequest } from '../../../models/update-notary-details/update-notary-details.model';
+import {
+    AddNotesRequest,
+    RenewalDateRequest,
+    PaidDateRequest,
+    QualifiedDateRequest,
+    ValidCertificateRequest,
+    AddComplaint
+} from '../../../models/update-notary-details/update-notary-details.model';
 
 @Component({
     selector: 'app-update-notary-details',
@@ -78,7 +97,7 @@ export class UpdateNotaryDetailsComponent implements OnInit {
     renewalMax = new Date(2100, 11, 31); // Dec 31, 2100
     paidMin = new Date(1899, 11, 31);    // Dec 31, 1899
     paidMax = this.today;
-;
+    public applicantId: number = -1;
 
     constructor(
         private router: Router,
@@ -104,6 +123,14 @@ export class UpdateNotaryDetailsComponent implements OnInit {
 
     ngOnInit(): void {
         this.temp = this.route.snapshot.paramMap.get('id');
+        const routeApplicantId = Number(this.temp);
+        if (Number.isFinite(routeApplicantId) && routeApplicantId > 0) {
+            this.applicantId = routeApplicantId;
+        } else if ((this.displayData as any)?.personalInfoDetails?.applicantId > 0) {
+            this.applicantId = (this.displayData as any).personalInfoDetails.applicantId;
+        } else {
+            console.error('Missing/invalid applicantId; Renewal Date submit will be blocked.');
+        }
 
         // Parent form with nested section groups
         this.form = this.fb.group({
@@ -422,6 +449,10 @@ export class UpdateNotaryDetailsComponent implements OnInit {
         if (!/^\d$/.test(e.key)) e.preventDefault();
     }
 
+    private toSqlOrToday(date: Date | null): string {
+        return this.toSql(date) ?? this.toSql(this.today)!;
+    }
+
     onSubmit(): void {
 
         if (!this.hasAnySectionEnabled) return;
@@ -431,56 +462,82 @@ export class UpdateNotaryDetailsComponent implements OnInit {
             return;
         }
 
-        // Build payload: only include sections that are enabled
-        const payload: { notes?: string, accountId?: number | null } = {};
+
         if (this.addNotesEnabledCtrl.value) {
-            payload.accountId = this.accountId;
-            payload.notes = this.notesCtrl.value;
-            console.log('SUBMIT payload:', payload);
+            const addNotesReq: AddNotesRequest = {
+                accountId: this.accountId ?? 0,   
+                notes: (this.notesCtrl.value ?? '').toString()
+            };
+            console.log(addNotesReq);
         }
+
 
 
         if (this.updateAppointmentEnabledCtrl.value) {
             if (this.renewalSelectedCtrl.value) {
-                console.log({ applicationId: this.accountId, approvalDate: this.toSql(this.renewalCtrl.value as Date | null) });
+                if (this.applicantId > 0) {
+                    const renewalReq: RenewalDateRequest = {
+                        applicantId: this.applicantId, // never 0
+                        approvalDate: this.toSqlOrToday(this.renewalCtrl.value as Date | null)
+                    };
+                    console.log(renewalReq);
+                } else {
+                    console.error('RenewalDateRequest not logged: applicantId is missing/invalid.');
+                }
             }
+
             if (this.paidSelectedCtrl.value) {
-                console.log({ applicationId: this.accountId, payDate: this.toSql(this.paidCtrl.value as Date | null) });
+                const paidReq: PaidDateRequest = {
+                    transactionStatusId: 1,
+                    applicationId: 0,                 
+                    transactionTypeId: 1,
+                    amount: 0,
+                    expeditedFee: 0,
+                    payId: 0,
+                    ccaId: 0,
+                    paymentNum: '',
+                    payDate: this.toSqlOrToday(this.paidCtrl.value as Date | null),
+                    comment: '',
+                    requestingHost: window.location.host,
+                    loggedInUserEmail: ''
+                };
+                console.log(paidReq);
             }
+
             if (this.qualifiedSelectedCtrl.value) {
-                console.log({ applicationId: this.accountId, qualifiedDate: this.toSql(this.qualifiedCtrl.value as Date | null) });
+                const qualifiedReq: QualifiedDateRequest = {
+                    applicationId: 0, 
+                    qualifiedDate: this.toSqlOrToday(this.qualifiedCtrl.value as Date | null)
+                };
+                console.log(qualifiedReq);
             }
         }
 
         if (this.validCertificateEnabledCtrl.value) {
-            const cert = (this.validationCertificateCtrl.value ?? '').toString();
-            const start = this.validationStartCtrl.value as Date | null;
-            const end = this.validationEndCtrl.value as Date | null;
-
-            console.log({ validationCertificate: cert, accountId: this.accountId });
-            console.log({ validationStartDate: this.toSql(start), accountId: this.accountId });
-            console.log({ validationEndDate: this.toSql(end), accountId: this.accountId });
+            const certReq: ValidCertificateRequest = {
+                accountId: this.accountId ?? 0,
+                certificateNumber: (this.validationCertificateCtrl.value ?? '').toString(),
+                validationStartDate: this.toSqlOrToday(this.validationStartCtrl.value as Date | null),
+                validationEndDate: this.toSqlOrToday(this.validationEndCtrl.value as Date | null)
+            };
+            console.log(certReq);
         }
 
         if (this.addComplaintEnabledCtrl.value) {
-            const dateOfComplaint = this.dateOfComplaintCtrl.value as Date | null;
-            const isRoncomplaint = !!this.isRoncomplaintCtrl.value;
             const isResolved = !!this.isResolvedCtrl.value;
-            const resolutionDate = this.resolutionDateCtrl.value as Date | null;
 
-            const complaintDetails = this.sanitize(this.complaintDetailsCtrl.value as string);
-            const resolutionNotes = this.sanitize(this.resolutionNotesCtrl.value as string);
-
-            console.log({
-                accountId: this.accountId,
-                dateOfComplaint: this.toSql(dateOfComplaint),                 // Option A: UTC midnight
-                isRoncomplaint,
-                complaintDetails,
+            const complaintReq: AddComplaint = {
+                accountId: this.accountId ?? 0,
+                dateOfComplaint: this.toSqlOrToday(this.dateOfComplaintCtrl.value as Date | null),
+                isRoncomplaint: !!this.isRoncomplaintCtrl.value,
+                complaintDetails: this.sanitize(this.complaintDetailsCtrl.value as string),
                 isResolved,
-                resolutionDate: isResolved ? this.toSql(resolutionDate) : null,
-                resolutionNotes: isResolved ? resolutionNotes || null : null
-            });
+                resolutionDate: isResolved ? this.toSqlOrToday(this.resolutionDateCtrl.value as Date | null) : null,
+                resolutionNotes: isResolved ? (this.sanitize(this.resolutionNotesCtrl.value as string) || null) : null
+            };
+            console.log(complaintReq);
         }
+
     }
 
     onCancel(evt?: Event): void {
