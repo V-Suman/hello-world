@@ -1,70 +1,68 @@
-Goal: To give code to an angular service called update-notary-details.service.ts file that has multiple methods each for each endpoint 
-and master checkboxes with the interfaces derived from the update-notary-details.model.ts file 
-More Details: The update-notary-details.component has few sections of data which the user can enable and enter data by clicking 
-on the master checkbox. Base on what are the current user selections.. I want to use that method in the service to post data to the api. 
-More CLearly: 
-1. Add NOtes section should use its own method in the service to post it to the endpoint /api/InternalUser/AddNotes
-2. Valid Certificate section should use its own method in the service to post it to the endpoint /api/InternalUser/UpdateValidationCertificate
-3. Add Complaint section should use its own method in the service to post it to the endpoint /api/InternalUser/AddComplaint
-4. The Renewal Date field is guarded by the renewal date checkbox and then a master checkbox called update notary appointment
-which should have its own method in the service to post it to the endpoint /api/InternalUser/UpdateRenewalDate
-5. The Paid Date field is guarded by the paid date checkbox and then a master checkbox called update notary appointment
-which should have its own method in the service to post it to the endpoint /api/InternalUser/UpdatePaidDate
-6. The Qualified Date field is guarded by the qualified date checkbox and then a master checkbox called update notary appointment
-which should have its own method in the service to post it to the endpoint /api/InternalUser/UpdateQualifiedDate
-Naturally, each of them will have the corresponding interfaces from the model file. 
-Ask me any clarifying questions you have before you get started. 
-update-notary-details.model.ts file: 
-export interface AddNotesRequest {
-    accountId: number | null;
-    notes: string;
-}
-export interface RenewalDateRequest {
-    applicantId: number;
-    approvalDate: string;
-}
-export interface PaidDateRequest {
-    transactionStatusId: number;
-    applicationId: number;
-    transactionTypeId: number;
-    amount: number;
-    expeditedFee: number;
-    payId: number;
-    ccaId: number;
-    paymentNum: string;
-    payDate: string;
-    comment: string;
-    requestingHost: string;
-    loggedInUserEmail: string;
-}
-export interface QualifiedDateRequest {
-    applicationId: number;
-    qualifiedDate: string;
-}
-export interface ValidCertificateRequest {
-    accountId: number | null;
-    certificateNumber: string;
-    validationStartDate: string;
-    validationEndDate: string;
-}
-export interface AddComplaint {
-    accountId: number | null;
-    dateOfComplaint: string;
-    isRoncomplaint: boolean;
-    complaintDetails: string;
-    isResolved: boolean;
-    resolutionDate: string | null;
-    resolutionNotes: string | null;
-}
-update-notary-details.service.ts file:
+Goal: To integrate the update-notary-details.service.ts with my component. The goal is 2 fold 
+Goal 1.1: Wire up the service methods to the respective sections in the page. Meaning addNotes() to addnotes section etc. 
+Goal 1.2: Make sure that the error handling and routing is in place 
+MOre Details: So, I already injected the service into the component file. For goal 1.1 you will have to wire the respective
+service methods and post data to that service. Now once that is done.. I will want you to worry about the error handling. 
+which is goal 1.2. I want error handling in such a way that(for all the 6 sections namely add notes, update renewal date, update
+paid date, update qualified date, valid certificate, add complaint).. Let's say during saving.. section 1,3,5 have data in them 
+I want to post data.. then ONLY take the user back to the notary-profile page IF ALL THE POSTS are successful. IF any of those
+3 posts is failing I want you to pop an alert message that says "There is an error in the add notes section.. could not save data"
+If there are multiple errors list all of that "There are errors in add notes, paid date sections" like that. Then the user 
+can make changes and resubmit. ONLY when the user is successful in all of the calls should we ever route them back. 
+ask me any clarifying/followup questions before you get started. 
+update-notary-details.service.ts file: 
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
+import {
+    AddNotesRequest,
+    RenewalDateRequest,
+    PaidDateRequest,
+    QualifiedDateRequest,
+    ValidCertificateRequest,
+    AddComplaint
+} from '../../models/update-notary-details/update-notary-details.model'; 
+import { environment } from '../../../environments/environment';
+
+@Injectable({ providedIn: 'root' })
 export class UpdateNotaryDetailsService {
+    private addNotesUrl = `${environment.apiurl}/api/InternalUser/AddNotes`;
+    private updateValidationCertUrl = `${environment.apiurl}/api/InternalUser/UpdateValidationCertificate`;
+    private addComplaintUrl = `${environment.apiurl}/api/InternalUser/AddComplaint`;
+    private updateRenewalDateUrl = `${environment.apiurl}/api/InternalUser/UpdateRenewalDate`;
+    private updatePaidDateUrl = `${environment.apiurl}/api/InternalUser/UpdatePaidDate`;
+    private updateQualifiedDateUrl = `${environment.apiurl}/api/InternalUser/UpdateQualifiedDate`;
 
-  constructor() { }
+    constructor(private http: HttpClient) { }
+
+    addNotes(payload: AddNotesRequest): Observable<boolean> {
+        return this.http.post<boolean>(this.addNotesUrl, payload);
+    }
+
+    updateValidationCertificate(payload: ValidCertificateRequest): Observable<boolean> {
+        return this.http.post<boolean>(this.updateValidationCertUrl, payload);
+    }
+
+    addComplaint(payload: AddComplaint): Observable<boolean> {
+        return this.http.post<boolean>(this.addComplaintUrl, payload);
+    }
+
+    updateRenewalDate(req: RenewalDateRequest): Observable<boolean> {
+        const params = new HttpParams()
+            .set('ApplicantId', String(req.applicantId))
+            .set('ApprovalDate', req.approvalDate);
+        // Body must be empty per swagger
+        return this.http.post<boolean>(this.updateRenewalDateUrl, null, { params });
+    }
+
+    updatePaidDate(payload: PaidDateRequest): Observable<boolean> {
+        return this.http.post<boolean>(this.updatePaidDateUrl, payload);
+    }
+
+    updateQualifiedDate(payload: QualifiedDateRequest): Observable<boolean> {
+        return this.http.post<boolean>(this.updateQualifiedDateUrl, payload);
+    }
 }
 update-notary-details.component.ts file:
 import { Component, OnInit } from '@angular/core';
@@ -80,6 +78,7 @@ import {
     ValidCertificateRequest,
     AddComplaint
 } from '../../../models/update-notary-details/update-notary-details.model';
+import { NotaryDetailsService } from '../../../services/get-notary-details/notary-details.service';
 
 @Component({
     selector: 'app-update-notary-details',
@@ -103,7 +102,8 @@ export class UpdateNotaryDetailsComponent implements OnInit {
         private router: Router,
         private route: ActivatedRoute,
         private fb: FormBuilder,
-        private refGetter: RefGetterService
+        private refGetter: RefGetterService,
+        private postNotaryDetails: NotaryDetailsService
     ) {
         // 1) Preferred: getCurrentNavigation (only on the initial nav)
         const nav = this.router.getCurrentNavigation();
