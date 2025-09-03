@@ -1,70 +1,6 @@
-Goal: To integrate the update-notary-details.service.ts with my component. The goal is 2 fold 
-Goal 1.1: Wire up the service methods to the respective sections in the page. Meaning addNotes() to addnotes section etc. 
-Goal 1.2: Make sure that the error handling and routing is in place 
-MOre Details: So, I already injected the service into the component file. For goal 1.1 you will have to wire the respective
-service methods and post data to that service. Now once that is done.. I will want you to worry about the error handling. 
-which is goal 1.2. I want error handling in such a way that(for all the 6 sections namely add notes, update renewal date, update
-paid date, update qualified date, valid certificate, add complaint).. Let's say during saving.. section 1,3,5 have data in them 
-I want to post data.. then ONLY take the user back to the notary-profile page IF ALL THE POSTS are successful. IF any of those
-3 posts is failing I want you to pop an alert message that says "There is an error in the add notes section.. could not save data"
-If there are multiple errors list all of that "There are errors in add notes, paid date sections" like that. Then the user 
-can make changes and resubmit. ONLY when the user is successful in all of the calls should we ever route them back. 
-ask me any clarifying/followup questions before you get started. 
-update-notary-details.service.ts file: 
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-
-import {
-    AddNotesRequest,
-    RenewalDateRequest,
-    PaidDateRequest,
-    QualifiedDateRequest,
-    ValidCertificateRequest,
-    AddComplaint
-} from '../../models/update-notary-details/update-notary-details.model'; 
-import { environment } from '../../../environments/environment';
-
-@Injectable({ providedIn: 'root' })
-export class UpdateNotaryDetailsService {
-    private addNotesUrl = `${environment.apiurl}/api/InternalUser/AddNotes`;
-    private updateValidationCertUrl = `${environment.apiurl}/api/InternalUser/UpdateValidationCertificate`;
-    private addComplaintUrl = `${environment.apiurl}/api/InternalUser/AddComplaint`;
-    private updateRenewalDateUrl = `${environment.apiurl}/api/InternalUser/UpdateRenewalDate`;
-    private updatePaidDateUrl = `${environment.apiurl}/api/InternalUser/UpdatePaidDate`;
-    private updateQualifiedDateUrl = `${environment.apiurl}/api/InternalUser/UpdateQualifiedDate`;
-
-    constructor(private http: HttpClient) { }
-
-    addNotes(payload: AddNotesRequest): Observable<boolean> {
-        return this.http.post<boolean>(this.addNotesUrl, payload);
-    }
-
-    updateValidationCertificate(payload: ValidCertificateRequest): Observable<boolean> {
-        return this.http.post<boolean>(this.updateValidationCertUrl, payload);
-    }
-
-    addComplaint(payload: AddComplaint): Observable<boolean> {
-        return this.http.post<boolean>(this.addComplaintUrl, payload);
-    }
-
-    updateRenewalDate(req: RenewalDateRequest): Observable<boolean> {
-        const params = new HttpParams()
-            .set('ApplicantId', String(req.applicantId))
-            .set('ApprovalDate', req.approvalDate);
-        // Body must be empty per swagger
-        return this.http.post<boolean>(this.updateRenewalDateUrl, null, { params });
-    }
-
-    updatePaidDate(payload: PaidDateRequest): Observable<boolean> {
-        return this.http.post<boolean>(this.updatePaidDateUrl, payload);
-    }
-
-    updateQualifiedDate(payload: QualifiedDateRequest): Observable<boolean> {
-        return this.http.post<boolean>(this.updateQualifiedDateUrl, payload);
-    }
-}
-update-notary-details.component.ts file:
+Goal: So, only for the valid certificate section.. the date formatting is a lil different. I need you to make that change. 
+More Details: The date format the backend is expecting for that endpoint is YYYY-MM-DD that's it. 
+update-notary-details.component.ts file: 
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
@@ -78,7 +14,9 @@ import {
     ValidCertificateRequest,
     AddComplaint
 } from '../../../models/update-notary-details/update-notary-details.model';
-import { NotaryDetailsService } from '../../../services/get-notary-details/notary-details.service';
+import { UpdateNotaryDetailsService } from '../../../services/update-notary-details/update-notary-details.service';
+import { forkJoin, of } from 'rxjs';
+import { map, catchError, finalize } from 'rxjs/operators';
 
 @Component({
     selector: 'app-update-notary-details',
@@ -97,13 +35,14 @@ export class UpdateNotaryDetailsComponent implements OnInit {
     paidMin = new Date(1899, 11, 31);    // Dec 31, 1899
     paidMax = this.today;
     public applicantId: number = -1;
+    submitting = false;
 
     constructor(
         private router: Router,
         private route: ActivatedRoute,
         private fb: FormBuilder,
         private refGetter: RefGetterService,
-        private postNotaryDetails: NotaryDetailsService
+        private postNotaryDetails: UpdateNotaryDetailsService
     ) {
         // 1) Preferred: getCurrentNavigation (only on the initial nav)
         const nav = this.router.getCurrentNavigation();
@@ -454,7 +393,6 @@ export class UpdateNotaryDetailsComponent implements OnInit {
     }
 
     onSubmit(): void {
-
         if (!this.hasAnySectionEnabled) return;
 
         if (this.form.invalid) {
@@ -462,34 +400,48 @@ export class UpdateNotaryDetailsComponent implements OnInit {
             return;
         }
 
+        // Build all selected calls
+        type SectionResult = { label: string; ok: boolean };
+        const calls: Array<import('rxjs').Observable<SectionResult>> = [];
 
         if (this.addNotesEnabledCtrl.value) {
-            const addNotesReq: AddNotesRequest = {
-                accountId: this.accountId ?? 0,   
+            const req: AddNotesRequest = {
+                accountId: this.accountId ?? 0,   // send 0 when missing
                 notes: (this.notesCtrl.value ?? '').toString()
             };
-            console.log(addNotesReq);
+            calls.push(
+                this.postNotaryDetails.addNotes(req).pipe(
+                    map(ok => ({ label: 'Add Notes', ok: ok === true })),
+                    catchError(() => of({ label: 'Add Notes', ok: false }))
+                )
+            );
         }
 
-
-
         if (this.updateAppointmentEnabledCtrl.value) {
+            // Renewal
             if (this.renewalSelectedCtrl.value) {
-                if (this.applicantId > 0) {
-                    const renewalReq: RenewalDateRequest = {
-                        applicantId: this.applicantId, // never 0
-                        approvalDate: this.toSqlOrToday(this.renewalCtrl.value as Date | null)
-                    };
-                    console.log(renewalReq);
-                } else {
-                    console.error('RenewalDateRequest not logged: applicantId is missing/invalid.');
+                if (!(this.applicantId > 0)) {
+                    alert('Missing applicantId for Renewal Date. Please navigate with a valid applicant id and try again.');
+                    return; // block whole submit as requested
                 }
+                const req: RenewalDateRequest = {
+                    applicantId: this.applicantId, // never 0
+                    approvalDate: this.toSqlOrToday(this.renewalCtrl.value as Date | null)
+                };
+                console.log(req);
+                calls.push(
+                    this.postNotaryDetails.updateRenewalDate(req).pipe(
+                        map(ok => ({ label: 'Renewal Date', ok: ok === true })),
+                        catchError(() => of({ label: 'Renewal Date', ok: false }))
+                    )
+                );
             }
 
+            // Paid
             if (this.paidSelectedCtrl.value) {
-                const paidReq: PaidDateRequest = {
+                const req: PaidDateRequest = {
                     transactionStatusId: 1,
-                    applicationId: 0,                 
+                    applicationId: 0,
                     transactionTypeId: 1,
                     amount: 0,
                     expeditedFee: 0,
@@ -501,32 +453,50 @@ export class UpdateNotaryDetailsComponent implements OnInit {
                     requestingHost: window.location.host,
                     loggedInUserEmail: ''
                 };
-                console.log(paidReq);
+                console.log(req);
+                calls.push(
+                    this.postNotaryDetails.updatePaidDate(req).pipe(
+                        map(ok => ({ label: 'Paid Date', ok: ok === true })),
+                        catchError(() => of({ label: 'Paid Date', ok: false }))
+                    )
+                );
             }
 
+            // Qualified
             if (this.qualifiedSelectedCtrl.value) {
-                const qualifiedReq: QualifiedDateRequest = {
-                    applicationId: 0, 
+                const req: QualifiedDateRequest = {
+                    applicationId: 0,
                     qualifiedDate: this.toSqlOrToday(this.qualifiedCtrl.value as Date | null)
                 };
-                console.log(qualifiedReq);
+                console.log(req);
+                calls.push(
+                    this.postNotaryDetails.updateQualifiedDate(req).pipe(
+                        map(ok => ({ label: 'Qualified Date', ok: ok === true })),
+                        catchError(() => of({ label: 'Qualified Date', ok: false }))
+                    )
+                );
             }
         }
 
         if (this.validCertificateEnabledCtrl.value) {
-            const certReq: ValidCertificateRequest = {
+            const req: ValidCertificateRequest = {
                 accountId: this.accountId ?? 0,
                 certificateNumber: (this.validationCertificateCtrl.value ?? '').toString(),
                 validationStartDate: this.toSqlOrToday(this.validationStartCtrl.value as Date | null),
                 validationEndDate: this.toSqlOrToday(this.validationEndCtrl.value as Date | null)
             };
-            console.log(certReq);
+            console.log(req);
+            calls.push(
+                this.postNotaryDetails.updateValidationCertificate(req).pipe(
+                    map(ok => ({ label: 'Valid Certificate', ok: ok === true })),
+                    catchError(() => of({ label: 'Valid Certificate', ok: false }))
+                )
+            );
         }
 
         if (this.addComplaintEnabledCtrl.value) {
             const isResolved = !!this.isResolvedCtrl.value;
-
-            const complaintReq: AddComplaint = {
+            const req: AddComplaint = {
                 accountId: this.accountId ?? 0,
                 dateOfComplaint: this.toSqlOrToday(this.dateOfComplaintCtrl.value as Date | null),
                 isRoncomplaint: !!this.isRoncomplaintCtrl.value,
@@ -535,9 +505,36 @@ export class UpdateNotaryDetailsComponent implements OnInit {
                 resolutionDate: isResolved ? this.toSqlOrToday(this.resolutionDateCtrl.value as Date | null) : null,
                 resolutionNotes: isResolved ? (this.sanitize(this.resolutionNotesCtrl.value as string) || null) : null
             };
-            console.log(complaintReq);
+            console.log(req);
+            calls.push(
+                this.postNotaryDetails.addComplaint(req).pipe(
+                    map(ok => ({ label: 'Add Complaint', ok: ok === true })),
+                    catchError(() => of({ label: 'Add Complaint', ok: false }))
+                )
+            );
         }
 
+        if (calls.length === 0) return;
+
+        this.submitting = true;
+        forkJoin(calls).pipe(finalize(() => (this.submitting = false))).subscribe(results => {
+            const failed = results.filter(r => !r.ok).map(r => r.label);
+            if (failed.length === 0) {
+                
+                if (this.temp != null) {
+                    this.router.navigate(['/notary-profile', this.temp]);
+                } else {
+                    console.error('No applicantId available to navigate back.');
+                }
+                return;
+            }
+
+            if (failed.length === 1) {
+                alert(`There is an error in the ${failed[0]} section. Could not save data.`);
+            } else {
+                alert(`There are errors in: ${failed.join(', ')} sections. Could not save data.`);
+            }
+        });
     }
 
     onCancel(evt?: Event): void {
