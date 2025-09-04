@@ -1,4 +1,4 @@
-Bug: 
+Bug: Fix a bug that displays email id in the secondary phone field
 Crux of the problem: Currently, the backend has 2 types of contacts (I know this because I was able to hit the getContactTypes 
 endpoint and it returned me the following: [
   {
