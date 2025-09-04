@@ -1,47 +1,5 @@
-Bug: When the user is clicking the is this a Po Box? checkbox.. and entering the details as required.. a rougue validation error is getting 
-triggered and is not letting the user submit the data the validation error is "Street number and Address Line are required."
-
-context: When the user clicks the isPoBox checkbox.. the street number and address line inputs should get clubbed into one single input 
-element.. and the data for that new single input element should be "PO Box".
-
-When the isPoBox is checked.. UI wise.. the street number and address line input fields are clubbed into one input field and the third 
-one becomes Po Box Number. Then model(or interface) wise.. the entirety of what was entered in Po Box Number field with the "PO Box" string
-should go into the street name property. 
-
-So, in normal circumstances (isPoBox unchecked) street number, address line and house number (as they appear in UI) will be tagged to their
-respective model properites street-number, street-name and apt number - NO change needed here. In circumstances where isPoBox is checked.. 
-the whole Po Box and number should get tagged to the street name property and rest all stays the same. 
-
-In normal case:
-{
-    "addressTypeId": 2,
-    "isPrefered": false,
-    "isPoBox": false,
-    "streetNumber": "5",
-    "streetName": "Commonwealth Road",
-    "aptNumber": "Suite 4B",
-    "addressLine2": null,
-    "zipCode": "01760",
-    "zipPlus": null,
-    "city": "Natick",
-    "stateId": 20
-}
-
-In Po Box true case:
-{
-    "addressTypeId": 2,
-    "isPrefered": false,
-    "isPoBox": true,
-    "streetNumber": "null",
-    "streetName": "PO Box 91",
-    "aptNumber": "null",
-    "addressLine2": null,
-    "zipCode": "03910",
-    "zipPlus": null,
-    "city": "York Beach",
-    "stateId": 22,
-}
-add-new-record.component.html file:
+Bug: The placeholder for date of birth field is displaying MM/dd/yyyy I want it to display MM/DD/YYYY 
+add-new-record.component.html:
 <div class="page-wrapper">
   <div class="first-row"><h2>{{viewHeading}}</h2><div class="required-indicator"><div class="asterisk">*</div><div class="required-indicator-text"> - Required fields</div></div></div>
   <!--<button kendoButton (click)="testDupeMatchDialog()">Invoke Dupe Match Dialog</button>-->
@@ -526,7 +484,7 @@ add-new-record.component.html file:
               </label>
             </label>
             <div class="error-message">
-              <span *ngIf="submittedAddress && addressForm.get('businessAddress')?.hasError('noStreet')">
+              <span *ngIf="submittedAddress && addressForm.get('businessAddress')?.hasError('noStreet') && !busPoBox">
                 Street number and Address Line are required.
               </span>
             </div>
@@ -687,7 +645,7 @@ add-new-record.component.html file:
                       (edit)="onDuplicateEdit()"
                       (ignore)="onDuplicateIgnore()">
 </app-existing-records>
-add-new-record.component.ts file: 
+add-new-record.component.ts file:
 import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
@@ -923,26 +881,41 @@ export class AddNewRecordComponent implements OnInit {
         picker.toggle(true);// picker.open();   // now it resolves the method correctly
     }
 
-  private optionalGroupValidator(prefix: 'residenceAddress' | 'businessAddress'): ValidatorFn {
-    return (group: AbstractControl): ValidationErrors | null => {
-      const g = group as FormGroup;
-      const vals = Object.values(g.value).some(v => !!v);
-      if (!vals) {
-        return null; // completely empty is OK
-      }
-      // now enforce: streetValidator + required on state/zipCode/cityTown
-      const streetErr = this.streetValidator()(g);
-      if (streetErr) {
-        return { noStreet: true };
-      }
-      for (const field of ['state', 'zipCode', 'cityTown']) {
-        if (!g.get(field)!.value) {
-          return { [`${field}Req`]: true };
-        }
-      }
-      return null;
-    };
-  }
+    private optionalGroupValidator(prefix: 'residenceAddress' | 'businessAddress'): ValidatorFn {
+        return (group: AbstractControl): ValidationErrors | null => {
+            const g = group as FormGroup;
+            const isPo = g.get('isPoBox')?.value === true;
+            const hasAny = Object.entries(g.value)
+                .some(([k, v]) => k !== 'isPoBox' && typeof v === 'string' && v.trim().length > 0);
+
+            if (!hasAny) return null; 
+
+            if (isPo) {
+                const poNum = (g.get('street3')?.value ?? '').toString().trim();
+                if (!poNum) {
+
+                    g.get('street3')?.setErrors({ required: true });
+                    return { poBoxNumberReq: true };
+                }
+            } else {
+
+                const s1 = (g.get('street1')?.value ?? '').toString().trim();
+                const s2 = (g.get('street2')?.value ?? '').toString().trim();
+                if (!s1 && !s2) return { noStreet: true };
+            }
+
+            for (const field of ['state', 'zipCode', 'cityTown'] as const) {
+                const ctrl = g.get(field);
+                const val = (ctrl?.value ?? '').toString().trim();
+                if (!val) {
+                    ctrl?.setErrors({ required: true });
+                    return { [`${field}Req`]: true } as any;
+                }
+            }
+
+            return null;
+        };
+    }
 
   private updateAddressValidators(pref: 'Residence' | 'Business') {
     const resGroup = this.addressForm.get('residenceAddress') as FormGroup;
@@ -1057,22 +1030,26 @@ export class AddNewRecordComponent implements OnInit {
       const buildAddress = (grp: any, typeId: number, preferred: boolean): AddressDto => {
           const isPo = grp.isPoBox === true;
 
-          // safe state lookup
           const stateName = grp.state as string;
           const stateRef = this.stateRefs.find(s => s.value === stateName);
           const stateId = stateRef?.stateId ?? 0;
+
+          const poNumber = (grp.street3 ?? '').toString().trim();
+          const streetName = isPo
+              ? (poNumber ? `PO Box ${poNumber}` : 'PO Box')
+              : (grp.street2?.trim() || null);
 
           return {
               addressTypeId: typeId,
               isPrefered: preferred,
               isPoBox: isPo,
-              streetNumber: isPo ? null : nullOr(grp.street1),
-              streetName: isPo ? 'PO Box' : nullOr(grp.street2),
-              aptNumber: nullOr(grp.street3),
-              addressLine2: nullOr(grp.street4),
-              zipCode: grp.zipCode,
-              zipPlus: nullOr(grp.zipPlus),
-              city: grp.cityTown,
+              streetNumber: isPo ? null : (grp.street1?.trim() || null),
+              streetName,
+              aptNumber: isPo ? null : (grp.street3?.trim() || null),
+              addressLine2: grp.street4?.trim() || null,
+              zipCode: grp.zipCode,                 
+              zipPlus: (grp.zipPlus?.trim() || null),
+              city: grp.cityTown,                  
               stateId
           };
       };
