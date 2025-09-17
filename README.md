@@ -1,13 +1,286 @@
-Goal: To disable the master checkboxes and their input elements when the accountId is "0"
-Details: When the this.displayData.personalInfoDetails.accountId is zero.. I want to completely disable the Add Notes, Valid Certificate 
-and Add Complaint sections as a whole. No amount of clicking on their master chekboxes should enable them. When the this.displayData.personalInfoDetails.accountId
-is "0" only the Update Notary Appointment's master checkbox and the subsequent inner checkboxes and input elemnts of renewal date, paid date 
-qualified date should be clickable. Subsequently the save button also should only react to the update notary appointment section. 
+Goal: to update the accountless flag to not worry about the addNotes section 
+Details: Previously when the user is accountless.. we would disable the add notes section AND that also 
+feeds into the save button enabling. But, the requirement changed and we now no longer need to worry 
+about including the add notes section in the accountless bracket. Meaning.. the whole addNotes section
+should be exempted from the accountless check that we have. Not only that we should also enable the 
+save button should a user land on the page and adds the notes as it qualifies as proper input. 
+Ask me any clarifying questions before you give code. 
+update-notary-details.component.html file: 
+<div class="page-wrapper">
+    <div class="heading-and-asterisk">
+        <div class="title-and-tooltip">
+            <h2 class="notary-title">
+                Update Notary Details - {{ temp }}
+            </h2>
+            <div *ngIf="displayData?.personalInfoDetails?.accountId == 0" kendoTooltip position="right" class="tooltip-wrapper">
+                <button kendoButton class="village-hyperlink" title="Some fields are unavailable to edit due to lack of a notary account">
+                    ?
+                </button>
+            </div>
+        </div>
+        <div class="required-indicator">
+            <div class="asterisk">*</div>
+            <div class="required-indicator-text"> - Required fields</div>
+        </div>
+    </div>
 
-This is an intermediate change only and will most likely be reverted in the future so keep that in mind as well. 
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-class" novalidate>
+        <!-- ADD NOTES -->
+        <div class="notes-section" formGroupName="addNotes">
+            <div class="div-header-section">
+                <input type="checkbox"
+                       kendoCheckBox
+                       formControlName="enabled"
+                       class="checkbox-override"
+                       [disabled]="isAccountless"/>
+                <div class="checkbox-header-level">Add Notes</div>
+            </div>
 
-Give less code comments (//something something) and ask me all clarifying questions before you get started. 
+            <div class="div-content-section">
+                <kendo-formfield class="full-width">
+                    <label kendoLabel for="notes">
+                        Notes <span class="text-danger asterisk padding-exception">*</span>
+                    </label>
+                    <!-- Disabled until checkbox is checked; value is preserved -->
+                    <textarea kendoTextArea
+                              id="notes"
+                              formControlName="notes"
+                              rows="6"
+                              maxlength="5000"></textarea>
+                    <kendo-formerror *ngIf="notesCtrl?.touched && notesCtrl?.errors?.['required']">
+                        Notes are required.
+                    </kendo-formerror>
+                    <kendo-formerror *ngIf="notesCtrl?.touched && notesCtrl?.errors?.['maxlength']">
+                        Max 500 characters.
+                    </kendo-formerror>
+                </kendo-formfield>
+            </div>
+        </div>
+        <div class="appointment-section" formGroupName="updateAppointment">
+            <div class="div-header-section">
+                <input type="checkbox"
+                       kendoCheckBox
+                       formControlName="enabled"
+                       class="checkbox-override" />
+                <div class="checkbox-header-level">Update Notary Appointment</div>
+            </div>
 
+            <div class="div-content-section">
+                <div class="form-column">
+                    <div class="flex-item">
+                        <div class="label-with-toggle">
+                            <input type="checkbox" kendoCheckBox formControlName="renewalSelected" class="mini-checkbox" />
+                            <label kendoLabel for="renewalDate">Renewal Date <span class="text-danger asterisk">*</span></label>
+                        </div>
+                        <kendo-formfield>
+                            <kendo-datepicker id="renewalDate" formControlName="renewalDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY" [min]="renewalMin" [max]="renewalMax">
+                            </kendo-datepicker>
+                        </kendo-formfield>
+                    </div>
+
+                    <div class="flex-item">
+                        <div class="label-with-toggle">
+                            <input type="checkbox" kendoCheckBox formControlName="paidSelected" class="mini-checkbox" />
+                            <label kendoLabel for="paidDate">Paid Date <span class="text-danger asterisk">*</span></label>
+                        </div>
+                        <kendo-formfield>
+                            <kendo-datepicker id="paidDate" formControlName="paidDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY" [min]="paidMin" [max]="paidMax">
+                            </kendo-datepicker>
+                        </kendo-formfield>
+                    </div>
+
+                    <div class="flex-item">
+                        <div class="label-with-toggle">
+                            <input type="checkbox" kendoCheckBox formControlName="qualifiedSelected" class="mini-checkbox" />
+                            <label kendoLabel for="qualifiedDate">Qualified Date <span class="text-danger asterisk">*</span></label>
+                        </div>
+                        <kendo-formfield>
+                            <kendo-datepicker id="qualifiedDate" formControlName="qualifiedDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY">
+                            </kendo-datepicker>
+                        </kendo-formfield>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="valid-certificate-section" formGroupName="validCertificate">
+            <div class="div-header-section">
+                <input type="checkbox"
+                       kendoCheckBox
+                       formControlName="enabled"
+                       class="checkbox-override" 
+                       [disabled]="isAccountless"/>
+                <div class="checkbox-header-level">Valid Certificate</div>
+            </div>
+
+            <div class="div-content-section">
+                <div class="form-column">
+                    <kendo-formfield class="flex-item">
+                        <label kendoLabel for="validationCertificate">
+                            Validation Certificate #
+                        </label>
+                        <input kendoTextBox
+                               id="validationCertificate"
+                               formControlName="validationCertificate"
+                               maxlength="10"
+                               inputmode="numeric"
+                               pattern="[0-9]*"
+                               (keypress)="digitsOnly($event)" />
+                        <kendo-formerror *ngIf="validationCertificateCtrl?.touched && validationCertificateCtrl?.errors?.['maxlength']">
+                            Max 10 digits.
+                        </kendo-formerror>
+                        <kendo-formerror *ngIf="validationCertificateCtrl?.touched && validationCertificateCtrl?.errors?.['pattern']">
+                            Numbers only.
+                        </kendo-formerror>
+                    </kendo-formfield>
+
+                    <kendo-formfield class="flex-item">
+                        <label kendoLabel for="validationStartDate">
+                            Validation Start Date <span class="text-danger asterisk">*</span>
+                        </label>
+                        <kendo-datepicker id="validationStartDate"
+                                          formControlName="validationStartDate"
+                                          [format]="'MM/dd/yyyy'"
+                                          placeholder="MM/DD/YYYY">
+                        </kendo-datepicker>
+                    </kendo-formfield>
+
+                    <kendo-formfield class="flex-item">
+                        <label kendoLabel for="validationEndDate">
+                            Validation End Date <span class="text-danger asterisk">*</span>
+                        </label>
+                        <kendo-datepicker id="validationEndDate"
+                                          formControlName="validationEndDate"
+                                          [format]="'MM/dd/yyyy'"
+                                          placeholder="MM/DD/YYYY">
+                        </kendo-datepicker>
+                    </kendo-formfield>
+                </div>
+            </div>
+        </div>
+        <div class="add-complaint-section" formGroupName="addComplaint">
+            <div class="div-header-section">
+                <input type="checkbox"
+                       kendoCheckBox
+                       formControlName="enabled"
+                       class="checkbox-override" 
+                       [disabled]="isAccountless"/>
+                <div class="checkbox-header-level">Add Complaint</div>
+            </div>
+
+            <div class="div-content-section">
+                <div class="form-column row-one">
+                    <!-- Date of Complaint -->
+                    <kendo-formfield class="flex-item">
+                        <label kendoLabel for="dateOfComplaint">
+                            Date of Complaint <span class="text-danger asterisk">*</span>
+                        </label>
+                        <kendo-datepicker id="dateOfComplaint"
+                                          formControlName="dateOfComplaint"
+                                          [format]="'MM/dd/yyyy'"
+                                          placeholder="MM/DD/YYYY">
+                        </kendo-datepicker>
+                        <kendo-formerror *ngIf="dateOfComplaintCtrl?.touched && dateOfComplaintCtrl?.errors?.['required']">
+                            Date of complaint is required.
+                        </kendo-formerror>
+                    </kendo-formfield>
+
+                    <!-- Is RON Complaint -->
+                    <kendo-formfield class="flex-item checkbox-option">
+                        <input type="checkbox"
+                               kendoCheckBox
+                               id="isRoncomplaint"
+                               formControlName="isRoncomplaint" />
+                        <label kendoLabel for="isRoncomplaint" id="is-ron-complaint">Remote Online Complaint?</label>
+                    </kendo-formfield>
+                </div>
+
+                <div class="form-column">
+                    <!-- Complaint Details -->
+                    <kendo-formfield class="full-width">
+                        <label kendoLabel for="complaintDetails">
+                            Complaint Details <span class="text-danger asterisk">*</span>
+                        </label>
+                        <textarea kendoTextArea
+                                  id="complaintDetails"
+                                  formControlName="complaintDetails"
+                                  rows="4"
+                                  maxlength="200"></textarea>
+                        <kendo-formerror *ngIf="complaintDetailsCtrl?.touched && complaintDetailsCtrl?.errors?.['required']">
+                            Complaint details are required.
+                        </kendo-formerror>
+                        <kendo-formerror *ngIf="complaintDetailsCtrl?.touched && complaintDetailsCtrl?.errors?.['maxlength']">
+                            Max 200 characters.
+                        </kendo-formerror>
+                    </kendo-formfield>
+                </div>
+
+                <div class="form-column">
+                    <!-- Resolution Notes -->
+                    <kendo-formfield class="full-width resolution-override height-override">
+                        <label kendoLabel *ngIf="isResolvedCtrl.value" for="resolutionNotes">
+                            Resolution Notes <span class="text-danger asterisk">*</span>
+                        </label>
+                        <label kendoLabel *ngIf="!isResolvedCtrl.value" for="resolutionNotes">
+                            Resolution Notes <span class="text-normal asterisk">*</span>
+                        </label>
+                        <textarea kendoTextArea
+                                  id="resolutionNotes"
+                                  formControlName="resolutionNotes"
+                                  rows="4"
+                                  maxlength="200"></textarea>
+                        <kendo-formerror *ngIf="resolutionNotesCtrl?.touched && resolutionNotesCtrl?.errors?.['required']">
+                            Resolution notes are required when resolved.
+                        </kendo-formerror>
+                        <kendo-formerror *ngIf="resolutionNotesCtrl?.touched && resolutionNotesCtrl?.errors?.['maxlength']">
+                            Max 200 characters.
+                        </kendo-formerror>
+                    </kendo-formfield>
+                    <div class="resolved-and-date">
+                        <kendo-formfield class="flex-item checkbox-option">
+                            <label kendoLabel for="isResolved" id="is-ron-complaint">Resolved?</label>
+                            <input type="checkbox"
+                                   kendoCheckBox
+                                   id="isResolved"
+                                   formControlName="isResolved" />
+                        </kendo-formfield>
+
+                        <kendo-formfield class="flex-item" *ngIf="isResolvedCtrl.value">
+                            <label kendoLabel for="resolutionDate">
+                                Resolution Date <span class="text-danger asterisk">*</span>
+                            </label>
+                            <kendo-datepicker id="resolutionDate"
+                                              formControlName="resolutionDate"
+                                              [format]="'MM/dd/yyyy'"
+                                              placeholder="MM/DD/YYYY">
+                            </kendo-datepicker>
+                            <kendo-formerror *ngIf="resolutionDateCtrl?.touched && resolutionDateCtrl?.errors?.['required']">
+                                Resolution date is required when resolved.
+                            </kendo-formerror>
+                        </kendo-formfield>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="buttons-row">
+            <button kendoButton
+                    themeColor="primary"
+                    type="button"
+                    class="custom-button-alt"
+                    (click)="onCancel($event)">
+                Cancel
+            </button>
+            <button kendoButton
+                    class="search-button"
+                    themeColor="primary"
+                    type="submit"
+                    [disabled]="submitting || !hasAnySectionEnabled || form.invalid">
+                Save
+            </button>
+        </div>
+    </form>
+</div>
 update-notary-details.component.ts file: 
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -68,6 +341,10 @@ export class UpdateNotaryDetailsComponent implements OnInit {
         console.log('Received buildEditObject:', this.accountId);
     }
 
+    get isAccountless(): boolean {
+        return (this.accountId ?? 0) === 0;
+    }
+
     ngOnInit(): void {
         this.temp = this.route.snapshot.paramMap.get('id');
         const routeApplicantId = Number(this.temp);
@@ -78,6 +355,7 @@ export class UpdateNotaryDetailsComponent implements OnInit {
         } else {
             console.error('Missing/invalid applicantId; Renewal Date submit will be blocked.');
         }
+
 
         // Parent form with nested section groups
         this.form = this.fb.group({
@@ -122,6 +400,17 @@ export class UpdateNotaryDetailsComponent implements OnInit {
                 resolutionNotes: [{ value: '', disabled: true }, [Validators.maxLength(200)]]
             }),
         });
+
+
+        if (this.isAccountless) {
+            (this.form.get('addNotes') as FormGroup).disable({ emitEvent: false });
+            (this.form.get('validCertificate') as FormGroup).disable({ emitEvent: false });
+            (this.form.get('addComplaint') as FormGroup).disable({ emitEvent: false });
+            // Ensure their "enabled" toggles stay false
+            this.addNotesEnabledCtrl.setValue(false, { emitEvent: false });
+            this.validCertificateEnabledCtrl.setValue(false, { emitEvent: false });
+            this.addComplaintEnabledCtrl.setValue(false, { emitEvent: false });
+        }
 
         // Wire the checkbox to the control's enable/disable & validators
         this.addNotesEnabledCtrl.valueChanges.subscribe((enabled: boolean) => {
@@ -359,7 +648,13 @@ export class UpdateNotaryDetailsComponent implements OnInit {
         return this.addNotesGroup.get('notes')!;
     }
     get hasAnySectionEnabled(): boolean {
-        // Future-proof: extend this OR across other section checkboxes
+        if (this.isAccountless) {
+            return !!this.updateAppointmentEnabledCtrl.value && (
+                !!this.renewalSelectedCtrl.value ||
+                !!this.paidSelectedCtrl.value ||
+                !!this.qualifiedSelectedCtrl.value
+            );
+        }
         return !!this.addNotesEnabledCtrl.value
             || !!this.validCertificateEnabledCtrl.value
             || !!this.addComplaintEnabledCtrl.value
@@ -412,9 +707,9 @@ export class UpdateNotaryDetailsComponent implements OnInit {
         type SectionResult = { label: string; ok: boolean };
         const calls: Array<import('rxjs').Observable<SectionResult>> = [];
 
-        if (this.addNotesEnabledCtrl.value) {
+        if (!this.isAccountless && this.addNotesEnabledCtrl.value) {
             const req: AddNotesRequest = {
-                accountId: this.accountId ?? 0,   // send 0 when missing
+                applicantId: this.applicantId,   // send 0 when missing
                 notes: (this.notesCtrl.value ?? '').toString()
             };
             console.log(req);
@@ -477,7 +772,7 @@ export class UpdateNotaryDetailsComponent implements OnInit {
             }
         }
 
-        if (this.validCertificateEnabledCtrl.value) {
+        if (!this.isAccountless && this.validCertificateEnabledCtrl.value) {
             const req: ValidCertificateRequest = {
                 accountId: this.accountId ?? 0,
                 certificateNumber: (this.validationCertificateCtrl.value ?? '').toString(),
@@ -493,7 +788,7 @@ export class UpdateNotaryDetailsComponent implements OnInit {
             );
         }
 
-        if (this.addComplaintEnabledCtrl.value) {
+        if (!this.isAccountless && this.addComplaintEnabledCtrl.value) {
             const isResolved = !!this.isResolvedCtrl.value;
             const req: AddComplaint = {
                 accountId: this.accountId ?? 0,
@@ -557,276 +852,3 @@ export class UpdateNotaryDetailsComponent implements OnInit {
         }
     }
 }
-update-notary-details.component.html file: 
-<div class="page-wrapper">
-    <div class="heading-and-asterisk">
-        <div class="title-and-tooltip">
-            <h2 class="notary-title">
-                Update Notary Details - {{ temp }}
-            </h2>
-            <div *ngIf="displayData?.personalInfoDetails?.accountId == 0" kendoTooltip position="right" class="tooltip-wrapper">
-                <button kendoButton class="village-hyperlink" title="Some fields are unavailable to edit due to lack of a notary account">
-                    ?
-                </button>
-            </div>
-        </div>
-        <div class="required-indicator">
-            <div class="asterisk">*</div>
-            <div class="required-indicator-text"> - Required fields</div>
-        </div>
-    </div>
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-class" novalidate>
-        <!-- ADD NOTES -->
-        <div class="notes-section" formGroupName="addNotes">
-            <div class="div-header-section">
-                <input type="checkbox"
-                       kendoCheckBox
-                       formControlName="enabled"
-                       class="checkbox-override" />
-                <div class="checkbox-header-level">Add Notes</div>
-            </div>
-
-            <div class="div-content-section">
-                <kendo-formfield class="full-width">
-                    <label kendoLabel for="notes">
-                        Notes <span class="text-danger asterisk padding-exception">*</span>
-                    </label>
-                    <!-- Disabled until checkbox is checked; value is preserved -->
-                    <textarea kendoTextArea
-                              id="notes"
-                              formControlName="notes"
-                              rows="6"
-                              maxlength="5000"></textarea>
-                    <kendo-formerror *ngIf="notesCtrl?.touched && notesCtrl?.errors?.['required']">
-                        Notes are required.
-                    </kendo-formerror>
-                    <kendo-formerror *ngIf="notesCtrl?.touched && notesCtrl?.errors?.['maxlength']">
-                        Max 500 characters.
-                    </kendo-formerror>
-                </kendo-formfield>
-            </div>
-        </div>
-        <div class="appointment-section" formGroupName="updateAppointment">
-            <div class="div-header-section">
-                <input type="checkbox"
-                       kendoCheckBox
-                       formControlName="enabled"
-                       class="checkbox-override" />
-                <div class="checkbox-header-level">Update Notary Appointment</div>
-            </div>
-
-            <div class="div-content-section">
-                <div class="form-column">
-                    <div class="flex-item">
-                        <div class="label-with-toggle">
-                            <input type="checkbox" kendoCheckBox formControlName="renewalSelected" class="mini-checkbox" />
-                            <label kendoLabel for="renewalDate">Renewal Date <span class="text-danger asterisk">*</span></label>
-                        </div>
-                        <kendo-formfield>
-                            <kendo-datepicker id="renewalDate" formControlName="renewalDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY" [min]="renewalMin" [max]="renewalMax">
-                            </kendo-datepicker>
-                        </kendo-formfield>
-                    </div>
-
-                    <div class="flex-item">
-                        <div class="label-with-toggle">
-                            <input type="checkbox" kendoCheckBox formControlName="paidSelected" class="mini-checkbox" />
-                            <label kendoLabel for="paidDate">Paid Date <span class="text-danger asterisk">*</span></label>
-                        </div>
-                        <kendo-formfield>
-                            <kendo-datepicker id="paidDate" formControlName="paidDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY" [min]="paidMin" [max]="paidMax">
-                            </kendo-datepicker>
-                        </kendo-formfield>
-                    </div>
-
-                    <div class="flex-item">
-                        <div class="label-with-toggle">
-                            <input type="checkbox" kendoCheckBox formControlName="qualifiedSelected" class="mini-checkbox" />
-                            <label kendoLabel for="qualifiedDate">Qualified Date <span class="text-danger asterisk">*</span></label>
-                        </div>
-                        <kendo-formfield>
-                            <kendo-datepicker id="qualifiedDate" formControlName="qualifiedDate" [format]="'MM/dd/yyyy'" placeholder="MM/DD/YYYY">
-                            </kendo-datepicker>
-                        </kendo-formfield>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="valid-certificate-section" formGroupName="validCertificate">
-            <div class="div-header-section">
-                <input type="checkbox"
-                       kendoCheckBox
-                       formControlName="enabled"
-                       class="checkbox-override" />
-                <div class="checkbox-header-level">Valid Certificate</div>
-            </div>
-
-            <div class="div-content-section">
-                <div class="form-column">
-                    <kendo-formfield class="flex-item">
-                        <label kendoLabel for="validationCertificate">
-                            Validation Certificate #
-                        </label>
-                        <input kendoTextBox
-                               id="validationCertificate"
-                               formControlName="validationCertificate"
-                               maxlength="10"
-                               inputmode="numeric"
-                               pattern="[0-9]*"
-                               (keypress)="digitsOnly($event)" />
-                        <kendo-formerror *ngIf="validationCertificateCtrl?.touched && validationCertificateCtrl?.errors?.['maxlength']">
-                            Max 10 digits.
-                        </kendo-formerror>
-                        <kendo-formerror *ngIf="validationCertificateCtrl?.touched && validationCertificateCtrl?.errors?.['pattern']">
-                            Numbers only.
-                        </kendo-formerror>
-                    </kendo-formfield>
-
-                    <kendo-formfield class="flex-item">
-                        <label kendoLabel for="validationStartDate">
-                            Validation Start Date <span class="text-danger asterisk">*</span>
-                        </label>
-                        <kendo-datepicker id="validationStartDate"
-                                          formControlName="validationStartDate"
-                                          [format]="'MM/dd/yyyy'"
-                                          placeholder="MM/DD/YYYY">
-                        </kendo-datepicker>
-                    </kendo-formfield>
-
-                    <kendo-formfield class="flex-item">
-                        <label kendoLabel for="validationEndDate">
-                            Validation End Date <span class="text-danger asterisk">*</span>
-                        </label>
-                        <kendo-datepicker id="validationEndDate"
-                                          formControlName="validationEndDate"
-                                          [format]="'MM/dd/yyyy'"
-                                          placeholder="MM/DD/YYYY">
-                        </kendo-datepicker>
-                    </kendo-formfield>
-                </div>
-            </div>
-        </div>
-        <div class="add-complaint-section" formGroupName="addComplaint">
-            <div class="div-header-section">
-                <input type="checkbox"
-                       kendoCheckBox
-                       formControlName="enabled"
-                       class="checkbox-override" />
-                <div class="checkbox-header-level">Add Complaint</div>
-            </div>
-
-            <div class="div-content-section">
-                <div class="form-column row-one">
-                    <!-- Date of Complaint -->
-                    <kendo-formfield class="flex-item">
-                        <label kendoLabel for="dateOfComplaint">
-                            Date of Complaint <span class="text-danger asterisk">*</span>
-                        </label>
-                        <kendo-datepicker id="dateOfComplaint"
-                                          formControlName="dateOfComplaint"
-                                          [format]="'MM/dd/yyyy'"
-                                          placeholder="MM/DD/YYYY">
-                        </kendo-datepicker>
-                        <kendo-formerror *ngIf="dateOfComplaintCtrl?.touched && dateOfComplaintCtrl?.errors?.['required']">
-                            Date of complaint is required.
-                        </kendo-formerror>
-                    </kendo-formfield>
-
-                    <!-- Is RON Complaint -->
-                    <kendo-formfield class="flex-item checkbox-option">
-                        <input type="checkbox"
-                               kendoCheckBox
-                               id="isRoncomplaint"
-                               formControlName="isRoncomplaint" />
-                        <label kendoLabel for="isRoncomplaint" id="is-ron-complaint">Remote Online Complaint?</label>
-                    </kendo-formfield>
-                </div>
-
-                <div class="form-column">
-                    <!-- Complaint Details -->
-                    <kendo-formfield class="full-width">
-                        <label kendoLabel for="complaintDetails">
-                            Complaint Details <span class="text-danger asterisk">*</span>
-                        </label>
-                        <textarea kendoTextArea
-                                  id="complaintDetails"
-                                  formControlName="complaintDetails"
-                                  rows="4"
-                                  maxlength="200"></textarea>
-                        <kendo-formerror *ngIf="complaintDetailsCtrl?.touched && complaintDetailsCtrl?.errors?.['required']">
-                            Complaint details are required.
-                        </kendo-formerror>
-                        <kendo-formerror *ngIf="complaintDetailsCtrl?.touched && complaintDetailsCtrl?.errors?.['maxlength']">
-                            Max 200 characters.
-                        </kendo-formerror>
-                    </kendo-formfield>
-                </div>
-
-                <div class="form-column">
-                    <!-- Resolution Notes -->
-                    <kendo-formfield class="full-width resolution-override height-override">
-                        <label kendoLabel *ngIf="isResolvedCtrl.value" for="resolutionNotes">
-                            Resolution Notes <span class="text-danger asterisk">*</span>
-                        </label>
-                        <label kendoLabel *ngIf="!isResolvedCtrl.value" for="resolutionNotes">
-                            Resolution Notes <span class="text-normal asterisk">*</span>
-                        </label>
-                        <textarea kendoTextArea
-                                  id="resolutionNotes"
-                                  formControlName="resolutionNotes"
-                                  rows="4"
-                                  maxlength="200"></textarea>
-                        <kendo-formerror *ngIf="resolutionNotesCtrl?.touched && resolutionNotesCtrl?.errors?.['required']">
-                            Resolution notes are required when resolved.
-                        </kendo-formerror>
-                        <kendo-formerror *ngIf="resolutionNotesCtrl?.touched && resolutionNotesCtrl?.errors?.['maxlength']">
-                            Max 200 characters.
-                        </kendo-formerror>
-                    </kendo-formfield>
-                    <div class="resolved-and-date">
-                        <kendo-formfield class="flex-item checkbox-option">
-                            <label kendoLabel for="isResolved" id="is-ron-complaint">Resolved?</label>
-                            <input type="checkbox"
-                                   kendoCheckBox
-                                   id="isResolved"
-                                   formControlName="isResolved" />
-                        </kendo-formfield>
-
-                        <kendo-formfield class="flex-item" *ngIf="isResolvedCtrl.value">
-                            <label kendoLabel for="resolutionDate">
-                                Resolution Date <span class="text-danger asterisk">*</span>
-                            </label>
-                            <kendo-datepicker id="resolutionDate"
-                                              formControlName="resolutionDate"
-                                              [format]="'MM/dd/yyyy'"
-                                              placeholder="MM/DD/YYYY">
-                            </kendo-datepicker>
-                            <kendo-formerror *ngIf="resolutionDateCtrl?.touched && resolutionDateCtrl?.errors?.['required']">
-                                Resolution date is required when resolved.
-                            </kendo-formerror>
-                        </kendo-formfield>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="buttons-row">
-            <button kendoButton
-                    themeColor="primary"
-                    type="button"
-                    class="custom-button-alt"
-                    (click)="onCancel($event)">
-                Cancel
-            </button>
-            <button kendoButton
-                    class="search-button"
-                    themeColor="primary"
-                    type="submit"
-                    [disabled]="submitting || !hasAnySectionEnabled || form.invalid">
-                Save
-            </button>
-        </div>
-    </form>
-</div>
