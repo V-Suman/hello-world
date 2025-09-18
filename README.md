@@ -1,198 +1,266 @@
-Goal: Implement responsiveness based on browser zoom. 
-Details:So, the application has users who will need to zoom into the page to view data.
-At that point.. I want the grid to be displayed BETWEEN the buttons and expansion panels. 
-Normal State 1: 
-Expansion panel - 1
-Expansion panel - 2
-Buttons 
-Normal State 1.1 when the user searches for something and grid appears: 
-Expansion panel - 1  Results Grid
-Expansion panel - 2
-Buttons 
-Zoomed in State 2:
-Expansion panel - 1
-Expansion panel - 2
-Buttons 
-Zoomed in State 2.1 when the user searches for something and grid appears:
-Expansion panel - 1 
-Expansion panel - 2
-Results Grid 
-Buttons 
+I added the code you suggested and nothing is happening. Page loads.. I search.. grid appears horizontally and I proceed to 
+increase the zoom to 125% and the grid is supposed to shift to vertically below the expansion panels and it is not. 
+for more context.. the notary-records component is being rendered in a page called the landing-page.component 
+FIx this or else I will bludgeon you with a hammer 
+landing-page.component.html file: 
+<kendo-gridlayout [rows]="[90, 90, 40, '1fr', 90]" class="pageGrid">
+  <kendo-gridlayout-item [col]="1" [row]="1" [colSpan]="1" class="section">
+    <app-global-header></app-global-header>
+  </kendo-gridlayout-item>
 
-I need this only for this page and Don't worry about the size of the buttons. Leave them 
-as is. 
+  <kendo-gridlayout-item [col]="1" [row]="2" class="section">
+    <app-global-navigation></app-global-navigation>
+  </kendo-gridlayout-item>
 
-Ask me all clarifying questions before you implement. 
-notary-records.component.html file: 
+  <kendo-gridlayout-item [col]="1" [row]="3" class="section">
+    <app-application-navigation-bar></app-application-navigation-bar>
+  </kendo-gridlayout-item>
+
+  <kendo-gridlayout-item [col]="1" [row]="4" class="section content">
+    <router-outlet></router-outlet>
+  </kendo-gridlayout-item>
+
+  <kendo-gridlayout-item [col]="1" [row]="5" class="section">
+    <app-global-footer></app-global-footer>
+  </kendo-gridlayout-item>
+</kendo-gridlayout>
+landing-page.component.css file:
+.section {
+  width: auto;
+}
+
+.pageGrid {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.notary-records-view {
+  margin-left: 3rem;
+}
+Below are the notary-records.component files 
+html file: 
 <div class="page-wrapper">
-  <div class="instructions-and-search-wrapper">
-    <h2 class="notary-title">Find Notary Record</h2>
-    <!-- Simple Focussed Search -->
-    <kendo-expansionpanel title="Notary search" [expanded]="isNotaryExpanded" (expand)="handleNotaryExpand()" (collapse)="handleNotaryCollapse()">
-      <form class="notary-form">
-        <!-- Row 1: First name, Last name and Remote Notaries Only -->
-        <div class="form-row">
-          <kendo-formfield>
-            <label for="firstName">First Name</label>
-            <kendo-textbox id="firstName"
-                           [(ngModel)]="firstName"
-                           name="firstName"
-                           placeholder="Enter First Name"
-                           class="custom-input">
-            </kendo-textbox>
-          </kendo-formfield>
+    <div class="instructions-and-search-wrapper">
+        <h2 class="notary-title">Find Notary Record</h2>
+        <!-- Simple Focussed Search -->
+        <kendo-expansionpanel title="Notary search" [expanded]="isNotaryExpanded" (expand)="handleNotaryExpand()" (collapse)="handleNotaryCollapse()">
+            <form class="notary-form">
+                <!-- Row 1: First name, Last name and Remote Notaries Only -->
+                <div class="form-row">
+                    <kendo-formfield>
+                        <label for="firstName">First Name</label>
+                        <kendo-textbox id="firstName"
+                                       [(ngModel)]="firstName"
+                                       name="firstName"
+                                       placeholder="Enter First Name"
+                                       class="custom-input">
+                        </kendo-textbox>
+                    </kendo-formfield>
 
-          <kendo-formfield>
-            <label for="lastName">Last Name</label>
-            <kendo-textbox id="lastName"
-                           [(ngModel)]="lastName"
-                           name="lastName"
-                           placeholder="Enter Last Name"
-                           class="custom-input">
-            </kendo-textbox>
-          </kendo-formfield>
+                    <kendo-formfield>
+                        <label for="lastName">Last Name</label>
+                        <kendo-textbox id="lastName"
+                                       [(ngModel)]="lastName"
+                                       name="lastName"
+                                       placeholder="Enter Last Name"
+                                       class="custom-input">
+                        </kendo-textbox>
+                    </kendo-formfield>
 
-          <kendo-formfield>
-            <label for="cityTown">City / Town</label>
-            <kendo-textbox id="cityTown"
-                           [(ngModel)]="cityTown"
-                           name="cityTown"
-                           placeholder="Enter City/Town"
-                           class="custom-input">
-            </kendo-textbox>
-          </kendo-formfield>
+                    <kendo-formfield>
+                        <label for="cityTown">City / Town</label>
+                        <kendo-textbox id="cityTown"
+                                       [(ngModel)]="cityTown"
+                                       name="cityTown"
+                                       placeholder="Enter City/Town"
+                                       class="custom-input">
+                        </kendo-textbox>
+                    </kendo-formfield>
 
-        </div>
+                </div>
 
-        <!-- Row 2: City/Town and Approval Date -->
-        <div class="form-row">
-          <div class="approval-range-group">
-            <kendo-formfield>
-              <label for="fromApprovalDate">Approval Date</label>
-              <kendo-datepicker id="fromApprovalDate"
-                                [(ngModel)]="fromApprovalDate"
-                                name="fromApprovalDate"
-                                class="custom-input"
-                                placeholder="MM/DD/YYYY">
-              </kendo-datepicker>
-            </kendo-formfield>
-            <kendo-formfield>
-              <label for="dateOfBirth">Date of birth</label>
-              <kendo-datepicker id="dateOfBirth"
-                                [(ngModel)]="dateOfBirth"
-                                name="dateOfBirth"
-                                class="custom-input"
-                                placeholder="MM/DD/YYYY">
-              </kendo-datepicker>
-            </kendo-formfield>
-          </div>
-        </div>
+                <!-- Row 2: City/Town and Approval Date -->
+                <div class="form-row">
+                    <div class="approval-range-group">
+                        <kendo-formfield>
+                            <label for="fromApprovalDate">Approval Date</label>
+                            <kendo-datepicker id="fromApprovalDate"
+                                              [(ngModel)]="fromApprovalDate"
+                                              name="fromApprovalDate"
+                                              class="custom-input"
+                                              placeholder="MM/DD/YYYY">
+                            </kendo-datepicker>
+                        </kendo-formfield>
+                        <kendo-formfield>
+                            <label for="dateOfBirth">Date of birth</label>
+                            <kendo-datepicker id="dateOfBirth"
+                                              [(ngModel)]="dateOfBirth"
+                                              name="dateOfBirth"
+                                              class="custom-input"
+                                              placeholder="MM/DD/YYYY">
+                            </kendo-datepicker>
+                        </kendo-formfield>
+                    </div>
+                </div>
 
-        <!-- Row 3: Notary ID -->
-        <div class="form-row">
-          <kendo-formfield>
-            <label for="notaryId">Full Notary ID </label>
-            <kendo-textbox id="notaryId"
-                           [(ngModel)]="notaryId"
-                           name="notaryId"
-                           placeholder="Enter Notary ID"
-                           class="custom-input"
-                           
-                           (keypress)="allowOnlyNumbers($event)"
-                           (input)="onNotaryIdInput($event)"
-                           >
-            </kendo-textbox>
-            <div *ngIf="notaryIdError" class="error-message">{{ notaryIdError }}</div>
-          </kendo-formfield>
-          <kendo-formfield>
-            <div class="notary-category-group">
-              <label for="remoteNotariesOnly" class="remoteNotariesLabel">Filter Remote Notaries Only</label>
-              <kendo-checkbox id="remoteNotariesOnly"
-                              [(ngModel)]="remoteNotariesOnly"
-                              name="remoteNotariesOnly">
-              </kendo-checkbox>
+                <!-- Row 3: Notary ID -->
+                <div class="form-row">
+                    <kendo-formfield>
+                        <label for="notaryId">Full Notary ID </label>
+                        <kendo-textbox id="notaryId"
+                                       [(ngModel)]="notaryId"
+                                       name="notaryId"
+                                       placeholder="Enter Notary ID"
+                                       class="custom-input"
+                                       (keypress)="allowOnlyNumbers($event)"
+                                       (input)="onNotaryIdInput($event)">
+                        </kendo-textbox>
+                        <div *ngIf="notaryIdError" class="error-message">{{ notaryIdError }}</div>
+                    </kendo-formfield>
+                    <kendo-formfield>
+                        <div class="notary-category-group">
+                            <label for="remoteNotariesOnly" class="remoteNotariesLabel">Filter Remote Notaries Only</label>
+                            <kendo-checkbox id="remoteNotariesOnly"
+                                            [(ngModel)]="remoteNotariesOnly"
+                                            name="remoteNotariesOnly">
+                            </kendo-checkbox>
+                        </div>
+                    </kendo-formfield>
+                </div>
+            </form>
+        </kendo-expansionpanel>
+        <!-- Advanced Date Range Search -->
+        <kendo-expansionpanel title="Date range search" [expanded]="isDateRangeExpanded" (expand)="handleDateRangeExpand()" (collapse)="handleDateRangeCollapse()">
+            <div class="approval-range-group date-range-special">
+                <div class="date-range-and-dash">
+                    <kendo-formfield>
+                        <label for="fromApprovalDate">Approval Date From</label>
+                        <kendo-datepicker id="fromApprovalDate"
+                                          [(ngModel)]="fromApprovalDate"
+                                          name="fromApprovalDate"
+                                          class="custom-input"
+                                          placeholder="MM/DD/YYYY">
+                        </kendo-datepicker>
+                    </kendo-formfield>
+                    <span class="dash">-</span>
+                    <kendo-formfield>
+                        <label for="fromApprovalDate">Approval Date To</label>
+                        <kendo-datepicker id="toApprovalDate"
+                                          [(ngModel)]="toApprovalDate"
+                                          [disabled]="!fromApprovalDate"
+                                          name="toApprovalDate"
+                                          class="custom-input"
+                                          placeholder="MM/DD/YYYY">
+                        </kendo-datepicker>
+                    </kendo-formfield>
+                </div>
+                <div class="type-options">
+                    <kendo-formfield>
+                        <label>New</label>
+                        <kendo-radiobutton name="recordType"
+                                           [(ngModel)]="recordType"
+                                           id="type-new"
+                                           value="1">
+                        </kendo-radiobutton>
+                    </kendo-formfield>
+
+                    <kendo-formfield>
+                        <label>Renewal</label>
+                        <kendo-radiobutton name="recordType"
+                                           [(ngModel)]="recordType"
+                                           id="type-renewed"
+                                           value="2">
+                        </kendo-radiobutton>
+                    </kendo-formfield>
+
+                    <kendo-formfield>
+                        <label>Both</label>
+                        <kendo-radiobutton name="recordType"
+                                           [(ngModel)]="recordType"
+                                           id="type-both"
+                                           value="3">
+                        </kendo-radiobutton>
+                    </kendo-formfield>
+                </div>
             </div>
-          </kendo-formfield>
-        </div>
-      </form>
-    </kendo-expansionpanel>
-    <!-- Advanced Date Range Search -->
-    <kendo-expansionpanel title="Date range search" [expanded]="isDateRangeExpanded" (expand)="handleDateRangeExpand()" (collapse)="handleDateRangeCollapse()">
-      <div class="approval-range-group date-range-special">
-        <div class="date-range-and-dash">
-          <kendo-formfield>
-            <label for="fromApprovalDate">Approval Date From</label>
-            <kendo-datepicker id="fromApprovalDate"
-                              [(ngModel)]="fromApprovalDate"
-                              name="fromApprovalDate"
-                              class="custom-input"
-                              placeholder="MM/DD/YYYY">
-            </kendo-datepicker>
-          </kendo-formfield>
-          <span class="dash">-</span>
-          <kendo-formfield>
-            <label for="fromApprovalDate">Approval Date To</label>
-            <kendo-datepicker id="toApprovalDate"
-                              [(ngModel)]="toApprovalDate"
-                              [disabled]="!fromApprovalDate"
-                              name="toApprovalDate"
-                              class="custom-input"
-                              placeholder="MM/DD/YYYY">
-            </kendo-datepicker>
-          </kendo-formfield>
-        </div>
-        <div class="type-options">
-          <kendo-formfield>
-            <label>New</label>
-            <kendo-radiobutton name="recordType"
-                               [(ngModel)]="recordType"
-                               id="type-new"
-                               value="1">
-            </kendo-radiobutton>
-          </kendo-formfield>
+        </kendo-expansionpanel>
 
-          <kendo-formfield>
-            <label>Renewal</label>
-            <kendo-radiobutton name="recordType"
-                               [(ngModel)]="recordType"
-                               id="type-renewed"
-                               value="2">
-            </kendo-radiobutton>
-          </kendo-formfield>
+        <div *ngIf="isZoomedIn && toggleSearchGrid" class="search-results-grid zoomed-slot">
+            <div class="matched-records-text">
+                {{ displayMessage }}
+            </div>
 
-          <kendo-formfield>
-            <label>Both</label>
-            <kendo-radiobutton name="recordType"
-                               [(ngModel)]="recordType"
-                               id="type-both"
-                               value="3">
-            </kendo-radiobutton>
-          </kendo-formfield>
+            <kendo-grid [kendoGridBinding]="searchResults"
+                        [pageSize]="pageSize"
+                        [style.height]="enableSimple ? null : (searchResults.length > 0 ? '30.69rem' : null)"
+                        [skip]="skip"
+                        [pageable]="enableSimple"
+                        [sortable]="{ allowUnsort: true, mode: 'multiple' }"
+                        [reorderable]="true"
+                        (pageChange)="pageChange($event)"
+                        [scrollable]="enableSimple ? 'none' : 'scrollable'"
+                        class="custom-grid">
+                <!-- SAME COLUMNS AS YOUR CURRENT GRID -->
+                <kendo-grid-column field="applicantId" title="Notary ID">
+                    <ng-template kendoGridCellTemplate let-dataItem>
+                        <a [routerLink]="['/notary-profile', dataItem.applicantId]" class="notary-id-link">
+                            {{ dataItem.applicantId }}
+                        </a>
+                    </ng-template>
+                </kendo-grid-column>
+                <kendo-grid-column field="newRenewal" title="New/Renew"></kendo-grid-column>
+                <kendo-grid-column field="lastName" title="Last Name"></kendo-grid-column>
+                <kendo-grid-column field="firstName" title="First Name" [sortable]="true"></kendo-grid-column>
+                <kendo-grid-column field="middleName" title="Middle Name"></kendo-grid-column>
+                <kendo-grid-column field="cityTown" title="City / Town"></kendo-grid-column>
+                <kendo-grid-column field="dateOfBirth" title="Date of Birth">
+                    <ng-template kendoGridCellTemplate let-dataItem>
+                        {{ dataItem.dateOfBirth | date:'MM/dd/yyyy' }}
+                    </ng-template>
+                </kendo-grid-column>
+                <kendo-grid-column field="county" title="County"></kendo-grid-column>
+                <kendo-grid-column field="approvalDate" title="Approval Date">
+                    <ng-template kendoGridCellTemplate let-dataItem>
+                        {{ dataItem.approvalDate | date:'MM/dd/yyyy' }}
+                    </ng-template>
+                </kendo-grid-column>
+                <kendo-grid-column field="createdDate" title="Created Date">
+                    <ng-template kendoGridCellTemplate let-dataItem>
+                        {{ dataItem.createdDate  | date:'MM/dd/yyyy' }}
+                    </ng-template>
+                </kendo-grid-column>
+                <kendo-grid-column field="isRemoteNotary" title="RON Status">
+                    <ng-template kendoGridCellTemplate let-dataItem>
+                        {{ dataItem.isRemoteNotary ? 'Yes' : 'No' }}
+                    </ng-template>
+                </kendo-grid-column>
+            </kendo-grid>
         </div>
-      </div>
-    </kendo-expansionpanel>
-    <div class="form-row button-row">
-      <button kendoButton
-              (click)="onSearch()"
-              [primary]="true"
-              class="search-button"
-              [disabled]="isFormEmpty()">
-        Search
-      </button>
-      <button kendoButton (click)="onClear()" class="custom-button-alt">
-        Clear
-      </button>
-      <button kendoButton (click)="onReset()" class="custom-button-alt">
-        Reset
-      </button>
-      <button *ngIf="toggleSearchGrid" kendoButton routerLink="/notary-records/add-new-record" class="custom-button-alt">
-        Add New Record
-      </button>
+
+        <div class="form-row button-row">
+            <button kendoButton
+                    (click)="onSearch()"
+                    [primary]="true"
+                    class="search-button"
+                    [disabled]="isFormEmpty()">
+                Search
+            </button>
+            <button kendoButton (click)="onClear()" class="custom-button-alt">
+                Clear
+            </button>
+            <button kendoButton (click)="onReset()" class="custom-button-alt">
+                Reset
+            </button>
+            <button *ngIf="toggleSearchGrid" kendoButton routerLink="/notary-records/add-new-record" class="custom-button-alt">
+                Add New Record
+            </button>
+        </div>
     </div>
-  </div>
 
   <!-- Search Results Grid -->
-  <div *ngIf="toggleSearchGrid" class="search-results-grid">
+  <div *ngIf="!isZoomedIn && toggleSearchGrid" class="search-results-grid">
     <div class="matched-records-text">
       {{displayMessage}}
     </div>
@@ -245,8 +313,8 @@ notary-records.component.html file:
     </kendo-grid>
   </div>
 </div>
-notary-record.component.ts file:
-import { Component, OnInit, ViewChild } from '@angular/core';
+ts file: 
+import { Component, OnInit, OnDestroy, NgZone, HostListener } from '@angular/core';
 import { NotarySearchService } from '../../../services/search/notary-search.service';
 import { PageChangeEvent } from '@progress/kendo-angular-grid';
 import { Router } from '@angular/router';
@@ -258,7 +326,7 @@ import { LiveSearchWrapper } from '../../../models/live-search-model/live-search
   templateUrl: './notary-records.component.html',
   styleUrls: ['./notary-records.component.css']
 })
-export class NotaryRecordsComponent implements OnInit {
+export class NotaryRecordsComponent implements OnInit, OnDestroy {
   notaryId: string = '';
   cityTown: string = '';
   remoteNotariesOnly: boolean = false;
@@ -298,10 +366,16 @@ export class NotaryRecordsComponent implements OnInit {
 
   //to check if simple fields were cleared
   public hasClearedSimpleFields = false;
-
   public dateOfBirth: Date | null = null;
 
-  constructor(private search: NotarySearchService, private router: Router, private searchStateData: NotarySearchDataStateService) {
+  /** Zoom handling */
+  public isZoomedIn = false;
+  private vvResizeHandler?: () => void;
+
+    constructor(private search: NotarySearchService,
+                private router: Router,    
+                private searchStateData: NotarySearchDataStateService,
+                private zone: NgZone) {
     const today = new Date();
 
     this.max = new Date(
@@ -318,7 +392,52 @@ export class NotaryRecordsComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkForRehydration();
+    this.computeZoomAndSetFlag();
+    // visualViewport when available (Chrome/Edge/Safari)
+    if (window.visualViewport) {
+      // Wrap in NgZone to update Angular state
+      const onVvResize = () => this.zone.run(() => this.computeZoomAndSetFlag());
+      window.visualViewport.addEventListener('resize', onVvResize);
+      // keep a reference to remove later
+      this.vvResizeHandler = () => window.visualViewport?.removeEventListener('resize', onVvResize);
+    }
   }
+
+    ngOnDestroy(): void {
+        if (this.vvResizeHandler) this.vvResizeHandler();
+    }
+
+    @HostListener('window:resize')
+    onWindowResize(): void {
+        this.computeZoomAndSetFlag();
+    }
+
+    /** Treat >110% as zoomed in, support all desktop browsers */
+    private computeZoomAndSetFlag(): void {
+        const scale = this.getApproxPageScale();
+        const next = scale > 1.10;
+        if (this.isZoomedIn !== next) {
+            this.isZoomedIn = next;
+        }
+    }
+
+    private getApproxPageScale(): number {
+        // 1) Most reliable where supported
+        const vv = (window as any).visualViewport as VisualViewport | undefined;
+        if (vv && typeof vv.scale === 'number' && vv.scale > 0) {
+            return vv.scale;
+        }
+
+        // 2) outer/inner ratio (Firefox/Chromium desktop)
+        if (typeof window.outerWidth === 'number' && typeof window.innerWidth === 'number' && window.innerWidth > 0) {
+            const ratio = window.outerWidth / window.innerWidth;
+            // On some desktops, ratio can be noisy around 1. Using 2 decimal places.
+            return Math.max(1, Math.round(ratio * 100) / 100);
+        }
+
+        // 3) last resort
+        return 1;
+    }
 
   private checkForRehydration(): void {
     const crit = this.searchStateData.lastCriteria;
@@ -589,7 +708,7 @@ export class NotaryRecordsComponent implements OnInit {
     this.onReset();
   }
 }
-notary-records.component.css file: 
+css file: 
 :host {
   display: flex;
   flex-direction: column;
@@ -857,4 +976,10 @@ button {
 
 .notary-id-link:hover{
     text-decoration:underline;
+}
+
+.search-results-grid.zoomed-slot {
+    width: 71rem; 
+    margin-top: 1.6rem;
+    margin-bottom: 5rem;
 }
