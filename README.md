@@ -1,15 +1,14 @@
-Goal: To edit the functionality of the Get County & District Button 
-Details: I added 3 new items to the existing add-new-record flow which are the county name, district name 
-and a button called Get County & District. Now.. ideally I should be binding the Get County & District button
-to some (click) handler for it to do anything. But.. if I click the button.. suddenly the form validators are firing 
-Fix this issue. Form validators should not be fired. Furthermore.. if I click on the Get County and District 
-button belonging to business address the Form validators for residence are getting fired. LIke what? 
+THis worked for the most parts.. but the one issue I still have left is.. 
+When the page loads.. the county name and district name input fields are clickable and when you click outside once
+you click on any of the county or district name there is a red border for those elements. 
+HEre is how I want it. 
+When the page loads.. the county name, district name input elements should be disabled.. and they should not 
+contain any value with them and should instead have a placeholder. 
+One more thing to fix is.. I want the submit button to be enabled only if the county name and district name 
+are filled with SOME values. 
 
-Also.. it throws 5 of the same error in the console saying "Error: The `kendo-formfield` component should contain only one control of type NgControl with a formControlName"
-
-Ask me clarifying questions before you implement. Fix these things else I will bludgeon you with a jackhammer
-
-Html file: 
+Ask me clarifying questions before you get started. 
+html file: 
 <div class="page-wrapper">
   <div class="first-row"><h2>{{viewHeading}}</h2><div class="required-indicator"><div class="asterisk">*</div><div class="required-indicator-text"> - Required fields</div></div></div>
   <!--<button kendoButton (click)="testDupeMatchDialog()">Invoke Dupe Match Dialog</button>-->
@@ -431,21 +430,48 @@ Html file:
                       County Name
                       <sup class="text-danger" [class.disable-super]="preferred==='Business'">*</sup>
                   </label>
-                  <input kendoTextBox id="county-name" placeholder="County Name" />
+                  <input kendoTextBox
+                         formControlName="countyName"
+                         id="county-name-res"
+                         placeholder="County Name"
+                         [readonly]="true" />
+                  <div class="error-message">
+                      <span *ngIf="submittedAddress && preferred==='Residence' && addressForm.get('residenceAddress.countyName')?.hasError('required')">
+                          County is required.
+                      </span>
+                  </div>
               </kendo-formfield>
+
               <kendo-formfield class="flex-item">
                   <label class="label-and-asterisk" kendoLabel>
                       District Name
                       <sup class="text-danger" [class.disable-super]="preferred==='Business'">*</sup>
                   </label>
-                  <input kendoTextBox id="district-name" placeholder="District Name" />
+                  <input kendoTextBox
+                         formControlName="districtName"
+                         id="district-name-res"
+                         placeholder="District Name"
+                         [readonly]="true" />
+                  <div class="error-message">
+                      <span *ngIf="submittedAddress && preferred==='Residence' && addressForm.get('residenceAddress.districtName')?.hasError('required')">
+                          District is required.
+                      </span>
+                  </div>
               </kendo-formfield>
-              <kendo-formfield class="flex-item">
+
+              <!-- Button OUTSIDE of kendo-formfield; type=button to avoid submit/validation -->
+              <div class="flex-item">
                   <label class="label-and-asterisk" kendoLabel>
                       <sup class="text-danger disable-super">*</sup>
                   </label>
-                  <button kendoButton class="btn-next width-modifier">Get County & District</button>
-              </kendo-formfield>
+                  <button kendoButton
+                          type="button"
+                          class="btn-next width-modifier"
+                          [disabled]="!resCanFetch"
+                          (click)="onGetResidenceCountyDistrict()">
+                      Get County &amp; District
+                  </button>
+              </div>
           </div>
         </div>
       </div>
@@ -623,21 +649,48 @@ Html file:
                           County Name
                           <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
                       </label>
-                      <input kendoTextBox id="county-name" placeholder="County Name" />
+                      <input kendoTextBox
+                             formControlName="countyName"
+                             id="county-name-bus"
+                             placeholder="County Name"
+                             [readonly]="true" />
+                      <div class="error-message">
+                          <span *ngIf="submittedAddress && preferred==='Business' && addressForm.get('businessAddress.countyName')?.hasError('required')">
+                              County is required.
+                          </span>
+                      </div>
                   </kendo-formfield>
+
                   <kendo-formfield class="flex-item">
                       <label class="label-and-asterisk" kendoLabel>
                           District Name
                           <sup class="text-danger" [class.disable-super]="preferred==='Residence'">*</sup>
                       </label>
-                      <input kendoTextBox id="district-name" placeholder="District Name" />
+                      <input kendoTextBox
+                             formControlName="districtName"
+                             id="district-name-bus"
+                             placeholder="District Name"
+                             [readonly]="true" />
+                      <div class="error-message">
+                          <span *ngIf="submittedAddress && preferred==='Business' && addressForm.get('businessAddress.districtName')?.hasError('required')">
+                              District is required.
+                          </span>
+                      </div>
                   </kendo-formfield>
-                  <kendo-formfield class="flex-item">
+
+                  <!-- Button OUTSIDE of kendo-formfield; type=button to avoid submit/validation -->
+                  <div class="flex-item">
                       <label class="label-and-asterisk" kendoLabel>
                           <sup class="text-danger disable-super">*</sup>
                       </label>
-                      <button kendoButton class="btn-next width-modifier">Get County & District</button>
-                  </kendo-formfield>
+                      <button kendoButton
+                              type="button"
+                              class="btn-next width-modifier"
+                              [disabled]="!busCanFetch"
+                              (click)="onGetBusinessCountyDistrict()">
+                          Get County &amp; District
+                      </button>
+                  </div>
               </div>
           </div>
       </div>
@@ -657,7 +710,7 @@ Html file:
                       (edit)="onDuplicateEdit()"
                       (ignore)="onDuplicateIgnore()">
 </app-existing-records>
-ts file: 
+ts file:
 import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
@@ -829,7 +882,9 @@ export class AddNewRecordComponent implements OnInit {
         isPoBox: [false],
         zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
         zipPlus: ['', Validators.pattern(/^$|^\d{2,4}$/)],
-        cityTown: ['']
+        cityTown: [''],
+          countyName: [''],
+          districtName: ['']   
       }, { validators: this.streetValidator() }),
 
       // Business sub‐group
@@ -842,7 +897,9 @@ export class AddNewRecordComponent implements OnInit {
         isPoBox: [false],
         zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
         zipPlus: ['', Validators.pattern(/^$|^\d{2,4}$/)],
-        cityTown: ['']
+        cityTown: [''],
+          countyName: [''],
+          districtName: ['']   
       }, { validators: this.streetValidator() })
     });
 
@@ -1001,7 +1058,44 @@ export class AddNewRecordComponent implements OnInit {
       resGroup.setValidators(this.optionalGroupValidator('residenceAddress'));
       resGroup.updateValueAndValidity({ onlySelf: true, emitEvent: false });
     }
+      // Make county/district required ONLY on the preferred group; clear on the other.
+      const on = pref === 'Residence' ? resGroup : busGroup;
+      const off = pref === 'Residence' ? busGroup : resGroup;
+
+      // Turn ON required for preferred
+      on.get('countyName')!.setValidators([Validators.required]);
+      on.get('districtName')!.setValidators([Validators.required]);
+      on.get('countyName')!.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+      on.get('districtName')!.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+
+      // Turn OFF required for the non-preferred
+      off.get('countyName')!.clearValidators();
+      off.get('districtName')!.clearValidators();
+      off.get('countyName')!.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+      off.get('districtName')!.updateValueAndValidity({ onlySelf: true, emitEvent: false });
   }
+
+    get resCanFetch(): boolean {
+        const g = this.addressForm.get('residenceAddress') as FormGroup;
+        return !!g?.get('street1')?.value?.toString().trim()
+            && !!g?.get('street2')?.value?.toString().trim()
+            && g?.get('cityTown')?.valid === true
+            && g?.get('zipCode')?.valid === true;
+    }
+
+    get busCanFetch(): boolean {
+        const g = this.addressForm.get('businessAddress') as FormGroup;
+        return !!g?.get('street1')?.value?.toString().trim()
+            && !!g?.get('street2')?.value?.toString().trim()
+            && g?.get('cityTown')?.valid === true
+            && g?.get('zipCode')?.valid === true;
+    }
+
+    public onGetResidenceCountyDistrict(): void {
+    }
+
+    public onGetBusinessCountyDistrict(): void {
+    }
 
   public onSubmit(): void {
     this.submitted = true;
