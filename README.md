@@ -1,985 +1,969 @@
-I added the code you suggested and nothing is happening. Page loads.. I search.. grid appears horizontally and I proceed to 
-increase the zoom to 125% and the grid is supposed to shift to vertically below the expansion panels and it is not. 
-for more context.. the notary-records component is being rendered in a page called the landing-page.component 
-FIx this or else I will bludgeon you with a hammer 
-landing-page.component.html file: 
-<kendo-gridlayout [rows]="[90, 90, 40, '1fr', 90]" class="pageGrid">
-  <kendo-gridlayout-item [col]="1" [row]="1" [colSpan]="1" class="section">
-    <app-global-header></app-global-header>
-  </kendo-gridlayout-item>
-
-  <kendo-gridlayout-item [col]="1" [row]="2" class="section">
-    <app-global-navigation></app-global-navigation>
-  </kendo-gridlayout-item>
-
-  <kendo-gridlayout-item [col]="1" [row]="3" class="section">
-    <app-application-navigation-bar></app-application-navigation-bar>
-  </kendo-gridlayout-item>
-
-  <kendo-gridlayout-item [col]="1" [row]="4" class="section content">
-    <router-outlet></router-outlet>
-  </kendo-gridlayout-item>
-
-  <kendo-gridlayout-item [col]="1" [row]="5" class="section">
-    <app-global-footer></app-global-footer>
-  </kendo-gridlayout-item>
-</kendo-gridlayout>
-landing-page.component.css file:
-.section {
-  width: auto;
+Goal: Search the getNotaryProfile response object and enable the respective tooltip based on a property. 
+Details: Currently the getNotaryProfile response object looks like this 
+{
+    "emailAddress": null,
+    "personalInfoDetails": {
+        "salutationTypeId": 3,
+        "salutationType": "Mr.",
+        "firstName": "Stephen",
+        "middleName": "A.",
+        "lastName": "Mangano",
+        "suffix": null,
+        "dateOfBirth": "1960-09-20T00:00:00",
+        "applicantId": 1104,
+        "notaryIdentifier": 1104,
+        "dateOfDeath": null,
+        "addressDetails": [
+            {
+                "addressId": 273077,
+                "applicantId": 1104,
+                "addressTypeId": 1,
+                "addressType": "Residential",
+                "isPrefered": true,
+                "isPoBox": false,
+                "streetNumber": "29",
+                "streetName": "Tower Hill Rd",
+                "aptNumber": "",
+                "addressLine2": null,
+                "zipCode": "01864",
+                "zipPlus": null,
+                "city": "North Reading",
+                "county": "Middlesex",
+                "district": "Fifth District",
+                "stateId": 20,
+                "state": "MA"
+            }
+        ],
+        "contactDetails": [
+            {
+                "contactTypeId": 1,
+                "contactType": "Phone",
+                "contactId": 4102,
+                "applicantId": 1104,
+                "contactValue": "5089822868",
+                "isPrimary": true
+            },
+            {
+                "contactTypeId": 1,
+                "contactType": "Phone",
+                "contactId": 201184,
+                "applicantId": 1104,
+                "contactValue": "9789822868",
+                "isPrimary": false
+            }
+        ]
+    },
+    "accountDetails": {
+        "accountId": 12828,
+        "applicantId": 1104,
+        "accountStatusId": 2,
+        "accountStatus": "Active",
+        "approvalDate": "2022-10-12T00:00:00",
+        "expirationDate": "2029-10-12T00:00:00",
+        "hasResigned": false,
+        "resignationDate": null,
+        "isRemoteNotary": false
+    },
+    "applicationDetails": {
+        "applicationId": 1555,
+        "applicantId": 1104,
+        "applicationType": null,
+        "applicationTypeId": 2,
+        "applicationDate": "2022-11-23T11:11:06.47",
+        "applicationStatusDate": null,
+        "applicationStatus": "Completed",
+        "applicationStatusId": 15,
+        "nextApplicationStatusId": null,
+        "applicationNextStep": "",
+        "exceptionApplicationStatusId": null,
+        "exceptionApplicationStatus": "",
+        "approvalDate": "2022-10-12",
+        "dueDate": "2023-01-12",
+        "applicationStatusToolTip": "",
+        "isRONApproved": false,
+        "roN_Partners": null
+    },
+    "hasActiveComplaints": false,
+    "displayControls": [
+        {
+            "controlID": 6,
+            "displayText": "Apply to become a Remote Online Notary",
+            "visible": true,
+            "enabled": true,
+            "displaySequence": 4
+        },
+        {
+            "controlID": 4,
+            "displayText": "Update Login Information",
+            "visible": true,
+            "enabled": true,
+            "displaySequence": 6
+        },
+        {
+            "controlID": 5,
+            "displayText": "Update Profile Information",
+            "visible": true,
+            "enabled": true,
+            "displaySequence": 7
+        }
+    ]
 }
+inside the response.. there is the personalInfoDetails which has the addressDetails object 
+which can contain at most 2 addresses business and residential. Oout of which one of them will 
+have the flag isPrefered as true and the other one will have false. 
 
-.pageGrid {
-  width: 100%;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
+We need to see which address has the value as true and enable that tooltip boolean. 
+
+For the above example.. there is only one address and that address has the property isPrefered
+as true and that address is residential. So.. we set the showResidentialToolTip as true. 
+
+{
+    "emailAddress": null,
+    "personalInfoDetails": {
+        "salutationTypeId": 3,
+        "salutationType": "Mr.",
+        "firstName": "Stephen",
+        "middleName": "A.",
+        "lastName": "Mangano",
+        "suffix": null,
+        "dateOfBirth": "1960-09-20T00:00:00",
+        "applicantId": 1104,
+        "notaryIdentifier": 1104,
+        "dateOfDeath": null,
+        "addressDetails": [
+            {
+                "addressId": 273077,
+                "applicantId": 1104,
+                "addressTypeId": 1,
+                "addressType": "Residential",
+                "isPrefered": false,
+                "isPoBox": false,
+                "streetNumber": "29",
+                "streetName": "Tower Hill Rd",
+                "aptNumber": "",
+                "addressLine2": null,
+                "zipCode": "01864",
+                "zipPlus": null,
+                "city": "North Reading",
+                "county": "Middlesex",
+                "district": "Fifth District",
+                "stateId": 20,
+                "state": "MA"
+            },
+			{
+                "addressId": 273047,
+                "applicantId": 1104,
+                "addressTypeId": 2,
+                "addressType": "Business",
+                "isPrefered": true,
+                "isPoBox": false,
+                "streetNumber": "10",
+                "streetName": "Bodda Hill Rd",
+                "aptNumber": "",
+                "addressLine2": null,
+                "zipCode": "01864",
+                "zipPlus": null,
+                "city": "North Reading",
+                "county": "Middlesex",
+                "district": "Fifth District",
+                "stateId": 20,
+                "state": "MA"
+            },
+        ],
+        "contactDetails": [
+            {
+                "contactTypeId": 1,
+                "contactType": "Phone",
+                "contactId": 4102,
+                "applicantId": 1104,
+                "contactValue": "5089822868",
+                "isPrimary": true
+            },
+            {
+                "contactTypeId": 1,
+                "contactType": "Phone",
+                "contactId": 201184,
+                "applicantId": 1104,
+                "contactValue": "9789822868",
+                "isPrimary": false
+            }
+        ]
+    },
+    "accountDetails": {
+        "accountId": 12828,
+        "applicantId": 1104,
+        "accountStatusId": 2,
+        "accountStatus": "Active",
+        "approvalDate": "2022-10-12T00:00:00",
+        "expirationDate": "2029-10-12T00:00:00",
+        "hasResigned": false,
+        "resignationDate": null,
+        "isRemoteNotary": false
+    },
+    "applicationDetails": {
+        "applicationId": 1555,
+        "applicantId": 1104,
+        "applicationType": null,
+        "applicationTypeId": 2,
+        "applicationDate": "2022-11-23T11:11:06.47",
+        "applicationStatusDate": null,
+        "applicationStatus": "Completed",
+        "applicationStatusId": 15,
+        "nextApplicationStatusId": null,
+        "applicationNextStep": "",
+        "exceptionApplicationStatusId": null,
+        "exceptionApplicationStatus": "",
+        "approvalDate": "2022-10-12",
+        "dueDate": "2023-01-12",
+        "applicationStatusToolTip": "",
+        "isRONApproved": false,
+        "roN_Partners": null
+    },
+    "hasActiveComplaints": false,
+    "displayControls": [
+        {
+            "controlID": 6,
+            "displayText": "Apply to become a Remote Online Notary",
+            "visible": true,
+            "enabled": true,
+            "displaySequence": 4
+        },
+        {
+            "controlID": 4,
+            "displayText": "Update Login Information",
+            "visible": true,
+            "enabled": true,
+            "displaySequence": 6
+        },
+        {
+            "controlID": 5,
+            "displayText": "Update Profile Information",
+            "visible": true,
+            "enabled": true,
+            "displaySequence": 7
+        }
+    ]
 }
+In the above example there are 2 addresses and one of the address has isPrefered as true and 
+we set that address's tooltip as true which is business.
 
-.notary-records-view {
-  margin-left: 3rem;
-}
-Below are the notary-records.component files 
-html file: 
-<div class="page-wrapper">
-    <div class="instructions-and-search-wrapper">
-        <h2 class="notary-title">Find Notary Record</h2>
-        <!-- Simple Focussed Search -->
-        <kendo-expansionpanel title="Notary search" [expanded]="isNotaryExpanded" (expand)="handleNotaryExpand()" (collapse)="handleNotaryCollapse()">
-            <form class="notary-form">
-                <!-- Row 1: First name, Last name and Remote Notaries Only -->
-                <div class="form-row">
-                    <kendo-formfield>
-                        <label for="firstName">First Name</label>
-                        <kendo-textbox id="firstName"
-                                       [(ngModel)]="firstName"
-                                       name="firstName"
-                                       placeholder="Enter First Name"
-                                       class="custom-input">
-                        </kendo-textbox>
-                    </kendo-formfield>
-
-                    <kendo-formfield>
-                        <label for="lastName">Last Name</label>
-                        <kendo-textbox id="lastName"
-                                       [(ngModel)]="lastName"
-                                       name="lastName"
-                                       placeholder="Enter Last Name"
-                                       class="custom-input">
-                        </kendo-textbox>
-                    </kendo-formfield>
-
-                    <kendo-formfield>
-                        <label for="cityTown">City / Town</label>
-                        <kendo-textbox id="cityTown"
-                                       [(ngModel)]="cityTown"
-                                       name="cityTown"
-                                       placeholder="Enter City/Town"
-                                       class="custom-input">
-                        </kendo-textbox>
-                    </kendo-formfield>
-
-                </div>
-
-                <!-- Row 2: City/Town and Approval Date -->
-                <div class="form-row">
-                    <div class="approval-range-group">
-                        <kendo-formfield>
-                            <label for="fromApprovalDate">Approval Date</label>
-                            <kendo-datepicker id="fromApprovalDate"
-                                              [(ngModel)]="fromApprovalDate"
-                                              name="fromApprovalDate"
-                                              class="custom-input"
-                                              placeholder="MM/DD/YYYY">
-                            </kendo-datepicker>
-                        </kendo-formfield>
-                        <kendo-formfield>
-                            <label for="dateOfBirth">Date of birth</label>
-                            <kendo-datepicker id="dateOfBirth"
-                                              [(ngModel)]="dateOfBirth"
-                                              name="dateOfBirth"
-                                              class="custom-input"
-                                              placeholder="MM/DD/YYYY">
-                            </kendo-datepicker>
-                        </kendo-formfield>
-                    </div>
-                </div>
-
-                <!-- Row 3: Notary ID -->
-                <div class="form-row">
-                    <kendo-formfield>
-                        <label for="notaryId">Full Notary ID </label>
-                        <kendo-textbox id="notaryId"
-                                       [(ngModel)]="notaryId"
-                                       name="notaryId"
-                                       placeholder="Enter Notary ID"
-                                       class="custom-input"
-                                       (keypress)="allowOnlyNumbers($event)"
-                                       (input)="onNotaryIdInput($event)">
-                        </kendo-textbox>
-                        <div *ngIf="notaryIdError" class="error-message">{{ notaryIdError }}</div>
-                    </kendo-formfield>
-                    <kendo-formfield>
-                        <div class="notary-category-group">
-                            <label for="remoteNotariesOnly" class="remoteNotariesLabel">Filter Remote Notaries Only</label>
-                            <kendo-checkbox id="remoteNotariesOnly"
-                                            [(ngModel)]="remoteNotariesOnly"
-                                            name="remoteNotariesOnly">
-                            </kendo-checkbox>
-                        </div>
-                    </kendo-formfield>
-                </div>
-            </form>
-        </kendo-expansionpanel>
-        <!-- Advanced Date Range Search -->
-        <kendo-expansionpanel title="Date range search" [expanded]="isDateRangeExpanded" (expand)="handleDateRangeExpand()" (collapse)="handleDateRangeCollapse()">
-            <div class="approval-range-group date-range-special">
-                <div class="date-range-and-dash">
-                    <kendo-formfield>
-                        <label for="fromApprovalDate">Approval Date From</label>
-                        <kendo-datepicker id="fromApprovalDate"
-                                          [(ngModel)]="fromApprovalDate"
-                                          name="fromApprovalDate"
-                                          class="custom-input"
-                                          placeholder="MM/DD/YYYY">
-                        </kendo-datepicker>
-                    </kendo-formfield>
-                    <span class="dash">-</span>
-                    <kendo-formfield>
-                        <label for="fromApprovalDate">Approval Date To</label>
-                        <kendo-datepicker id="toApprovalDate"
-                                          [(ngModel)]="toApprovalDate"
-                                          [disabled]="!fromApprovalDate"
-                                          name="toApprovalDate"
-                                          class="custom-input"
-                                          placeholder="MM/DD/YYYY">
-                        </kendo-datepicker>
-                    </kendo-formfield>
-                </div>
-                <div class="type-options">
-                    <kendo-formfield>
-                        <label>New</label>
-                        <kendo-radiobutton name="recordType"
-                                           [(ngModel)]="recordType"
-                                           id="type-new"
-                                           value="1">
-                        </kendo-radiobutton>
-                    </kendo-formfield>
-
-                    <kendo-formfield>
-                        <label>Renewal</label>
-                        <kendo-radiobutton name="recordType"
-                                           [(ngModel)]="recordType"
-                                           id="type-renewed"
-                                           value="2">
-                        </kendo-radiobutton>
-                    </kendo-formfield>
-
-                    <kendo-formfield>
-                        <label>Both</label>
-                        <kendo-radiobutton name="recordType"
-                                           [(ngModel)]="recordType"
-                                           id="type-both"
-                                           value="3">
-                        </kendo-radiobutton>
-                    </kendo-formfield>
-                </div>
-            </div>
-        </kendo-expansionpanel>
-
-        <div *ngIf="isZoomedIn && toggleSearchGrid" class="search-results-grid zoomed-slot">
-            <div class="matched-records-text">
-                {{ displayMessage }}
-            </div>
-
-            <kendo-grid [kendoGridBinding]="searchResults"
-                        [pageSize]="pageSize"
-                        [style.height]="enableSimple ? null : (searchResults.length > 0 ? '30.69rem' : null)"
-                        [skip]="skip"
-                        [pageable]="enableSimple"
-                        [sortable]="{ allowUnsort: true, mode: 'multiple' }"
-                        [reorderable]="true"
-                        (pageChange)="pageChange($event)"
-                        [scrollable]="enableSimple ? 'none' : 'scrollable'"
-                        class="custom-grid">
-                <!-- SAME COLUMNS AS YOUR CURRENT GRID -->
-                <kendo-grid-column field="applicantId" title="Notary ID">
-                    <ng-template kendoGridCellTemplate let-dataItem>
-                        <a [routerLink]="['/notary-profile', dataItem.applicantId]" class="notary-id-link">
-                            {{ dataItem.applicantId }}
-                        </a>
-                    </ng-template>
-                </kendo-grid-column>
-                <kendo-grid-column field="newRenewal" title="New/Renew"></kendo-grid-column>
-                <kendo-grid-column field="lastName" title="Last Name"></kendo-grid-column>
-                <kendo-grid-column field="firstName" title="First Name" [sortable]="true"></kendo-grid-column>
-                <kendo-grid-column field="middleName" title="Middle Name"></kendo-grid-column>
-                <kendo-grid-column field="cityTown" title="City / Town"></kendo-grid-column>
-                <kendo-grid-column field="dateOfBirth" title="Date of Birth">
-                    <ng-template kendoGridCellTemplate let-dataItem>
-                        {{ dataItem.dateOfBirth | date:'MM/dd/yyyy' }}
-                    </ng-template>
-                </kendo-grid-column>
-                <kendo-grid-column field="county" title="County"></kendo-grid-column>
-                <kendo-grid-column field="approvalDate" title="Approval Date">
-                    <ng-template kendoGridCellTemplate let-dataItem>
-                        {{ dataItem.approvalDate | date:'MM/dd/yyyy' }}
-                    </ng-template>
-                </kendo-grid-column>
-                <kendo-grid-column field="createdDate" title="Created Date">
-                    <ng-template kendoGridCellTemplate let-dataItem>
-                        {{ dataItem.createdDate  | date:'MM/dd/yyyy' }}
-                    </ng-template>
-                </kendo-grid-column>
-                <kendo-grid-column field="isRemoteNotary" title="RON Status">
-                    <ng-template kendoGridCellTemplate let-dataItem>
-                        {{ dataItem.isRemoteNotary ? 'Yes' : 'No' }}
-                    </ng-template>
-                </kendo-grid-column>
-            </kendo-grid>
-        </div>
-
-        <div class="form-row button-row">
-            <button kendoButton
-                    (click)="onSearch()"
-                    [primary]="true"
-                    class="search-button"
-                    [disabled]="isFormEmpty()">
-                Search
-            </button>
-            <button kendoButton (click)="onClear()" class="custom-button-alt">
-                Clear
-            </button>
-            <button kendoButton (click)="onReset()" class="custom-button-alt">
-                Reset
-            </button>
-            <button *ngIf="toggleSearchGrid" kendoButton routerLink="/notary-records/add-new-record" class="custom-button-alt">
-                Add New Record
-            </button>
-        </div>
-    </div>
-
-  <!-- Search Results Grid -->
-  <div *ngIf="!isZoomedIn && toggleSearchGrid" class="search-results-grid">
-    <div class="matched-records-text">
-      {{displayMessage}}
-    </div>
-
-    <kendo-grid [kendoGridBinding]="searchResults"
-                [pageSize]="pageSize"
-                [style.height]="enableSimple ? null : (searchResults.length > 0 ? '30.69rem' : null)"
-                [skip]="skip"
-                [pageable]="enableSimple"
-                [sortable]="{ allowUnsort: true, mode: 'multiple' }"
-                [reorderable]="true"
-                (pageChange)="pageChange($event)"
-                [scrollable]="enableSimple ? 'none' : 'scrollable'"
-                class="custom-grid">
-      <!-- Columns -->
-      <kendo-grid-column field="applicantId" title="Notary ID">
-        <ng-template kendoGridCellTemplate let-dataItem>
-          <a [routerLink]="['/notary-profile', dataItem.applicantId]" class="notary-id-link">
-            {{ dataItem.applicantId }}
-          </a>
-        </ng-template>
-      </kendo-grid-column>
-      <kendo-grid-column field="newRenewal" title="New/Renew"></kendo-grid-column>
-      <kendo-grid-column field="lastName" title="Last Name"></kendo-grid-column>
-      <kendo-grid-column field="firstName" title="First Name" [sortable]="true"></kendo-grid-column>
-      <kendo-grid-column field="middleName" title="Middle Name"></kendo-grid-column>
-      <kendo-grid-column field="cityTown" title="City / Town"></kendo-grid-column>
-      <kendo-grid-column field="dateOfBirth" title="Date of Birth">
-        <ng-template kendoGridCellTemplate let-dataItem>
-          {{ dataItem.dateOfBirth | date:'MM/dd/yyyy' }}
-        </ng-template>
-      </kendo-grid-column>
-      <kendo-grid-column field="county" title="County"></kendo-grid-column>
-      <kendo-grid-column field="approvalDate" title="Approval Date">
-        <ng-template kendoGridCellTemplate let-dataItem>
-          {{ dataItem.approvalDate | date:'MM/dd/yyyy' }}
-        </ng-template>
-      </kendo-grid-column>
-      <kendo-grid-column field="createdDate" title="Created Date">
-        <ng-template kendoGridCellTemplate let-dataItem>
-          {{ dataItem.createdDate  | date:'MM/dd/yyyy' }}
-        </ng-template>
-      </kendo-grid-column>
-      <!--No Created Date Available-->
-      <kendo-grid-column field="isRemoteNotary" title="RON Status">
-        <ng-template kendoGridCellTemplate let-dataItem>
-          {{ dataItem.isRemoteNotary ? 'Yes' : 'No' }}
-        </ng-template>
-      </kendo-grid-column>
-    </kendo-grid>
-  </div>
-</div>
-ts file: 
-import { Component, OnInit, OnDestroy, NgZone, HostListener } from '@angular/core';
-import { NotarySearchService } from '../../../services/search/notary-search.service';
-import { PageChangeEvent } from '@progress/kendo-angular-grid';
-import { Router } from '@angular/router';
+ASk me any clarifying questions before you start. 
+notary-profile.component.ts file: 
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import mockData from '../../../../mockdata/mock2.json';
+import mockProfileData from '../../../../mockdata/mock-profile-data.json';
+import expansionData from '../../../../mockdata/mock-expansion-panel-data.json';
 import { NotarySearchDataStateService } from '../../../services/helper-services/notary-search-data-state/notary-search-data-state.service';
-import { LiveSearchWrapper } from '../../../models/live-search-model/live-search.model';
+import { plusIcon, minusIcon, SVGIcon } from "@progress/kendo-svg-icons";
+import { NotaryDetailsService } from '../../../services/get-notary-details/notary-details.service';
+import { NotaryProfileDetailInfo } from '../../../models/notary-profile-models/notary-profile-detail/notary-profile-detail-info.model';
+import { NotaryAccountDetailInfo } from '../../../models/notary-profile-models/notary-account-detail/notary-account-detail-info.model';
+import { NotesHistoryService } from '../../../services/get-notes-history/notes-history.service';
+import { NameHistory, NoteHistory, AddressHistory, ComplaintHistory, CertificateHistory } from '../../../models/ref-items-model/ref-items.model';
+import { NameHistoryService } from '../../../services/get-name-history/name-history.service';
+import { AddressHistoryService } from '../../../services/get-address-history/address-history.service';
+import { ComplaintHistoryService } from '../../../services/get-complaint-history/complaint-history.service';
+import { NotaryApplicationDetails } from '../../../models/notary-profile-models/notary-application-detail/notary-application-details.model';
+import { AccountHistoryService } from '../../../services/get-account-history/account-history.service';
+import { GridDataResult, PageChangeEvent } from '@progress/kendo-angular-grid';
+import { CertificateHistoryService } from '../../../services/get-certificate-history/certificate-history.service';
+import { BuildEditObject, UpdatePersonalProfileInformation } from '../../../models/update-profile-info-model/update-profile-info.model';
+import { UpdateComplaint } from '../../../models/update-complaint-model/update-complaint.model';
 
 @Component({
-  selector: 'app-notary-records',
-  templateUrl: './notary-records.component.html',
-  styleUrls: ['./notary-records.component.css']
+    selector: 'app-notary-profile',
+    templateUrl: './notary-profile.component.html',
+    styleUrls: ['./notary-profile.component.css']
 })
-export class NotaryRecordsComponent implements OnInit, OnDestroy {
-  notaryId: string = '';
-  cityTown: string = '';
-  remoteNotariesOnly: boolean = false;
-  firstName: string = '';
-  lastName: string = '';
-  // For Approval Date Range – we are using two date pickers.
-  fromApprovalDate: Date | null = null;
-  toApprovalDate: Date | null = null;
+export class NotaryProfileComponent implements OnInit {
 
-  // Validation error
-  public notaryIdError: string = '';
+    public notaryId!: number;
+    public plusIcon: SVGIcon = plusIcon;
+    public minusIcon: SVGIcon = minusIcon;
 
-  // Properties for storing the response data
-  displayMessage: string = '';
-  searchResults: any[] = [];
+    public profileDetail?: NotaryProfileDetailInfo;
+    public accountDetail?: NotaryAccountDetailInfo;
+    public notesHistory: NoteHistory[] = [];
+    private notesHistoryLoaded = false;
+    public nameHistory: NameHistory[] = [];
+    private nameHistoryLoaded = false;
+    public addressHistory: AddressHistory[] = [];
+    private addressHistoryLoaded = false;
+    public complaintHistory: ComplaintHistory[] = [];
+    private complaintHistoryLoaded = false;
+    public applicationDetail?: NotaryApplicationDetails;
+    public accountHistory: Array<{
+        accountId: string | null;
+        accountStatus: string;
+        approvalDate: string;
+        expirationDate: string;
+        resignationDate: string;
+        paymentDate: string;
+        qualifiedDate: string;
+        hasResigned: string;
+        isRemoteEnabled: string;
+    }> = [];
+    public accountHistoryLoaded = false;
+    public gridView!: GridDataResult;
+    public pageSize = 5;
+    public skip = 0;
+    public certificateHistory: Array<{
+        accountId: number | string;
+        cetificateType: string;
+        certificateNumber: string;
+        validationStartDate: string;
+        validationEndDate: string;
+        createdOn: string;
+        createdByUser: string;
+    }> = [];
+    public certificateHistoryLoaded = false;
+    public buildEditObject!: BuildEditObject;
+    public buildUpdateComplaintObject!: UpdateComplaint;
+    public activeComplaints: boolean = false;
 
-  // Grid properties
-  toggleSearchGrid: boolean = false;
-  public pageSize = 10;
-  public skip = 0;
+    messageToUser: string = "Searching for Notary ID ";
+    primaryAddress: string = "This is the user's preferred address";
+    showResidentialToolTip: boolean = false;
+    showBusinessToolTip: boolean = false;
+    constructor(private route: ActivatedRoute,
+        private searchStateData: NotarySearchDataStateService,
+        private router: Router,
+        private notaryDetails: NotaryDetailsService,
+        private notesHistoryService: NotesHistoryService,
+        private nameHistoryService: NameHistoryService,
+        private addressHistoryService: AddressHistoryService,
+        private accountHistoryService: AccountHistoryService,
+        private certificateHistoryService: CertificateHistoryService,
+        private complaintHistoryService: ComplaintHistoryService) { }
 
-  //Accordion enabling
-  enableSimple: boolean = true;
-  enableDateRange: boolean = false;
-
-  //Record types
-  public recordType: "1"|"2"|"3" = "3";
-
-  //expansion panel
-  expandedPanel: boolean = true;
-  public isNotaryExpanded = true;
-  public isDateRangeExpanded = false;
-
-  //min and max dates for datepickers
-  public max!: Date;
-  public min!: Date;
-
-  //to check if simple fields were cleared
-  public hasClearedSimpleFields = false;
-  public dateOfBirth: Date | null = null;
-
-  /** Zoom handling */
-  public isZoomedIn = false;
-  private vvResizeHandler?: () => void;
-
-    constructor(private search: NotarySearchService,
-                private router: Router,    
-                private searchStateData: NotarySearchDataStateService,
-                private zone: NgZone) {
-    const today = new Date();
-
-    this.max = new Date(
-      today.getFullYear() - 18,
-      today.getMonth(),
-      today.getDate()
-    );
-    this.min = new Date(
-      today.getFullYear() - 80,
-      today.getMonth(),
-      today.getDate()
-    );
-  }
-
-  ngOnInit(): void {
-    this.checkForRehydration();
-    this.computeZoomAndSetFlag();
-    // visualViewport when available (Chrome/Edge/Safari)
-    if (window.visualViewport) {
-      // Wrap in NgZone to update Angular state
-      const onVvResize = () => this.zone.run(() => this.computeZoomAndSetFlag());
-      window.visualViewport.addEventListener('resize', onVvResize);
-      // keep a reference to remove later
-      this.vvResizeHandler = () => window.visualViewport?.removeEventListener('resize', onVvResize);
-    }
-  }
-
-    ngOnDestroy(): void {
-        if (this.vvResizeHandler) this.vvResizeHandler();
-    }
-
-    @HostListener('window:resize')
-    onWindowResize(): void {
-        this.computeZoomAndSetFlag();
-    }
-
-    /** Treat >110% as zoomed in, support all desktop browsers */
-    private computeZoomAndSetFlag(): void {
-        const scale = this.getApproxPageScale();
-        const next = scale > 1.10;
-        if (this.isZoomedIn !== next) {
-            this.isZoomedIn = next;
-        }
-    }
-
-    private getApproxPageScale(): number {
-        // 1) Most reliable where supported
-        const vv = (window as any).visualViewport as VisualViewport | undefined;
-        if (vv && typeof vv.scale === 'number' && vv.scale > 0) {
-            return vv.scale;
+    ngOnInit(): void {
+        const idParam = this.route.snapshot.paramMap.get('id');
+        if (!idParam) {
+            console.error('No "id" found in route parameters!');
+            this.messageToUser = "No notary ID provided for profile search";
+            return;
         }
 
-        // 2) outer/inner ratio (Firefox/Chromium desktop)
-        if (typeof window.outerWidth === 'number' && typeof window.innerWidth === 'number' && window.innerWidth > 0) {
-            const ratio = window.outerWidth / window.innerWidth;
-            // On some desktops, ratio can be noisy around 1. Using 2 decimal places.
-            return Math.max(1, Math.round(ratio * 100) / 100);
+        this.notaryId = Number(idParam);
+        if (isNaN(this.notaryId)) {
+            console.error(`Route parameter "id" is not a valid number: ${idParam}`);
+            this.messageToUser = "No valid notary ID provided for profile search";
+            return;
         }
+        this.messageToUser = this.messageToUser + idParam;
 
-        // 3) last resort
-        return 1;
-    }
-
-  private checkForRehydration(): void {
-    const crit = this.searchStateData.lastCriteria;
-    if (!crit) { return; }
-
-    //getting back the panels to prev state
-    if (crit.generalSearch) {
-      const g = crit.generalSearch;
-      this.notaryId = g.applicantId != null ? g.applicantId.toString() : '';
-      this.firstName = g.firstName;
-      this.lastName = g.lastName;
-      this.cityTown = g.cityTown;
-      this.remoteNotariesOnly = g.remoteNotaryOnly;
-
-      this.fromApprovalDate = g.approvalDate ? this.parseLocalDate(g.approvalDate) : null;
-
-      this.enableSimple = true;
-      this.enableDateRange = false;
-      this.isNotaryExpanded = true;
-      this.isDateRangeExpanded = false;
-    }
-    else if (crit.dateRangeSearch) {
-      const d = crit.dateRangeSearch;
-      this.fromApprovalDate = d.approvalDateFrom ? this.parseLocalDate(d.approvalDateFrom) : null;
-      this.toApprovalDate = d.approvalDateTo ? this.parseLocalDate(d.approvalDateTo) : null;
-      //this.recordType = d.searchType as "1"|"2"|"3";
-
-      this.enableSimple = false;
-      this.enableDateRange = true;
-      this.isNotaryExpanded = false;
-      this.isDateRangeExpanded = true;
-    }
-
-    //make a fresh new call
-    this.fetchResults(crit);
-  }
-
-  /** to hit the api */
-  private fetchResults(wrapper: LiveSearchWrapper): void {
-    //general or daterange
-    if (wrapper.generalSearch) {
-      this.search.searchNotaries(wrapper).subscribe({
-        next: (response) => {
-          this.applyResults(response);
-        },
-        error: (err) => console.error('Re-fetch general search failed', err)
-      });
-    }
-    else if (wrapper.dateRangeSearch) {
-      this.search.searchNotariesWithDateRange(wrapper).subscribe({
-        next: (response) => {
-          this.applyResults(response);
-        },
-        error: (err) => console.error('Re-fetch date-range failed', err)
-      });
-    }
-  }
-
-  /** Shared logic for applying and persisting results */
-  private applyResults(response: { message: string; notarySearchResultsInternalDto: any[] }): void {
-    this.searchResults = response.notarySearchResultsInternalDto.map(item => ({
-      ...item,
-      approvalDate: item.approvalDate ? this.parseLocalDate(item.approvalDate) : null,
-      createdDate: item.createdDate ? this.parseLocalDate(item.createdDate) : null
-    }));
-    this.skip = 0;
-    this.displayMessage = response.message;
-    this.toggleSearchGrid = true;
-    this.pageSize = this.displayMessage.includes('between') ? this.searchResults.length : 10;
-    //this.pageSize = this.searchResults.length;
-
-    this.searchStateData.lastResults = this.searchResults.slice();
-  }
-
-  onSearch(): void {
-    if (this.enableSimple) {
-      const wrapper = {
-        generalSearch: {
-          applicantId: this.notaryId.trim()
-            ? parseInt(this.notaryId.trim(), 10)
-            : null,
-          firstName: this.firstName.trim(),
-          lastName: this.lastName.trim(),
-          cityTown: this.cityTown.trim(),
-          approvalDate: this.fromApprovalDate
-            ? this.formatDate(this.fromApprovalDate)
-            : null,
-          dateOfBirth: this.dateOfBirth
-            ? this.formatDate(this.dateOfBirth)
-            : null,
-          remoteNotaryOnly: this.remoteNotariesOnly
-        }
-      };
-
-      this.search.searchNotaries(wrapper).subscribe({
-        next: (response) => {
-          this.displayMessage = response.message;
-          this.searchResults = response.notarySearchResultsInternalDto;
-          this.toggleSearchGrid = true;
-          this.skip = 0;
-          //to persist the data
-          this.searchStateData.lastCriteria = wrapper;
-          this.searchStateData.lastResults = response.notarySearchResultsInternalDto?.slice();
-        },
-        error: (error) => console.error('Error:', error)
-      });
-      return;
-    }
-    if (this.enableDateRange) {
-      console.log(this.enableDateRange);
-      if (this.fromApprovalDate && !this.toApprovalDate) {
-        this.toApprovalDate = new Date();
-      }
-
-      const wrapper = {
-        dateRangeSearch: {
-          approvalDateFrom: this.fromApprovalDate
-            ? this.formatDate(this.fromApprovalDate)
-            : null,
-          approvalDateTo: this.toApprovalDate
-            ? this.formatDate(this.toApprovalDate)
-            : null,
-          searchType: Number(this.recordType)
-        }
-        }
-        console.log(wrapper);
-
-        this.search.searchNotariesWithDateRange(wrapper)
-            .subscribe(response => {
-                const raw = response.notarySearchResultsInternalDto;
-                this.searchResults = raw.map((item: any) => ({
-                    ...item,
-                    approvalDate: item.approvalDate
-                        ? this.parseLocalDate(item.approvalDate)  
-                        : null,
-                    createdDate: item.createdDate
-                        ? this.parseLocalDate(item.createdDate)   
-                        : null
-                }));
-
-                this.displayMessage = response.message;
-                this.pageSize = response.length;
-                this.toggleSearchGrid = true;
-                this.searchStateData.lastCriteria = wrapper;
-                this.searchStateData.lastResults = response.notarySearchResultsInternalDto?.slice();
+        this.notaryDetails.getNotaryProfile(Number(idParam)).subscribe({
+            next: response => {
+                this.profileDetail = this.mapToDetailInfo(response);
+                this.accountDetail = this.mapToAccountDetailInfo(response);
+                this.applicationDetail = this.mapToApplicationDetailInfo(response);
+                this.buildEditObject = this.mapToEditObject(response);
+                console.log(this.buildEditObject);
+                console.log(response);
+                console.log(this.profileDetail);
             },
-                err => console.error(err));
-      return;
+            error: err => {
+                this.messageToUser = "There was an error finding notary profile with ID " + idParam;
+                console.error('Error fetching notary profile:', err);
+            }
+        });
+
     }
-  }
 
-  public onNotaryIdInput(event: Event): void {
-    const val = (event.target as HTMLInputElement).value;
-    if (!this.hasClearedSimpleFields && val.length === 1) {
-      this.firstName = '';
-      this.lastName = '';
-      this.cityTown = '';
-      this.remoteNotariesOnly = false;
-      this.fromApprovalDate = null;
-      this.toApprovalDate = null;
-      this.hasClearedSimpleFields = true;
+    private buildUpdateComplaintFor(item: ComplaintHistory): UpdateComplaint {
+        const pid = this.buildEditObject?.personalInfoDetails;
+        if (!pid) {
+            throw new Error('buildEditObject.personalInfoDetails is not ready yet.');
+        }
+
+        const accountId = pid.accountId;
+
+        return {
+            // person/account fields
+            firstName: pid.firstName,
+            middleName: pid.middleName,
+            lastName: pid.lastName,
+            applicantId: pid.applicantId,
+            accountId: pid.accountId,
+
+            // complaint-specific fields (raw values)
+            complaintId: item.complaintId,
+            dateOfComplaint: item.dateOfComplaint,
+            isRoncomplaint: item.isRoncomplaint,
+            complaintDetails: item.complaintDetails,
+            isResolved: item.isResolved,
+            resolutionNotes: item.resolutionNotes,
+            resolutionDate: item.resolutionDate
+        };
     }
-  }
 
-  onClear(): void {
-    // Reset all form fields.
-    this.notaryId = '';
-    this.cityTown = '';
-    this.remoteNotariesOnly = false;
-    this.firstName = '';
-    this.lastName = '';
-    this.fromApprovalDate = null;
-    this.dateOfBirth = null;
-    this.toApprovalDate = null;
-    this.notaryIdError = '';
-    this.hasClearedSimpleFields = false; 
-  }
+    public onComplaintIdClick(item: ComplaintHistory): void {
+        try {
+            sessionStorage.removeItem('updateComplaint');
+            this.buildUpdateComplaintObject = this.buildUpdateComplaintFor(item);
 
-  onReset(): void {
-    this.toggleSearchGrid = false;
-    this.onClear();
-  }
-
-  onAddNewRecord(): void {
-    this.router.navigate(['add-new-record']);
-  }
-
-  // Determines whether all input fields are empty.
-  isFormEmpty(): boolean {
-    return (
-      !this.notaryId.trim() &&
-      !this.firstName.trim() &&
-      !this.lastName.trim() &&
-      !this.cityTown.trim() &&
-      !this.dateOfBirth &&
-      !this.fromApprovalDate
-    );
-  }
-
-  // Validates Notary ID on blur. Clears the field and sets an error.
-  validateNotaryId(): void {
-    if (this.notaryId) {
-      this.notaryIdError = "Notary ID search parameter cannot be empty";
-      this.notaryId = '';
-    } else {
-      this.notaryIdError = "";
+            // Persist for reloads
+            sessionStorage.setItem(
+                'updateComplaint',
+                JSON.stringify(this.buildUpdateComplaintObject)
+            );
+        } catch (e) {
+            console.error(e);
+        }
     }
-  }
 
-  // Restricts key presses to numbers only.
-  allowOnlyNumbers(event: KeyboardEvent): void {
-    const charCode = event.which ? event.which : event.keyCode;
-    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-      event.preventDefault();
+    private mapToEditObject(resp: any): BuildEditObject {
+        if (resp.accountDetails == null) {
+            const pid = resp.personalInfoDetails;
+            const email = resp.emailAddress;
+            return {
+                personalInfoDetails: {
+                    accountId: 0,
+                    emailAddress: email,
+                    salutationTypeId: pid.salutationTypeId,
+                    salutationType: pid.salutationType,
+                    firstName: pid.firstName,
+                    middleName: pid.middleName,
+                    lastName: pid.lastName,
+                    suffix: pid.suffix,
+                    dateOfBirth: pid.dateOfBirth,
+                    applicantId: pid.applicantId,
+                    notaryIdentifier: pid.notaryIdentifier,
+                    dateOfDeath: pid.dateOfDeath,
+                    dateOfResignation: null,
+                    addressDetails: pid.addressDetails.map((a: any) => ({
+                        addressId: a.addressId,
+                        applicantId: a.applicantId,
+                        addressTypeId: a.addressTypeId,
+                        addressType: a.addressType,
+                        isPrefered: a.isPrefered,
+                        isPoBox: a.isPoBox,
+                        streetNumber: a.streetNumber,
+                        streetName: a.streetName,
+                        aptNumber: a.aptNumber,
+                        addressLine2: a.addressLine2,
+                        zipCode: a.zipCode,
+                        zipPlus: a.zipPlus,
+                        city: a.city,
+                        county: a.county,
+                        district: a.district,
+                        stateId: a.stateId,
+                        state: a.state,
+                    })),
+                    contactDetails: pid.contactDetails.map((c: any) => ({
+                        contactTypeId: c.contactTypeId,
+                        contactType: c.contactType,
+                        contactId: c.contactId,
+                        applicantId: c.applicantId,
+                        contactValue: c.contactValue,
+                        isPrimary: c.isPrimary,
+                    })),
+                }
+            };
+        } else {
+            const pid = resp.personalInfoDetails;
+            const email = resp.emailAddress;
+            const accountIdentifier = resp.accountDetails?.accountId;
+            const acctDetails = resp.accountDetails;
+            return {
+                personalInfoDetails: {
+                    accountId: accountIdentifier,
+                    emailAddress: email,
+                    salutationTypeId: pid.salutationTypeId,
+                    salutationType: pid.salutationType,
+                    firstName: pid.firstName,
+                    middleName: pid.middleName,
+                    lastName: pid.lastName,
+                    suffix: pid.suffix,
+                    dateOfBirth: pid.dateOfBirth,
+                    applicantId: pid.applicantId,
+                    notaryIdentifier: pid.notaryIdentifier,
+                    dateOfDeath: pid.dateOfDeath,
+                    dateOfResignation: acctDetails.resignationDate,
+                    addressDetails: pid.addressDetails.map((a: any) => ({
+                        addressId: a.addressId,
+                        applicantId: a.applicantId,
+                        addressTypeId: a.addressTypeId,
+                        addressType: a.addressType,
+                        isPrefered: a.isPrefered,
+                        isPoBox: a.isPoBox,
+                        streetNumber: a.streetNumber,
+                        streetName: a.streetName,
+                        aptNumber: a.aptNumber,
+                        addressLine2: a.addressLine2,
+                        zipCode: a.zipCode,
+                        zipPlus: a.zipPlus,
+                        city: a.city,
+                        county: a.county,
+                        district: a.district,
+                        stateId: a.stateId,
+                        state: a.state,
+                    })),
+                    contactDetails: pid.contactDetails.map((c: any) => ({
+                        contactTypeId: c.contactTypeId,
+                        contactType: c.contactType,
+                        contactId: c.contactId,
+                        applicantId: c.applicantId,
+                        contactValue: c.contactValue,
+                        isPrimary: c.isPrimary,
+                    })),
+                }
+            };
+        }
     }
-  }
 
-  // Helper function to format a Date object as "YYYY-MM-DD"
-  private formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
+    private mapToDetailInfo(resp: any): NotaryProfileDetailInfo {
+        const pid = resp.personalInfoDetails;
+        this.activeComplaints = resp.hasActiveComplaints;
+        const addrs = pid.addressDetails as any[];
+        const contacts = pid.contactDetails as any[];
 
-  private parseLocalDate(dateStr: string): Date {
-    const [year, month, day] = dateStr
-      .split('-')
-      .map(part => parseInt(part, 10));
-    return new Date(year, month - 1, day);
-  }
+        const name = [pid.firstName, pid.middleName, pid.lastName, pid.suffix]
+            .filter(n => !!n)
+            .join(' ');
 
-  public pageChange(event: PageChangeEvent): void {
-    this.skip = event.skip;
-    this.pageSize = event.take;
-  }
+        const dateOfBirth = pid.dateOfBirth.split('T')[0];
+        const dateOfDeath = pid.dateOfDeath ? pid.dateOfDeath.split('T')[0] : '';
 
-  public handleNotaryExpand(): void {
-    this.isNotaryExpanded = true;
-    this.isDateRangeExpanded = false;
-    this.enableDateRange = false;
-    this.enableSimple = true;
-    this.onReset();
-  }
+        const emailAddress = resp.emailAddress != null ? resp.emailAddress : '---';
 
-  public handleNotaryCollapse(): void {
-    this.isNotaryExpanded = false;
-    this.isDateRangeExpanded = true;
-    this.enableDateRange = true;
-    this.enableSimple = false;
-    this.onReset();
-  }
 
-  public handleDateRangeExpand(): void {
-    this.isDateRangeExpanded = true;
-    this.isNotaryExpanded = false;
-    this.enableDateRange = true;
-    this.enableSimple = false;
-    this.recordType = "3";
-    this.onReset();
-  }
+        const phoneContacts = (contacts || []).filter((c: any) =>
+            c?.contactTypeId === 1 || (c?.contactType || '').toLowerCase() === 'phone'
+        );
 
-  public handleDateRangeCollapse(): void {
-    this.isDateRangeExpanded = false;
-    this.isNotaryExpanded = true;
-    this.enableDateRange = false;
-    this.enableSimple = true;
-    this.onReset();
-  }
-}
-css file: 
-:host {
-  display: flex;
-  flex-direction: column;
-}
+        const primaryPhone = phoneContacts.find((p: any) => !!p.isPrimary)?.contactValue || '';
+        const secondaryPhone = phoneContacts.find((p: any) => !p.isPrimary)?.contactValue || '';
 
-kendo-textbox, kendo-datepicker{
-  --kendo-color-subtle: #aaa !important;
-}
+        const phone1 = primaryPhone || null;
+        const phone2 = secondaryPhone || null;
 
-kendo-expansionpanel {
-  width: 640px;
-}
 
-.k-expander:not(.k-expanded) + .k-expander:not(.k-expanded) {
-  border-top-width: 1px !important;
-}
+        const preferred = addrs.find((a: any) => a.isPrefered);
+        const countyName = preferred?.county ?? '---';
+        const districtName = preferred?.district ?? '---';
 
-.page-wrapper {
-  display: flex;
-  flex-direction: row;
-  column-gap: 2rem;
-  margin-left: 3rem;
-}
 
-.individual-search-instructions{
-    display:flex;
-    flex-direction: column;
-    row-gap:1rem;
-    margin-bottom:1.4rem;
-}
+        const formatAddress = (a: any) => {
+            let parts: string = `${a.streetNumber} ${a.streetName}`;
+            if (a.aptNumber) parts += ` ${a.aptNumber}`;
+            if (a.addressLine2) parts += ` ${a.addressLine2}`;
+            parts += `, ${a.city}, ${a.state} ${a.zipCode}`;
+            if (a.zipPlus) parts += `-${a.zipPlus}`;
+            return parts;
+        };
 
-.search-instructions{
-    padding-top: 1rem;
-}
+        const resAddrObj = addrs.find((a: any) => a.addressType === 'Residential');
+        const businessAddrObj = addrs.find((a: any) => a.addressType === 'Business');
 
-.instructions-and-search-wrapper {
-  display: flex;
-  flex-direction: column;
-  row-gap: 2rem;
-  margin-bottom: 6rem;
-}
+        const residentialAddress = resAddrObj ? formatAddress(resAddrObj) : '';
+        const businessAddress = businessAddrObj ? formatAddress(businessAddrObj) : '---';
 
-strong{
-    font-size:15px;
-}
-.notary-title {
-  color: #074e72;
-  margin-bottom: 0!important
-}
+        return {
+            name,
+            dateOfBirth,
+            emailAddress,
+            phone1,
+            phone2,
+            residentialAddress,
+            businessAddress,
+            countyName,
+            districtName,
+            dateOfDeath
+        };
+    }
 
-.card-title {
-  margin-top: 0 !important;
-  color: white;
-  margin-bottom: 0 !important
-}
+    private mapToAccountDetailInfo(resp: any): NotaryAccountDetailInfo {
+        if (resp.accountDetails == null) {
+            console.log("inside null");
+            const persInfo = resp.personalInfoDetails;
+            console.log(persInfo);
+            const acct = resp.applicationDetails;
+            return {
+                notaryId: persInfo.applicantId,
+                status: null,
+                commissionDate: acct.approvalDate ? acct.approvalDate.split('T')[0] : null,
+                expirationDate: null,
+                resignationDate: null,
+                hasResigned: null,
+                remoteEnabled: null
+            };
+        }
+        else {
+            console.log("inside non-null");
+            const acct = resp.accountDetails;
+            return {
+                notaryId: acct.applicantId,
+                status: acct.accountStatus,
+                commissionDate: acct.approvalDate.split('T')[0],
+                expirationDate: acct.expirationDate.split('T')[0],
+                resignationDate: acct.resignationDate ? acct.resignationDate.split('T')[0] : null,
+                hasResigned: acct.hasResigned ? 'Yes' : 'No',
+                remoteEnabled: acct.isRemoteNotary ? 'Yes' : 'No'
+            };
+        }
+    }
 
-label {
-    font-weight:bold;
-}
+    public onNotesExpand(): void {
+        if (this.notesHistoryLoaded) {
+            return;
+        }
 
-.k-form-field {
-  display: flex;
-  flex-flow: column;
-  gap: 0.5rem;
-  align-self: flex-start;
-}
+        this.notesHistoryService.getNotesHistory(this.notaryId).subscribe({
+            next: hist => {
+                if (hist.length === 0) {
+                    // no history show one row of ‘---’
+                    this.notesHistory = [{
+                        noteId: 0,
+                        accountId: this.notaryId,
+                        notes: '---',
+                        createdOn: '---',
+                        createdByUser: '---'
+                    }];
+                } else {
+                    this.notesHistory = hist;
+                }
+                this.notesHistoryLoaded = true;
+            },
+            error: err => {
+                console.error('Error fetching notes history:', err);
+                // optionally populate the empty-state row on error as well
+                this.notesHistory = [{
+                    noteId: 0,
+                    accountId: this.notaryId,
+                    notes: '---',
+                    createdOn: '---',
+                    createdByUser: '---'
+                }];
+                this.notesHistoryLoaded = true;
+            }
+        });
+    }
 
-.k-form-field-wrap{
-    margin-top:1rem!important;
-}
+    public formatFullName(item: NameHistory): string {
+        const parts = [item.firstName, item.middleName, item.lastName]
+            .filter(n => !!n && n.trim() !== '');
+        return parts.length ? parts.join(' ') : '---';
+    }
 
-.notary-form {
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-}
+    /** Returns 'Official' if isOfficalNameChange, 'Correction' if isNameCorrection, else '---' */
+    public formatChangeType(item: NameHistory): string {
+        if (item.isOfficialNameChange) {
+            return 'Official';
+        }
+        if (item.isNameCorrection) {
+            return 'Correction';
+        }
+        return '---';
+    }
 
-.form-row {
-  display: flex;
-  gap: 1rem;
-}
+    public onNameExpand(): void {
+        if (this.nameHistoryLoaded) { return; }
 
-/* Notary Category styling */
-.notary-category-group {
-  display: flex;
-  flex-direction: column;
-}
+        this.nameHistoryService.getNameHistory(this.notaryId).subscribe({
+            next: (data: NameHistory[]) => {
+                if (!data || data.length === 0) {
+                    // placeholder row of all '---'
+                    this.nameHistory = [{
+                        updatedOn: '',
+                        firstName: '---',
+                        middleName: '',
+                        lastName: '',
+                        dateOfBirth: '',
+                        isOfficialNameChange: false,
+                        isNameCorrection: false
+                    }];
+                } else {
+                    this.nameHistory = data;
+                    console.log("Name Data:", data);
+                }
+                this.nameHistoryLoaded = true;
+            },
+            error: err => {
+                console.error('Error fetching name history:', err);
+                this.nameHistory = [{
+                    updatedOn: '',
+                    firstName: '---',
+                    middleName: '',
+                    lastName: '',
+                    dateOfBirth: '',
+                    isOfficialNameChange: false,
+                    isNameCorrection: false
+                }];
+                this.nameHistoryLoaded = true;
+            }
+        });
+    }
 
-.k-checkbox-wrap {
-  margin-left: 4rem !important;
-}
+    public formatFullAddress(item: AddressHistory): string {
+        const parts: string[] = [];
+        if (item.streetNumber) parts.push(item.streetNumber);
+        if (item.streetName) parts.push(item.streetName);
+        if (item.aptNumber) parts.push(item.aptNumber as string);
+        if (item.addressLine2) parts.push(item.addressLine2 as string);
+        if (item.city) parts.push(item.city);
 
-.remoteNotariesLabel{
-    margin-bottom:0.8rem;
-}
+        if (item.zipPlus != null && `${item.zipPlus}`.trim() !== '') {
+            if (item.state) parts.push(item.state);
+            parts.push(`${item.zipCode}-${item.zipPlus}`);
+        } else if (item.state) {
+            parts.push(`${item.state} - ${item.zipCode}`);
+        }
 
-/* Approval row styling */
-.approval-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
+        return parts.join(', ');
+    }
 
-.or-separator {
-  font-weight: bold;
-  margin-top: 1.7rem;
-}
+    /** Official vs Correction vs --- */
+    public formatAddressChangeType(item: AddressHistory): string {
+        if (item.isOfficalAddressChange) return 'Official';
+        if (item.isAddressCorrection) return 'Correction';
+        return '';
+    }
 
-.approval-range-group {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+    public onAddressExpand(): void {
+        if (this.addressHistoryLoaded) { return; }
 
-.date-range-special{
-    display:flex!important;
-    flex-direction:column!important;
-}
+        this.addressHistoryService.getAddressHistory(this.notaryId).subscribe({
+            next: (data: AddressHistory[]) => {
+                if (!data || data.length === 0) {
+                    // one row of all '---'
+                    this.addressHistory = [{
+                        updatedOn: '',
+                        streetNumber: '',
+                        streetName: '---',
+                        aptNumber: '',
+                        addressLine2: '',
+                        city: '',
+                        state: '',
+                        zipCode: '',
+                        zipPlus: '',
+                        addressType: '---',
+                        isOfficalAddressChange: false,
+                        isAddressCorrection: false
+                    }];
+                } else {
+                    this.addressHistory = data;
+                }
+                this.addressHistoryLoaded = true;
+            },
+            error: err => {
+                console.error('Error fetching address history:', err);
+                this.addressHistory = [{
+                    updatedOn: '',
+                    streetNumber: '---',
+                    streetName: '---',
+                    aptNumber: '---',
+                    addressLine2: '---',
+                    city: '---',
+                    state: '---',
+                    zipCode: '---',
+                    zipPlus: '',
+                    addressType: '---',
+                    isOfficalAddressChange: false,
+                    isAddressCorrection: false
+                }];
+                this.addressHistoryLoaded = true;
+            }
+        });
+    }
 
-.radio-buttons-group{
-    display:flex;
-    flex-direction:row;
-    justify-content:space-around;
-}
+    public formatYesNo(value: boolean | string | null | undefined): string {
+        if (value === null || value === undefined || `${value}`.trim() === '') {
+            return '---';
+        }
+        if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+        const v = (value as string).toLowerCase();
+        if (v === 'true') return 'Yes';
+        if (v === 'false') return 'No';
+        return '---';
+    }
 
-.radio-buttons-special {
-  display: flex !important;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
+    public onComplaintExpand(): void {
+        if (this.complaintHistoryLoaded) { return; }
 
-.dash {
-  margin-right: 0.7rem;
-  margin-top: 1.3rem;
-  margin-left: 0.6rem;
-  font-size: 2rem;
-}
+        this.complaintHistoryService.getComplaintHistory(this.notaryId)
+            .subscribe({
+                next: (data: ComplaintHistory[]) => {
+                    if (!data || data.length === 0) {
+                        this.complaintHistory = [{
+                            complaintId: 0,
+                            dateOfComplaint: '',
+                            complaintDetails: '---',
+                            isRoncomplaint: '',
+                            isResolved: false,
+                            resolutionNotes: '---',
+                            resolutionDate: '---'
+                        }];
+                    } else {
+                        this.complaintHistory = data;
+                    }
+                    this.complaintHistoryLoaded = true;
+                },
+                error: err => {
+                    console.error('Error fetching complaint history:', err);
+                    this.complaintHistory = [{
+                        complaintId: 0,
+                        dateOfComplaint: '',
+                        complaintDetails: '---',
+                        isRoncomplaint: '',
+                        isResolved: false,
+                        resolutionNotes: '---',
+                        resolutionDate: '---'
+                    }];
+                    this.complaintHistoryLoaded = true;
+                }
+            });
+    }
 
-/* Buttons styling */
-.button-row {
-  display: flex;
-  gap: 1rem;
-  margin-top:1rem;
-}
+    private formatDate(dateStr?: string | null): string {
+        if (!dateStr) {
+            return '';
+        }
+        // split off any time portion, then MM/DD/YYYY
+        const [datePart] = dateStr.split('T');
+        const [year, month, day] = datePart.split('-');
+        return `${month}/${day}/${year}`;
+    }
 
-.search-button {
-  background-color: #074e72;
-  border-color: #074e72;
-}
+    private mapToApplicationDetailInfo(resp: any): NotaryApplicationDetails {
+        const app = resp.applicationDetails || {};
 
-::ng-deep .custom-input {
-  width: 12rem;
-  height: 2.2rem;
-  border-radius: 0.36rem;
-  border: 1px solid #adadad;
-  box-sizing: border-box;
-}
+        return {
+            applicationDate: this.formatDate(app.applicationDate),
+            applicationStatus: app.applicationStatus ?? '---',
+            applicationStatusDate: this.formatDate(app.applicationStatusDate),
+            approvalDate: this.formatDate(app.approvalDate),
+            dueDate: this.formatDate(app.dueDate),
+            applicationNextStep: app.applicationNextStep == '' ? '---' : app.applicationNextStep,
+            applicationStatusToolTip: app.applicationStatusToolTip ?? '---'
+        };
+    }
 
-.no-label-compensation{
-    margin-top:1.6rem;
-}
+    public onAccountHistoryExpand(): void {
+        if (this.accountHistoryLoaded) return;
 
-button {
-    width:7rem;
-    height:2rem;
-}
+        this.accountHistoryService.getAccountHistory(this.notaryId).subscribe({
+            next: raw => {
+                const data = Array.isArray(raw) ? raw : [];
 
-.custom-button-alt {
-  border-color: #074e72;
-  background-color: transparent;
-  color: #074e72;
-}
+                // keep only items with a real accountId
+                const usable = data.filter(item => item && item.accountId != null);
+                console.log(usable);
 
-.search-results-grid {
-  margin-top: 1.6rem;
-  width: 71rem;
-  margin-bottom: 5rem;
-}
+                if (usable.length === 0) {
+                    // either empty array OR only null-accountId rows single placeholder row
+                    this.accountHistory = [{
+                        accountId: null,
+                        accountStatus: '---',
+                        approvalDate: '---',
+                        expirationDate: '---',
+                        resignationDate: '---',
+                        paymentDate: '---',
+                        qualifiedDate: '---',
+                        hasResigned: '---',
+                        isRemoteEnabled: '---'
+                    }];
+                } else {
+                    // map as usual, no sorting, preserve API order
+                    this.accountHistory = usable.map(item => ({
+                        accountId: null,
+                        accountStatus: item.accountStatus?.trim() ? item.accountStatus : '---',
+                        approvalDate: this.formatDate(item.approvalDate),       
+                        expirationDate: this.formatDate(item.expirationDate),
+                        resignationDate: this.formatDate(item.resignationDate),
+                        paymentDate: this.formatDate(item.paymentDate),
+                        qualifiedDate: this.formatDate(item.qualifiedDate),
+                        hasResigned: this.formatYesNo(item.hasResigned),         
+                        isRemoteEnabled: this.formatYesNo(item.isRemoteEnabled), 
+                    }));
+                }
 
-#notaryId{
-    margin-bottom:2rem;
-}
+                this.accountHistoryLoaded = true;
+                this.loadGrid(); 
+            },
+            error: err => {
+                console.error('Error fetching account history:', err);
+                this.accountHistory = [{
+                    accountId: null,
+                    accountStatus: '---',
+                    approvalDate: '',
+                    expirationDate: '',
+                    resignationDate: '',
+                    paymentDate: '',
+                    qualifiedDate: '',
+                    hasResigned: '---',
+                    isRemoteEnabled: '---'
+                }];
+                this.accountHistoryLoaded = true;
+                this.loadGrid();
+            }
+        });
+    }
 
-.custom-grid .k-grid-header {
-  background-color: #074e72 !important;
-}
+    private loadGrid(): void {
+        this.gridView = {
+            data: this.accountHistory.slice(this.skip, this.skip + this.pageSize),
+            total: this.accountHistory.length
+        };
+    }
 
-  .custom-grid .k-grid-header .k-header,
-  .custom-grid .k-grid-header .k-link {
-    color: #ffffff !important;
-  }
+    public pageChange(event: PageChangeEvent): void {
+        this.skip = event.skip;
+        this.loadGrid();
+    }
 
-/* Row Hover Styling */
-.custom-grid .k-grid-content tr.k-master-row:hover {
-  background-color: #f1f5f9;
-}
+    public onCertificateHistoryExpand(): void {
+        if (this.certificateHistoryLoaded) {
+            return;
+        }
 
-.custom-grid .k-pager-wrap {
-  background-color: #ffffff;
-  border-top: 1px solid #ddd;
-}
+        this.certificateHistoryService
+            .getAddressHistory(this.notaryId)   // (yes, the method is named getAddressHistory)
+            .subscribe({
+                next: data => {
+                    if (!data || data.length === 0) {
+                        // one all-‘---’ placeholder row
+                        this.certificateHistory = [{
+                            accountId: '---',
+                            cetificateType: '---',
+                            certificateNumber: '---',
+                            validationStartDate: '---',
+                            validationEndDate: '---',
+                            createdOn: '---',
+                            createdByUser: '---'
+                        }];
+                    } else {
+                        this.certificateHistory = data.map(item => ({
+                            accountId: item.accountId,
+                            cetificateType: item.cetificateType?.trim() ? item.cetificateType : '---',
+                            certificateNumber: item.certificateNumber?.trim() ? item.certificateNumber : '---',
+                            validationStartDate: this.formatDate(item.validationStartDate),
+                            validationEndDate: this.formatDate(item.validationEndDate),
+                            createdOn: this.formatDate(item.createdOn),
+                            createdByUser: item.createdByUser?.trim() ? item.createdByUser : '---',
+                        }));
+                    }
+                    this.certificateHistoryLoaded = true;
+                },
+                error: err => {
+                    console.error('Error fetching certificate history:', err);
+                    this.certificateHistoryLoaded = true;
+                    this.certificateHistory = [{
+                        accountId: '---',
+                        cetificateType: '---',
+                        certificateNumber: '---',
+                        validationStartDate: '',
+                        validationEndDate: '',
+                        createdOn: '',
+                        createdByUser: '---'
+                    }];
+                }
+            });
+    }
 
-::ng-deep thead {
-  background-color: #074e72!important;
-  color: white!important;
-}
 
-.matched-records-text {
-  color: #074e72;
-  font-weight:bold;
-  margin-bottom:1rem;
-}
-
-.form-row kendo-formfield {
-  position: relative;
-}
-
-/* Style the error message so it doesn't push content around */
-.error-message {
-  position: absolute;
-  top: 4.1rem;
-  left: 0;
-  color: red;
-  font-size: 0.85rem; 
-  pointer-events: none;
-}
-
-.type-options {
-  display: flex;
-  gap: 3rem;
-  align-self:flex-start;
-}
-
-.type-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.type-option label {
-  margin-top: 0.5rem;
-  font-weight: bold;
-}
-
-.date-range-and-dash {
-  display: flex;
-  align-items: center;
-  align-self: flex-start;
-}
-
-#type-new, #type-both {
-    margin-left: 5px;
-}
-
-#type-renewed {
-    margin-left: 19px;
-}
-
-.notary-id-link, .notary-id-link:active{
-    color:#074e72;
-    font-weight:600;
-}
-
-.notary-id-link:hover{
-    text-decoration:underline;
-}
-
-.search-results-grid.zoomed-slot {
-    width: 71rem; 
-    margin-top: 1.6rem;
-    margin-bottom: 5rem;
+    public returnToSearch(): void {
+        this.router.navigate(['/notary-records']);
+    }
 }
