@@ -1,785 +1,810 @@
-So I am confused. Fuck that here are the component.ts files and the service file and the model files. Clearly tell me what to do and where. 
-schedule-oath.state.ts file:
+Goal: To add code to the existing oath-scheduler parent page that should then get 
+the ability to track the states of the child pages and change the logos of the steps in the parent page. 
+
+More Details: The idea is that.. the oath-scheduler page will have 2 sections the left side nav-bar 
+section which has the child pages names, icons for said names and the right side section which is 
+essentially just a container where all the child pages are rendered. 
+
+The oath-scheduler page should behave like a dumb container which can only keep a track of which step 
+the user is currently in. 
+
+Let’s say if the user is on step - 1 which is the personal information section.. the personal 
+information heading in the left side nav-bar section should follow a certain styling (bold letters) 
+and the icon being displayed should be different. If the user has finished the work on that page and 
+clicked next.. the styling on the page header in the nav-bar should change and so should the icon. 
+This is the general process. When the user hits the “previous” button on the step - 2 page. 
+The step - 1 page should load and have the relevant styling and icons. 
+
+The holistic process is as follows: 
+The user lands on the localhost:4200/oath-scheduler and the OathSchedulerPersonalInformation component
+should be the initial one being rendered in the content section. 
+
+Initial State and Followup logic: 
+Left Section- Should have 4 step texts for 4 pages Personal Information, Date and Time, Confirm Reservation, 
+Reservation Confirmation with the Personal Information section highlighted. and relevant Icon displayed. 
+When the user does some job on the page and they satisfy the conditon to move forward and the user clicks 
+next.. we then change the state of the side nav-bar items such that the step - 1 personal information's 
+icon is now a tick icon (available in my assests folder) and step - 2 now has active step related styling
+meaning step text is bold and the icon is different. So on an so forth. If for some reason the user 
+has decided to go back to step 1 while theuy are in step 2 we allow them.. but the look and feel of it is 
+different. 
+
+Task at hand: 
+I already implemented this in some other page.. what I want you to do is to implement similar logic here. 
+I will paste the component in which I implemented this to give you a better understanding of how I did it. 
+I want you to figure out how I did it.. then use that knowledge to draft me a plan to help me implement it 
+in my oath-scheduler mini app. Cool? 
+
+Ask me any clarifying questions you might have before you give me a plan. Then I will give you the oath-scheduler 
+individual steps components code.. then you give me the code to implement it. 
+
+The pictures I attached shows how it should look like and how It should behave. 
+
+Here is another mini app inside my website that I implemented what I'm talking about: 
+account-registration.component.ts file: 
+import { Component, OnInit, OnDestroy, ViewChild, ViewContainerRef } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { RegistrationStepTrackerService, StepState } from '../../services/helper-services/registration-step-tracker/registration-step-tracker.service';
+import { RegistrationFlowTokenService } from '../../services/registration-services/registration-token-service/registration-flow-token.service';
+import { NotificationRef, NotificationService } from '@progress/kendo-angular-notification';
+import { NavigationStart } from '@angular/router';
+
+@Component({
+    selector: 'app-account-registration',
+    templateUrl: './account-registration.component.html',
+    styleUrls: ['./account-registration.component.css']
+})
+export class AccountRegistrationComponent implements OnInit, OnDestroy {
+    @ViewChild('notificationContainer', { read: ViewContainerRef, static: true }) notificationContainer!: ViewContainerRef;
+    private lastNotificationRef: NotificationRef | null = null;
+    notificationContainerClass: string = 'notification-component';
+    private childNotificationSub!: Subscription;
+    stepState!: StepState;
+    private routeSub!: Subscription;
+    private otpWarningSub!: Subscription;
+    private otpExpiredSub!: Subscription;
+    private sessionWarningSub!: Subscription;
+    private sessionExpiredSub!: Subscription;
+    private expirationCheckInterval!: any;
+
+    constructor(
+        private router: Router,
+        private stepTrackerService: RegistrationStepTrackerService,
+        private registrationFlowTokenService: RegistrationFlowTokenService,
+        private notificationService: NotificationService
+    ) { }
+
+    ngOnInit(): void {
+        this.childNotificationSub = this.stepTrackerService.childNotification$.subscribe(notification => {
+            if (notification) {
+                this.triggerNotification(notification.message, notification.className);
+            }
+        });
+
+        this.stepTrackerService.stepState$.subscribe(state => {
+            this.stepState = state;
+        });
+
+        this.router.events.pipe(
+            filter(event => event instanceof NavigationStart)
+        ).subscribe((event) => {
+            // Clear any active notifications before navigation begins.
+            if (this.notificationContainer) {
+                this.notificationContainer.clear();
+            }
+            if (this.lastNotificationRef) {
+                this.lastNotificationRef.hide();
+                this.lastNotificationRef = null;
+            }
+        });
+
+        this.routeSub = this.router.events.pipe(
+            filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+        ).subscribe((event) => {
+            const currentRoute = event.url;
+
+            if (currentRoute.includes('email-verification')) {
+                this.notificationContainerClass = 'notification-component email-verification';
+            } else if (currentRoute.includes('personal-information')) {
+                this.notificationContainerClass = 'notification-component personal-information';
+            } else {
+                this.notificationContainerClass = 'notification-component';
+            }
+
+            // Clear sessionStorage and reset flags for specific routes
+            if (currentRoute.includes('session-expired') || currentRoute.includes('login')) {
+                sessionStorage.removeItem('registrationOtpExpiryTime');
+                sessionStorage.removeItem('registrationFlowExpiresAt');
+                this.stepTrackerService.resetFlags();
+            }
+
+            // Reset service flags when navigating to email-verification
+            if (currentRoute.includes('email-verification')) {
+                this.stepTrackerService.resetFlags();
+            } else {
+                // When not on email-verification, reset the OTP state
+                this.stepTrackerService.resetOtpState();
+            }
+
+            // Update step navigation (extract the last route segment)
+            const routeSegment = currentRoute.split('/').pop();
+            if (routeSegment) {
+                this.stepTrackerService.updateStatesForRoute(routeSegment);
+            }
+
+            // Track expirations (now, without an OTP expiry value, OTP notifications won’t fire)
+            this.stepTrackerService.trackExpirations();
+        });
+
+        this.otpWarningSub = this.stepTrackerService.otpWarning$.subscribe(message => {
+            if (message) {
+                this.triggerNotification(message, 'custom-notification info');
+            }
+        });
+
+        this.otpExpiredSub = this.stepTrackerService.otpExpired$.subscribe(message => {
+            if (message) {
+                this.triggerNotification(message, 'custom-notification incorrect');
+            }
+        });
+
+        this.sessionWarningSub = this.stepTrackerService.sessionWarning$.subscribe(message => {
+            if (message) {
+                this.triggerNotification(message, 'custom-notification info');
+            }
+        });
+
+        this.sessionExpiredSub = this.stepTrackerService.sessionExpired$.subscribe(message => {
+            if (message) {
+                this.triggerNotification(message, 'custom-notification incorrect');
+                this.stepTrackerService.resetFlags();
+                this.registrationFlowTokenService.clearToken();
+                this.router.navigate(['/session-expired']);
+            }
+        });
+
+        this.expirationCheckInterval = setInterval(() => {
+            this.stepTrackerService.trackExpirations();
+        }, 5000);
+    }
+
+    triggerNotification(notificationMessage: string, className: string): void {
+
+        if (this.lastNotificationRef) { this.lastNotificationRef.hide(); }
+
+        this.lastNotificationRef = this.notificationService.show({
+            content: notificationMessage,
+            cssClass: className,
+            animation: { type: 'fade', duration: 200 },
+            hideAfter: 200,
+            position: { horizontal: 'center', vertical: 'top' },
+            closable: true,
+            width: 500,
+            appendTo: this.notificationContainer,
+        });
+    }
+
+    ngOnDestroy(): void {
+        if (this.routeSub) this.routeSub.unsubscribe();
+        if (this.otpWarningSub) this.otpWarningSub.unsubscribe();
+        if (this.otpExpiredSub) this.otpExpiredSub.unsubscribe();
+        if (this.sessionWarningSub) this.sessionWarningSub.unsubscribe();
+        if (this.sessionExpiredSub) this.sessionExpiredSub.unsubscribe();
+        if (this.expirationCheckInterval) {
+            clearInterval(this.expirationCheckInterval);
+        }
+        if (this.childNotificationSub) { this.childNotificationSub.unsubscribe(); }
+    }
+}
+account-registration.component.html file: 
+<div class="account-registration-page">
+    <div class="nav-pane">
+        <div class="side-bar-heading">Account Registration</div>
+        <div class="pages-list">
+            <div class="email-verification">
+                <img [src]="stepState.emailVerification.icon" alt="Email verification" class="icon" />
+                <a class="step-link" [ngClass]="stepState.emailVerification.textClass">
+                    Email Verification
+                </a>
+            </div>
+            <div class="personal-information">
+                <img [src]="stepState.personalInformation.icon" alt="Personal Information verification" class="icon" />
+                <a class="step-link" [ngClass]="stepState.personalInformation.textClass">
+                    Personal Information
+                </a>
+            </div>
+            <div class="account-confirmation">
+                <img [src]="stepState.accountConfirmation.icon" alt="Account Information verification and confirmation" class="icon" />
+                <a class="step-link" [ngClass]="stepState.accountConfirmation.textClass">
+                    Account Confirmation
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="details-area">
+        <div #notificationContainer [ngClass]="notificationContainerClass"></div><router-outlet></router-outlet>
+    </div>
+</div>
+The service I used to track steps registration-step-tracker.service.ts file: 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { NotaryProfileDto } from '../../model/schedule-oath/schedule-oath.models';
 
-export interface ScheduleOathState {
-    applicantId: number | null;
-    email: string | null;
-    profile: NotaryProfileDto | null;
-
-    visitTypeId: number | null;
-    selectedSlot: any;
-    holdEndTimeUtc: string | null;
-    confirmation: any;
+export interface StepStyle {
+    icon: string;
+    textClass: string;
 }
 
-const initialState: ScheduleOathState = {
-    applicantId: null,
-    email: null,
-    profile: null,
-
-    visitTypeId: null,
-    selectedSlot: null,
-    holdEndTimeUtc: null,
-    confirmation: null
-};
-
-const STORAGE_KEY = 'so_state';
-
-function loadFromStorage(): ScheduleOathState {
-    try {
-        const raw = sessionStorage.getItem(STORAGE_KEY);
-        if (!raw) return initialState;
-        const parsed = JSON.parse(raw);
-        return { ...initialState, ...parsed };
-    } catch {
-        return initialState;
-    }
+export interface StepState {
+    emailVerification: StepStyle;
+    personalInformation: StepStyle;
+    accountConfirmation: StepStyle;
 }
 
-@Injectable({ providedIn: 'root' })
-export class ScheduleOathStore {
-    private subj = new BehaviorSubject<ScheduleOathState>(loadFromStorage());
-    readonly state$ = this.subj.asObservable();
-
-    get snapshot(): ScheduleOathState {
-        return this.subj.value;
-    }
-
-    patch(p: Partial<ScheduleOathState>): void {
-        const next = { ...this.subj.value, ...p };
-        this.subj.next(next);
-        try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { }
-    }
-
-    reset(): void {
-        this.subj.next({ ...initialState });
-        try { sessionStorage.removeItem(STORAGE_KEY); } catch { }
-    }
+export interface ChildNotification {
+    message: string;
+    className: string;
 }
-schedule-oath-confirm.component.ts file:
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { interval, Subject, takeUntil } from 'rxjs';
-import { ScheduleOathService } from '../../services/schedule-oath/schedule-oath.service';
-import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
 
-@Component({
-    selector: 'app-schedule-oath-confirm',
-    templateUrl: './schedule-oath-confirm.component.html',
-    styleUrls: ['./schedule-oath-confirm.component.css']
+@Injectable({
+    providedIn: 'root'
 })
-export class ScheduleOathConfirmComponent implements OnInit, OnDestroy {
-    disclaimerAccepted = false;
-    holdExpiresAt!: Date;
-    remaining = '';
-    expired = false;
+export class RegistrationStepTrackerService {
+    private emailVerified = false;
+    private personalInfoCompletion = false;
 
-    private destroy$ = new Subject<void>();
+    private readonly ICONS = {
+        visited1: `assets/v1.svg`,
+        visited2: `assets/v2.svg`,
+        unvisited2: `assets/uv2.svg`,
+        unvisited3: `assets/uv3.svg`,
+        done: `assets/done.svg`
+    };
 
-    constructor(
-        public store: ScheduleOathStore,
-        private service: ScheduleOathService,
-        public router: Router,
-        private zone: NgZone
-    ) { }
+    private readonly STYLES = {
+        activeBold: 'step-text-active',
+        inactive: 'step-text-inactive',
+        completed: 'step-text-completed'
+    };
 
-    get slot() { return this.store.snapshot.selectedSlot; }
-    get startIso() { return this.slot?.startTimeUtc ?? null; }
-    get endIso() { return this.slot?.endTimeUtc ?? null; }
-
-    ngOnInit(): void {
-        const s = this.store.snapshot;
-        if (!s.selectedSlot || !s.holdEndTimeUtc) {
-            this.router.navigate(['/schedule-oath/date-time']);
-            return;
+    private stepStateSource = new BehaviorSubject<StepState>({
+        emailVerification: {
+            icon: this.ICONS.visited1,
+            textClass: this.STYLES.activeBold
+        },
+        personalInformation: {
+            icon: this.ICONS.unvisited2,
+            textClass: this.STYLES.inactive
+        },
+        accountConfirmation: {
+            icon: this.ICONS.unvisited3,
+            textClass: this.STYLES.inactive
         }
-        this.holdExpiresAt = new Date(s.holdEndTimeUtc);
+    });
 
-        this.zone.runOutsideAngular(() => {
-            interval(1000).pipe(takeUntil(this.destroy$)).subscribe(() => {
-                const diff = this.holdExpiresAt.getTime() - Date.now();
-                this.expired = diff <= 0;
-                this.remaining = this.formatDiff(Math.max(diff, 0));
-            });
-        });
+    stepState$ = this.stepStateSource.asObservable();
+
+    private childNotificationSubject = new BehaviorSubject<ChildNotification | null>(null);
+    childNotification$ = this.childNotificationSubject.asObservable();
+
+    triggerChildNotification(message: string, className: string): void {
+        this.childNotificationSubject.next({ message, className });
     }
 
-    private formatDiff(ms: number): string {
-        const total = Math.floor(ms / 1000);
-        const m = Math.floor(total / 60).toString().padStart(2, '0');
-        const s = (total % 60).toString().padStart(2, '0');
-        return `${m}:${s}`;
+    // Flags to ensure alerts are shown only once
+    private otpWarningShown = false;
+    private otpExpiredShown = false;
+    private sessionWarningShown = false;
+    private sessionExpiredShown = false;
+
+    private otpWarningSubject = new BehaviorSubject<string | null>(null);
+    private otpExpiredSubject = new BehaviorSubject<string | null>(null);
+    private sessionWarningSubject = new BehaviorSubject<string | null>(null);
+    private sessionExpiredSubject = new BehaviorSubject<string | null>(null);
+
+    otpWarning$ = this.otpWarningSubject.asObservable();
+    otpExpired$ = this.otpExpiredSubject.asObservable();
+    sessionWarning$ = this.sessionWarningSubject.asObservable();
+    sessionExpired$ = this.sessionExpiredSubject.asObservable();
+
+    updateStatesForRoute(currentRoute: string): void {
+        switch (currentRoute) {
+            case 'email-verification':
+                this.stepStateSource.next({
+                    emailVerification: {
+                        icon: this.ICONS.visited1,
+                        textClass: this.STYLES.activeBold
+                    },
+                    personalInformation: {
+                        icon: this.ICONS.unvisited2,
+                        textClass: this.STYLES.inactive
+                    },
+                    accountConfirmation: {
+                        icon: this.ICONS.unvisited3,
+                        textClass: this.STYLES.inactive
+                    }
+                });
+                break;
+
+            case 'personal-information':
+                this.stepStateSource.next({
+                    emailVerification: {
+                        icon: this.ICONS.done,
+                        textClass: this.STYLES.completed
+                    },
+                    personalInformation: {
+                        icon: this.ICONS.visited2,
+                        textClass: this.STYLES.activeBold
+                    },
+                    accountConfirmation: {
+                        icon: this.ICONS.unvisited3,
+                        textClass: this.STYLES.inactive
+                    }
+                });
+                break;
+
+            case 'account-confirmation':
+                this.stepStateSource.next({
+                    emailVerification: {
+                        icon: this.ICONS.done,
+                        textClass: this.STYLES.completed
+                    },
+                    personalInformation: {
+                        icon: this.ICONS.done,
+                        textClass: this.STYLES.completed
+                    },
+                    accountConfirmation: {
+                        icon: this.ICONS.done,
+                        textClass: this.STYLES.completed
+                    }
+                });
+                break;
+        }
     }
 
-    goBackToSlots() { this.router.navigate(['/schedule-oath/date-time']); }
+    trackExpirations(): void {
+        const otpExpiryStr = sessionStorage.getItem('registrationOtpExpiryTime');
+        const sessionExpiryStr = sessionStorage.getItem('registrationFlowExpiresAt');
+        const now = new Date();
 
-    confirm() {
-        const s = this.store.snapshot;
-        if (this.expired) { this.goBackToSlots(); return; }
-
-        this.service.confirmReservation({
-            applicantId: s.applicantId!,
-            reservationSlotId: s.selectedSlot!.reservationSlotId,
-            visitTypeId: s.visitTypeId!,
-            disclaimerAccepted: this.disclaimerAccepted
-        }).subscribe({
-            next: conf => {
-                this.store.patch({ confirmation: conf });
-                this.router.navigate(['/schedule-oath/confirmation']);
-            },
-            error: (err) => {
-                if (err?.status === 409) this.goBackToSlots();
-                else alert('Failed to confirm reservation.');
+        // OTP Expiration
+        if (otpExpiryStr) {
+            const otpExpiryDate = new Date(otpExpiryStr);
+            const otpTimeLeft = otpExpiryDate.getTime() - now.getTime();
+            if (otpTimeLeft > 0 && otpTimeLeft <= 60000 && !this.otpWarningShown) {
+                this.otpWarningSubject.next('1 more minute to go before the OTP expires.');
+                this.otpWarningShown = true;
+            } else if (otpTimeLeft <= 0 && !this.otpExpiredShown) {
+                this.otpExpiredSubject.next('Your OTP has expired.');
+                this.otpExpiredShown = true;
+            } else if (otpTimeLeft <= 0) {
+                // Clear expired OTP
+                sessionStorage.removeItem('registrationOtpExpiryTime');
             }
-        });
+        }
+
+        // Session Expiration
+        if (sessionExpiryStr) {
+            const sessionExpiryDate = new Date(sessionExpiryStr);
+            const sessionTimeLeft = sessionExpiryDate.getTime() - now.getTime();
+            if (sessionTimeLeft > 0 && sessionTimeLeft <= 60000 && !this.sessionWarningShown) {
+                this.sessionWarningSubject.next('1 more minute till your session expires.');
+                this.sessionWarningShown = true;
+            } else if (sessionTimeLeft <= 0 && !this.sessionExpiredShown) {
+                this.sessionExpiredSubject.next('Your session has expired.');
+                this.sessionExpiredShown = true;
+            } else if (sessionTimeLeft <= 0) {
+                // Clear expired session
+                sessionStorage.removeItem('registrationFlowExpiresAt');
+            }
+        }
     }
 
-    ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
+    markEmailAsVerified(): void {
+        this.emailVerified = true;
+    }
+
+    isEmailVerified(): boolean {
+        return this.emailVerified;
+    }
+
+    markPersonalInfoAsDone(): void {
+        this.personalInfoCompletion = true;
+    }
+
+    isPersonalInfoDone(): boolean {
+        return this.personalInfoCompletion;
+    }
+
+    resetFlags(): void {
+        // Reset all alert flags to ensure proper re-triggering
+        this.otpWarningShown = false;
+        this.otpExpiredShown = false;
+        this.sessionWarningShown = false;
+        this.sessionExpiredShown = false;
+        this.otpWarningSubject.next(null);
+        this.otpExpiredSubject.next(null);
+        this.sessionWarningSubject.next(null);
+        this.sessionExpiredSubject.next(null);
+        this.childNotificationSubject.next(null);
+    }
+
+    resetOtpState(): void {
+        sessionStorage.removeItem('registrationOtpExpiryTime');
+        this.otpWarningShown = false;
+        this.otpExpiredShown = false;
+        this.otpWarningSubject.next(null);
+        this.otpExpiredSubject.next(null);
+    }
 }
-schedule-oath-confirmation.component.ts file: 
-import { Component } from '@angular/core';
+This is how step - 1 the email verification component is handling the step tracker thing: 
+import { Component, ElementRef, EventEmitter, HostListener, Output, QueryList, ViewChild, ViewChildren, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { NotificationRef, NotificationService } from '@progress/kendo-angular-notification';
+import { UserLoginService } from '../../services/user-login-service/user-login.service';
 import { Router } from '@angular/router';
-import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
+import { Subscription } from 'rxjs';
+import { RegistrationFlowTokenService } from '../../services/registration-services/registration-token-service/registration-flow-token.service';
+import { VerifyOtpService } from '../../services/registration-services/verify-otp-service/verify-otp.service';
+import { ResendOtpService } from '../../services/registration-services/resend-otp-service/resend-otp.service';
+import { environment } from '../../../environments/environment';
+import { RegistrationStepTrackerService } from '../../services/helper-services/registration-step-tracker/registration-step-tracker.service';
 
 @Component({
-    selector: 'app-schedule-oath-confirmation',
-    templateUrl: './schedule-oath-confirmation.component.html',
-    styleUrls: ['./schedule-oath-confirmation.component.css']
+    selector: 'app-email-verification',
+    templateUrl: './email-verification.component.html',
+    styleUrl: './email-verification.component.css'
 })
-export class ScheduleOathConfirmationComponent {
-    constructor(public store: ScheduleOathStore, public router: Router) { }
+export class EmailVerificationComponent {
+    @ViewChild('notificationContainer', { read: ViewContainerRef, static: true }) notificationContainer!: ViewContainerRef;
+    @ViewChildren('otpInput') otpInputs!: QueryList<ElementRef>;
+    emailForm: FormGroup;
+    showValidationErrors: boolean = false;
+    isEmailFilled: boolean = false;
+    private backNavigationSubscription!: Subscription;
+    dialogVisible = false;
+    private lastNotificationRef: NotificationRef | null = null;
+    showOtpSection: boolean = false;
+    otpBoxes = ['', '', '', '', '', ''];
+    isVerifyButtonDisabled: boolean = true;
+    isPinVerified: boolean = false;
+    pinCounter: number = 0;
+    disableInputs: boolean = false;
+    loaderVisible: boolean = false;
+    verifyPinLoaderVisible: boolean = false;
+    public loaderSize: 'small' | 'medium' = 'medium';
+    private email: string = '';
+    private otpCheckInterval!: any;
+    private otpExpiredSubChild!: Subscription;
 
-    print() { window.print(); }
-    done() {
-        this.store.reset();  
-        this.router.navigate(['/']);
-    }
-    startOver() { this.router.navigate(['/schedule-oath']); }
-}
-schedule-oath-date-time.component.ts file:
-import {
-    Component,
-    OnDestroy,
-    OnInit,
-    ChangeDetectionStrategy,
-    ChangeDetectorRef
-} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
-import { ScheduleOathService } from '../../services/schedule-oath/schedule-oath.service';
-import {
-    OfficeDto,
-    ReservationSlotDto,
-    HoldResponseDto,
-    ReservationConfirmationDto
-} from '../../model/schedule-oath/schedule-oath.models';
-import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
-
-type Dir = 'current' | 'next' | 'prev';
-
-export type SchedulerItem = {
-    id: number;
-    slotId: number;
-    title: string;
-    start: Date;
-    end: Date;
-    isAllDay: boolean;
-};
-
-function isValidDate(d: Date): boolean {
-    return d instanceof Date && !Number.isNaN(d.getTime());
-}
-
-@Component({
-    selector: 'app-schedule-oath-date-time',
-    templateUrl: './schedule-oath-date-time.component.html',
-    styleUrls: ['./schedule-oath-date-time.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
-})
-export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
-    loading = true;
-    errorMsg = '';
-
-    offices: OfficeDto[] = [];
-    selectedOfficeId: number | null = null;
-
-    /** Events bound to the Scheduler via [kendoSchedulerBinding] */
-    events: SchedulerItem[] = [];
-    selectedDate: Date = new Date();
-
-    weekLabel = '';
-    hold: HoldResponseDto | null = null;
-    acceptedDisclaimer = false;
-    confirming = false;
-
-    private applicantId = 0;
-    private email = '';
-    private visitTypeId = 0;
-    private destroy$ = new Subject<void>();
-
-    private static readonly MAX_EVENTS = 1000;
-
-    constructor(
-        private route: ActivatedRoute,
+    constructor(private fb: FormBuilder,
+        private userLoginService: UserLoginService,
         private router: Router,
-        private svc: ScheduleOathService,
-        public store: ScheduleOathStore,
-        private cdr: ChangeDetectorRef
-    ) { }
-
-    ngOnInit(): void {
-        const qp = this.route.snapshot.queryParamMap;
-        this.applicantId =
-            Number(qp.get('applicantId')) || this.store.snapshot.applicantId || 0;
-        this.email = qp.get('email') || this.store.snapshot.email || '';
-        this.visitTypeId =
-            Number(qp.get('visitTypeId')) || this.store.snapshot.visitTypeId || 0;
-
-        if (!this.applicantId || !this.email || !this.visitTypeId) {
-            this.loading = false;
-            this.errorMsg =
-                'Missing required data (applicantId / email / visitTypeId).';
-            this.cdr.markForCheck();
-            return;
-        }
-
-        // Persist for refreshes
-        this.store.patch({
-            applicantId: this.applicantId,
-            email: this.email,
-            visitTypeId: this.visitTypeId
-        });
-
-        this.loadOffices(() => this.loadSlotsWithFallback());
-    }
-
-    // ---------- data loads ----------
-    private loadOffices(onDone?: () => void) {
-        this.svc
-            .getOffices()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (offices) => {
-                    this.offices = (offices || []).filter(
-                        (o) => (o as any).isActive ?? true
-                    );
-                    if (!this.selectedOfficeId && this.offices.length) {
-                        this.selectedOfficeId = this.offices[0].officeId;
-                    }
-                },
-                error: () => { },
-                complete: () => {
-                    if (onDone) onDone();
-                    this.cdr.markForCheck();
-                }
-            });
-    }
-
-    loadSlotsWithFallback(): void {
-        this.loading = true;
-        this.errorMsg = '';
-        const weekOf = this.mondayIso(new Date());
-
-        // current week
-        this.searchWeek(weekOf, 'current', () => {
-            if (this.events.length) {
-                this.loading = false;
-                this.cdr.markForCheck();
-                return;
+        private verifyOtpService: VerifyOtpService,
+        private registrationFlowTokenService: RegistrationFlowTokenService,
+        private notificationService: NotificationService,
+        private resendOtpService: ResendOtpService,
+        private stepTrackerService: RegistrationStepTrackerService) {
+        this.emailForm = this.fb.group(
+            {
+                email: [
+                    '',
+                    [
+                        Validators.required,
+                        Validators.email
+                    ],
+                ],
+                confirmEmail: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
+            },
+            {
+                validators: this.emailsMatchValidator,
             }
-            // next week
-            this.searchWeek(weekOf, 'next', () => {
-                this.loading = false;
-                if (!this.events.length) {
-                    this.errorMsg =
-                        'No available slots for this or next week. Try a different week or office.';
-                }
-                this.cdr.markForCheck();
-            });
-        });
-    }
-
-    private searchWeek(weekOf: string, dir: Dir, done?: () => void): void {
-        const req: any = {
-            applicantId: this.applicantId,
-            visitTypeId: this.visitTypeId,
-            weekOf,
-            // Keep your lowercase pageDirection since your sample shows that payload
-            pageDirection: dir
-        };
-        if (this.selectedOfficeId) req.officeId = this.selectedOfficeId;
-
-        this.svc
-            .searchWeeklySlots(req)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (resp) => {
-                    // Type-safe: your SlotSearchResponse exposes weekStartUtc / weekEndUtc / slots
-                    const startIso: string | undefined = resp?.weekStartUtc;
-                    const endIso: string | undefined = resp?.weekEndUtc;
-
-                    const wkStart = startIso ? new Date(startIso) : null;
-                    const wkEnd = endIso ? new Date(endIso) : null;
-
-                    if (!wkStart || !isValidDate(wkStart) || !wkEnd || !isValidDate(wkEnd)) {
-                        this.events = [];
-                        this.errorMsg = 'Server returned invalid week dates.';
-                        return;
-                    }
-
-                    this.selectedDate = wkStart;
-                    this.weekLabel = this.formatWeekLabel(startIso!, endIso!);
-
-                    const rawSlots: any[] = Array.isArray(resp?.slots) ? resp.slots : [];
-
-                    const items: SchedulerItem[] = rawSlots
-                        .map((s: any) => {
-                            const startUTC =
-                                s.startTimeUtc ??
-                                (s.scheduleDate && s.startTime
-                                    ? `${s.scheduleDate}T${s.startTime}Z`
-                                    : null) ??
-                                s.start;
-                            const endUTC =
-                                s.endTimeUtc ??
-                                (s.scheduleDate && s.endTime
-                                    ? `${s.scheduleDate}T${s.endTime}Z`
-                                    : null) ??
-                                s.end;
-
-                            if (!startUTC || !endUTC) return null;
-
-                            const start = new Date(startUTC);
-                            const end = new Date(endUTC);
-                            if (!isValidDate(start) || !isValidDate(end)) return null;
-
-                            const id = Number(s.reservationSlotId ?? s.slotId ?? s.id ?? 0);
-
-                            return {
-                                id,
-                                slotId: id,
-                                title: s.title ?? 'Available',
-                                start,
-                                end,
-                                isAllDay: false
-                            };
-                        })
-                        .filter((x): x is SchedulerItem => !!x)
-                        .sort((a, b) => a.start.getTime() - b.start.getTime())
-                        .slice(0, ScheduleOathDateTimeComponent.MAX_EVENTS);
-
-                    this.events = items;
-                    this.errorMsg = this.events.length
-                        ? ''
-                        : 'No available slots for this week. Try another week or office.';
-                },
-                error: (err) => {
-                    this.errorMsg = err?.message || 'Failed to load slots.';
-                    if (done) done();
-                    this.cdr.markForCheck();
-                },
-                complete: () => {
-                    if (done) done();
-                    this.cdr.markForCheck();
-                }
-            });
-    }
-
-    // ---------- interactions ----------
-    onOfficeChange(): void {
-        this.loadSlotsWithFallback();
-    }
-
-    goWeek(dir: Dir): void {
-        this.loading = true;
-        const weekOf = this.mondayIso(new Date());
-        this.searchWeek(weekOf, dir, () => {
-            this.loading = false;
-            this.cdr.markForCheck();
-        });
-    }
-
-    onEventClick(e: any): void {
-        // Only used if/when you add (eventClick) back
-        const data = e?.event?.dataItem as SchedulerItem | undefined;
-        if (!data) return;
-        this.holdSlotById(data.slotId);
-    }
-
-    holdSlotById(slotId: number): void {
-        if (!this.applicantId) return;
-        this.hold = null;
-        this.acceptedDisclaimer = false;
-
-        this.svc
-            .setHold(slotId, this.applicantId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (h) => {
-                    this.hold = h;
-                    this.cdr.markForCheck();
-                },
-                error: (err) => {
-                    this.errorMsg = err?.message || 'Unable to hold slot.';
-                    this.cdr.markForCheck();
-                }
-            });
-    }
-
-    releaseHold(): void {
-        if (!this.hold) return;
-        this.svc
-            .releaseHold((this.hold as any).appointmentId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: () => {
-                    this.hold = null;
-                    this.cdr.markForCheck();
-                },
-                error: () => {
-                    this.hold = null;
-                    this.cdr.markForCheck();
-                }
-            });
-    }
-
-    confirm(): void {
-        if (!this.hold || !this.acceptedDisclaimer || this.confirming) return;
-        this.confirming = true;
-        this.cdr.markForCheck();
-
-        this.svc
-            .confirmReservation({
-                appointmentId: (this.hold as any).appointmentId,
-                disclaimerAccepted: true
-            } as any)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (conf: ReservationConfirmationDto) => {
-                    this.router.navigate(['/schedule-oath/confirmation'], {
-                        queryParams: {
-                            reservationId: (conf as any).reservationId,
-                            confirmationNumber: (conf as any).confirmationNumber
-                        }
-                    });
-                },
-                error: (err) => {
-                    this.errorMsg = err?.message || 'Unable to confirm reservation.';
-                    this.confirming = false;
-                    this.cdr.markForCheck();
-                },
-                complete: () => {
-                    this.confirming = false;
-                    this.cdr.markForCheck();
-                }
-            });
-    }
-
-    // ---------- helpers ----------
-    officeLabel(o: OfficeDto): string {
-        const a = o as any;
-        return a.value ?? a.name ?? a.description ?? `Office ${o.officeId}`;
-    }
-    trackOffice(_i: number, o: OfficeDto) {
-        return o?.officeId;
-    }
-
-    private mondayIso(d: Date): string {
-        const utc = new Date(
-            Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
         );
-        const dow = utc.getUTCDay() || 7;
-        if (dow !== 1) utc.setUTCDate(utc.getUTCDate() - (dow - 1));
-        const y = utc.getUTCFullYear(),
-            m = String(utc.getUTCMonth() + 1).padStart(2, '0'),
-            day = String(utc.getUTCDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-    }
-    private formatWeekLabel(startIso: string, endIso: string): string {
-        try {
-            const s = new Date(startIso),
-                e = new Date(endIso);
-            const fmt = (d: Date) =>
-                d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-            return `${fmt(s)}-${fmt(e)}, ${e.getFullYear()}`;
-        } catch {
-            return '';
-        }
+        const navigation = this.router.getCurrentNavigation();
     }
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
+    @HostListener('window:resize')
+    onResize() {
+        this.updateLoaderSize();
     }
-}
-schedule-oath-personal-info.component.ts file:
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
-import { timeout, finalize } from 'rxjs/operators';
-
-import { ScheduleOathService } from '../../services/schedule-oath/schedule-oath.service';
-import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
-import { NotaryProfileDto, VisitTypeDto } from '../../model/schedule-oath/schedule-oath.models';
-
-type VisitCode = 'InPerson' | 'External' | 'Virtual';
-type VisitVM = { id: number; code: VisitCode; label: string; help: string; raw?: VisitTypeDto };
-
-@Component({
-    selector: 'app-schedule-oath-personal-info',
-    templateUrl: './schedule-oath-personal-info.component.html',
-    styleUrls: ['./schedule-oath-personal-info.component.css']
-})
-export class ScheduleOathPersonalInfoComponent implements OnInit, OnDestroy {
-    form!: FormGroup;
-    submitted = false;
-
-    profile: NotaryProfileDto | null = null;
-    visitOptions: VisitVM[] = [];
-    loading = true;
-
-    private destroy$ = new Subject<void>();
-
-    constructor(
-        private fb: FormBuilder,
-        private service: ScheduleOathService,
-        public store: ScheduleOathStore,
-        private router: Router
-    ) { }
 
     ngOnInit(): void {
-        const qp = new URLSearchParams(window.location.search);
-        const applicantId = Number(qp.get('applicantId')) || this.store.snapshot.applicantId || 0;
-
-        const emailFromUrl = (qp.get('email') || '').trim();
-        const emailFromSession = (sessionStorage.getItem('Email') || '').trim();
-        const email = emailFromUrl || emailFromSession || this.store.snapshot.email || '';
-
-        // If URL missing email but available in session, rewrite once (supports deep links)
-        if (applicantId && !emailFromUrl && emailFromSession) {
-            this.router.navigate([], {
-                queryParams: { email: emailFromSession },
-                queryParamsHandling: 'merge',
-                replaceUrl: true
-            });
-            return;
-        }
-
-        if (!applicantId) { this.loading = false; alert('Missing applicant id.'); return; }
-        if (!email) { this.loading = false; alert('Missing email address. Please re-login or open from Profile Homepage.'); return; }
-
-        // No disabled-on-load — control is enabled from the start
-        this.form = this.fb.group({
-            visitTypeId: new FormControl(
-                this.store.snapshot.visitTypeId != null ? String(this.store.snapshot.visitTypeId) : '',
-                Validators.required
-            )
-        });
-
-        // Show defaults immediately
-        this.visitOptions = this.defaultVisitOptions();
-
-        // Persist identity early
-        this.store.patch({ applicantId, email });
-
-        // Load profile + visit types; just flip loading off in finalize()
-        this.service.start(applicantId, email)
-            .pipe(
-                takeUntil(this.destroy$),
-                timeout(5000),
-                finalize(() => {
-                    // runs on success OR error — no enable/disable here
-                    this.loading = false;
-                })
-            )
-            .subscribe({
-                next: (res) => {
-                    this.profile = res.profile ?? null;
-
-                    const normalized = this.normalizeVisitTypes(res.visitTypes ?? []);
-                    if (normalized.length) this.visitOptions = normalized;
-
-                    // Default selection if none persisted
-                    if (!this.form.value.visitTypeId && this.visitOptions.length) {
-                        this.form.patchValue({ visitTypeId: String(this.visitOptions[0].id) });
-                    } else if (typeof this.form.value.visitTypeId === 'number') {
-                        this.form.patchValue({ visitTypeId: String(this.form.value.visitTypeId) });
-                    }
-
-                    // Persist profile for downstream steps
-                    this.store.patch({ profile: this.profile });
-                },
-                error: () => {
-                    // Keep defaults; still let user proceed
-                    if (!this.form.value.visitTypeId && this.visitOptions.length) {
-                        this.form.patchValue({ visitTypeId: String(this.visitOptions[0].id) });
-                    }
+        this.backNavigationSubscription = this.userLoginService.backNavigation$
+            .subscribe(shouldNavigateBack => {
+                if (shouldNavigateBack) {
+                    this.openDialog();
+                    this.userLoginService.resetBackNavigation();
                 }
             });
-    }
 
-    onSelectVisitType(ev: Event): void {
-        const val = (ev.target as HTMLInputElement | null)?.value ?? '';
-        this.form.get('visitTypeId')!.setValue(String(val));
-    }
-
-    next(): void {
-        this.submitted = true;
-        if (this.form.invalid) {
-            this.form.markAllAsTouched();
-            return;
-        }
-
-        const visitTypeId = Number(this.form.value.visitTypeId);
-        const { applicantId, email } = this.store.snapshot;
-
-        this.store.patch({
-            visitTypeId,
-            selectedSlot: null,
-            holdEndTimeUtc: null,
-            confirmation: null
-        });
-
-        this.router.navigate(['/schedule-oath/date-time'], {
-            queryParams: { applicantId, email, visitTypeId }
-        });
-    }
-
-    cancel(): void {
-        this.router.navigate(['/profile-homepage']);
-    }
-
-    // ---------- Helpers ----------
-    private normalizeVisitTypes(list: VisitTypeDto[]): VisitVM[] {
-        const onlyActive = (list || []).filter((v: any) => (v?.isActive ?? v?.IsActive ?? true));
-        const toId = (v: any) => Number(v?.visitTypeId ?? v?.VisitTypeId ?? v?.id ?? 0);
-        const toCode = (v: any): VisitCode | null => {
-            const c = String(v?.code ?? v?.Code ?? v?.value ?? '').toLowerCase();
-            if (c === 'inperson') return 'InPerson';
-            if (c === 'external') return 'External';
-            if (c === 'virtual') return 'Virtual';
-            return null;
+        this.updateLoaderSize();
+        window.history.pushState(null, '', window.location.href);
+        window.onpopstate = () => {
+            window.history.pushState(null, '', window.location.href);
+            this.openDialog();
         };
-
-        const opts: VisitVM[] = [];
-        for (const v of onlyActive) {
-            const id = toId(v);
-            const code = toCode(v);
-            if (!id || !code) continue;
-            opts.push({
-                id,
-                code,
-                label: code === 'InPerson' ? 'In Person' : code,
-                help:
-                    code === 'InPerson' ? 'Visit a designated office to take the oath' :
-                        code === 'External' ? 'Take the oath with an approved partner' :
-                            'Complete the oath remotely via video',
-                raw: v
-            });
-        }
-        const order: VisitCode[] = ['InPerson', 'External', 'Virtual'];
-        return opts.sort((a, b) => order.indexOf(a.code) - order.indexOf(b.code));
-    }
-
-    private defaultVisitOptions(): VisitVM[] {
-        return [
-            { id: 1, code: 'InPerson', label: 'In Person', help: 'Visit a designated office to take the oath' },
-            { id: 2, code: 'External', label: 'External', help: 'Take the oath with an approved partner' },
-            { id: 3, code: 'Virtual', label: 'Virtual', help: 'Complete the oath remotely via video' }
-        ];
+        this.otpExpiredSubChild = this.stepTrackerService.otpExpired$.subscribe(message => {
+            if (message) {
+                this.doMaxTriesPin(message);
+            }
+        });
+        //this.stepTrackerService.triggerChildNotification('Doing a random notification for testing', 'custom-notification correct');
     }
 
     ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
+        if (this.backNavigationSubscription) {
+            this.backNavigationSubscription.unsubscribe();
+        }
+        window.onpopstate = null;
+        if (this.otpExpiredSubChild) {
+            this.otpExpiredSubChild.unsubscribe();
+        }
     }
-}
-schedule-oath.models.ts file:
-import { Type } from '@angular/core';
 
-export interface OfficeDto {
-    officeId: number;
-    name: string;
-    description: string;
-    isActive: boolean;
-    value?: string;
-}
+    private updateLoaderSize(): void {
+        this.loaderSize = window.innerWidth < 425 ? 'small' : 'medium';
+    }
 
-export interface ReservationSlotDto {
-    reservationSlotId: number;
-    officeId: number;
-    scheduleDate: string;
-    startTime: string;
-    endTime: string;
-    startTimeUtc?: string;
-    endTimeUtc?: string;
-    start?: string;
-    end?: string;
-    title?: string;
-    id?: number;
-}
+    sanitizeInput(event: any): void {
+        //const sanitizedValue = event.target.value.replace(/['";]/g, '');
+        //event.target.value = sanitizedValue;
+        const inputEl = event.target as HTMLInputElement;
+        const forbiddenRegex = /[`!#$%\^{},|\[\]\\'()\?\/<>\;=]/g;
 
-export interface HoldRequestDto {
-    applicantId: number;
-    reservationSlotId: number;
-}
+        const cleaned = inputEl.value.replace(forbiddenRegex, '');
+        inputEl.value = cleaned;
 
-export interface HoldResponseDto {
-    appointmentId: number;
-    officeId: number;
-    officeName: string;
-    officeAddress: string;
-    officePhone: string;
-    scheduleDateUtc: string;
-    startTimeUtc: string;
-    endTimeUtc: string;
-    disclaimer: string;
-    disclaimerAccepted: boolean;
-}
+        const controlName = inputEl.getAttribute('formControlName');
+        if (controlName) {
+            const ctrl = this.emailForm.get(controlName);
+            if (ctrl) {
+                ctrl.setValue(cleaned, { emitEvent: false });
+            }
+        }
+    }
 
-export interface ConfirmReservationDto {
-    appointmentId: number;
-    disclaimerAccepted: boolean;
-}
+    emailsMatchValidator(group: FormGroup) {
+        const email = group.get('email')?.value;
+        const confirmEmail = group.get('confirmEmail')?.value;
+        if (!confirmEmail) {
+            return null;
+        }
+        return email === confirmEmail ? null : { emailsDoNotMatch: true };
+    }
 
-export interface ReservationConfirmationDto {
-    reservationId: number;
-    confirmationNumber: string;
-    applicantId: number;
-    officeId: number;
-    officeName: string;
-    scheduleDateUtc: string;
-    startTimeUtc: string;
-    endTimeUtc: string;
-    disclaimer: string;
-    disclaimerAccepted: boolean;
-}
+    onEmailInput(): void {
+        const emailControl = this.emailForm.get('email');
+        const confirmEmailControl = this.emailForm.get('confirmEmail');
+        if (emailControl?.value) {
+            confirmEmailControl?.enable();
+        } else {
+            confirmEmailControl?.disable();
+            confirmEmailControl?.reset();
+        }
+    }
 
-export interface WeekSlotsResponse {
-    weekStartUtc: string;
-    weekEndUtc: string;
-    slots: ReservationSlotDto[];
-}
+    onNext(): void {
+        this.showValidationErrors = true;
+        const enteredEmail = this.emailForm.get('email')?.value;
+        if (this.emailForm.valid) {
+            this.loaderVisible = true;
+            this.registrationFlowTokenService.verifyEmail(enteredEmail).subscribe({
+                next: (response) => {
+                    const { message, token, expiresAt } = response;
+                    if (token && expiresAt) {
+                        sessionStorage.removeItem('registrationOtpExpiryTime');
+                        sessionStorage.removeItem('registrationFlowExpiresAt');
+                        this.registrationFlowTokenService.saveToken(token);
+                        sessionStorage.setItem('registrationFlowExpiresAt', expiresAt);
+                        this.setOtpExpiry();
+                        this.triggerNotification(response?.message, 'custom-notification correct');
+                        this.showOtpSection = true;
+                    }
+                },
+                error: (error) => {
+                    this.loaderVisible = false;
+                    this.triggerNotification(error?.error?.message,'custom-notification incorrect')
+                }
+            });
+        } else {
+            console.log('Form is invalid:');
+        }
+    }
 
-export interface NotaryProfileDto {
-    notaryId: number;
-    fullName: string;
-    // Add other fields as needed based on your API response
-}
+    setOtpExpiry(): void {
+        const registrationOtpExpiryTime = new Date(Date.now() + 5 * 60 * 1000);
+        sessionStorage.setItem('registrationOtpExpiryTime', registrationOtpExpiryTime.toISOString());
+    }
 
-export interface VisitTypeDto {
-    visitTypeId: number;
-    description: string;
-    // Add other fields as needed
-}
+    onCancel(): void {
+        this.openDialog();
+    }
 
-export interface SlotFilterDto {
-    startDateUtc: string;
-    endDateUtc: string;
-    officeId?: number;
-    timeOfDay?: string;
+    openDialog(): void {
+        this.dialogVisible = true;
+    }
+
+    closeDialog(): void {
+        this.dialogVisible = false;
+    }
+
+    onConfirm(): void {
+        this.closeDialog();
+        this.registrationFlowTokenService.clearToken();
+        location.href = `${environment.homepage}`;
+    } 
+
+    onDecline(): void {
+        this.closeDialog();
+    }
+
+    triggerNotification(notificationMessage: string, className: string): void {
+        this.stepTrackerService.triggerChildNotification(notificationMessage, className);
+    }
+
+    onFocus(event: FocusEvent): void {
+        const input = event.target as HTMLInputElement;
+        input.placeholder = '';
+        input.style.textAlign = 'center';
+    }
+
+    onBlur(event: FocusEvent): void {
+        const input = event.target as HTMLInputElement;
+        if (input.value === '') {
+            input.placeholder = '--';
+        }
+    }
+
+    movementFunction(event: KeyboardEvent, index: number): void {
+        if (event.ctrlKey && event.key.toLowerCase() === 'v') {
+            return;
+        }
+        const input = event.target as HTMLInputElement;
+        if (event.key.match(/[0-9]/)) {
+            input.value = event.key;
+            const nextInput = this.otpInputs.toArray()[index + 1];
+            if (nextInput) {
+                nextInput.nativeElement.focus();
+            }
+        } else if (event.key === 'Backspace') {
+            if (input.value !== '') {
+                input.value = '';
+                input.placeholder = '--';
+            } else {
+                const previousInput = this.otpInputs.toArray()[index - 1];
+                if (previousInput) {
+                    previousInput.nativeElement.focus();
+                    previousInput.nativeElement.placeholder = '--';
+                }
+            }
+        }
+        event.preventDefault();
+        this.validateInputs();
+    }
+
+    validateInputs(): void {
+        if (this.disableInputs) {
+            this.otpInputs.forEach(input => {
+                input.nativeElement.disabled = true;
+            });
+        }
+        this.isVerifyButtonDisabled = this.otpInputs.toArray().some(input => {
+            const value = input.nativeElement.value.trim();
+            return value === '' || isNaN(Number(value));
+        });
+    }
+
+    verifyPin(): void {
+        if (!this.disableInputs) {
+            const enteredPin = this.otpInputs.toArray()
+                .map(input => input.nativeElement.value)
+                .join('');
+            const enteredEmail = this.emailForm.get('email')?.value;
+            this.verifyPinLoaderVisible = true;
+            this.verifyOtpService.verifyPin(enteredEmail, enteredPin).subscribe({
+                next: (response) => {
+                    const successMessage = response.message || 'Pin Verified Successfully';
+                    this.triggerNotification(successMessage, 'custom-notification correct');
+                    this.isPinVerified = true;
+                    this.stepTrackerService.markEmailAsVerified();
+                    this.disableInputs = true;
+                    this.verifyPinLoaderVisible = false;
+                },
+                error: (error) => {
+                    const errorMessage = error.error?.message || 'My own error';
+                    const finalErrorMessage = errorMessage.match("expired") ? true : false;
+                    finalErrorMessage ? this.doMaxTriesPin(errorMessage)
+                        : this.doIncorrectPin(errorMessage);
+                    this.verifyPinLoaderVisible = false;
+                }
+            });
+            this.resetPinInputs();
+        }
+    }
+
+    onResendClick(event: Event): void {
+        event.preventDefault(); // Prevents the default anchor navigation
+        if (!this.isPinVerified) {
+            this.resendPin();
+            this.resetPinInputs();
+        }
+    }
+
+    resetPinInputs(): void {
+        this.otpInputs.forEach(input => {
+            input.nativeElement.value = '';
+            input.nativeElement.placeholder = '--';
+        });
+        this.isVerifyButtonDisabled = true;
+    }
+
+    resendPin(): void {
+        const enteredEmail = this.emailForm.get('email')?.value;
+        this.resendOtpService.triggerResend(enteredEmail).subscribe({
+            next: (response) => {
+                const successMessage = response.message || 'Pin Resent Successfully';
+                this.disableInputs = false;
+                this.triggerNotification(successMessage, 'custom-notification info');
+                this.setOtpExpiry();
+                this.stepTrackerService.resetFlags();
+            },
+            error: (error) => {
+                const errorMessage = error.error?.message || 'My own error';
+                this.triggerNotification(errorMessage, 'custom-notification incorrect');
+            }
+        });
+    }
+
+    onPrevious(): void {
+        this.showOtpSection = false;
+        this.registrationFlowTokenService.clearToken();
+    }
+
+    handleExpiredPin(message: string): void {
+        this.triggerNotification(message, 'custom-notification info');
+        this.disableInputs = true;
+    }
+
+    doIncorrectPin(message: string): void {
+        this.triggerNotification(message, 'custom-notification incorrect');
+    }
+
+    doMaxTriesPin(message: string): void {
+        this.triggerNotification(message, 'custom-notification incorrect');
+        this.disableInputs = true;
+    }
+
+    onNextAgain(): void {
+        if (this.lastNotificationRef) { this.lastNotificationRef.hide(); }
+        const enteredEmail = this.emailForm.get('email')?.value;
+        this.router.navigate(['/account-registration/personal-information'], { state: { email: enteredEmail } });
+    }
+
+    handleOtpPaste(event: ClipboardEvent): void {
+        event.preventDefault();
+        const pastedData = event.clipboardData?.getData('text') || '';
+        const digits = pastedData.replace(/\D/g, '');
+        const inputs = this.otpInputs.toArray();
+        for (let i = 0; i < inputs.length; i++) {
+            inputs[i].nativeElement.value = digits.charAt(i) || '';
+        }
+        this.validateInputs();
+        if (inputs.length > 0) {
+            inputs[inputs.length - 1].nativeElement.focus();
+        }
+    }
+
+    handleConfirmEmailEnter(event: any): void {
+        event.preventDefault();
+        if (this.emailForm.valid) {
+            this.onNext();
+        }
+    }
+
+    onOtpEnter(): void {
+        if (!this.isVerifyButtonDisabled) {
+            this.verifyPin();
+        }
+    }
 }
