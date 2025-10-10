@@ -1,9 +1,21 @@
-Goal: Solve the issue that is popping up when I click on a slot 
-Details: When the page loads and all the slots load with it.. and I click on a slot.. the consolelogging is happening.. but there is an 
-error in the console and the hidden div is not getting displayed. WHat is happenign? I will post the html, ts and service files take a 
-look, and fix the issue 
+Bug: There is a bug in the grid.. the bug is 2 fold.. firstly incorrect days are popping up on the column header. We should never see a sunday day on the 
+calendar. We are seeing sunday. And the second aspect of the bug is.. when I click any reservation slot on the sunday and it console logs it.. 
+the date in the console log is pointing to the Monday of that week. For example, in the screenshot I attached.. it has Sunday Sep 28 
+and it has a slot at 5:00 AM. When I click that the console log is {
+    "reservationSlotId": 812,
+    "reservationId": 56,
+    "office": {
+        "officeId": 1,
+        "value": "Boston"
+    },
+    "visitTypeId": 1,
+    "scheduleDate": "2025-09-29",
+    "startTime": "09:00:00",
+    "endTime": "09:30:00"
+}
+If you notice the schedule date of that is 29th september. Which is incorrect. Fix this. 
 
-Ask any clarifying questions you have before you start implementing a fix 
+Ask me any clarifying questions you have before you get started. 
 
 html file: 
 <div class="wrapper" *ngIf="!loading; else busy">
@@ -86,7 +98,7 @@ html file:
         <div>Loading available offices and slots...</div>
     </div>
 </ng-template>
-ts file:
+ts file: 
 import {
     Component,
     OnDestroy,
@@ -825,65 +837,5 @@ export class ScheduleOathService {
         const endMs = endIso ? Date.parse(endIso) : Number.NaN;
 
         return [startMs, endMs];
-    }
-}
-scheduler-oath.state.ts file:
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { NotaryProfileDto } from '../../model/schedule-oath/schedule-oath.models';
-
-export interface ScheduleOathState {
-    applicantId: number | null;
-    email: string | null;
-    profile: NotaryProfileDto | null;
-    appointmentId: number | null;
-    visitTypeId: number | null;
-    selectedSlot: any;
-    holdEndTimeUtc: string | null;
-    confirmation: any;
-}
-
-const initialState: ScheduleOathState = {
-    applicantId: null,
-    email: null,
-    profile: null,
-    appointmentId: null,
-    visitTypeId: null,
-    selectedSlot: null,
-    holdEndTimeUtc: null,
-    confirmation: null
-};
-
-const STORAGE_KEY = 'so_state';
-
-function loadFromStorage(): ScheduleOathState {
-    try {
-        const raw = sessionStorage.getItem(STORAGE_KEY);
-        if (!raw) return initialState;
-        const parsed = JSON.parse(raw);
-        return { ...initialState, ...parsed };
-    } catch {
-        return initialState;
-    }
-}
-
-@Injectable({ providedIn: 'root' })
-export class ScheduleOathStore {
-    private subj = new BehaviorSubject<ScheduleOathState>(loadFromStorage());
-    readonly state$ = this.subj.asObservable();
-
-    get snapshot(): ScheduleOathState {
-        return this.subj.value;
-    }
-
-    patch(p: Partial<ScheduleOathState>): void {
-        const next = { ...this.subj.value, ...p };
-        this.subj.next(next);
-        try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { }
-    }
-
-    reset(): void {
-        this.subj.next({ ...initialState });
-        try { sessionStorage.removeItem(STORAGE_KEY); } catch { }
     }
 }
