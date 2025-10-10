@@ -1,269 +1,76 @@
-Bug: When the user selects a radio button and clicks next.. the criteria for the user to cross the page is done.. so the nav-bar section 
-on the parent component schedule-oath.component should show the icon done.svg instead of v1.svg and the next step's icon should change 
-from uv2.svg to v2.svg and so should its text to bold styling. That is not happening. 
+Goal: Look at the code here and tell me what the code is doing on click on the next button and what network call is being made ask me to 
+paste the code for a certain service or a certain component or a certain model if you need it. The end result you should be able to explain
+what is going here on click of next. 
 
-Details: When I land on the parent page (with the first child page already rendered in the details section) this is how the URL looks like 
-http://localhost:4200/schedule-oath/personal-information?applicantId=7&email=test01@oathdue.com now.. when I click the next button by selecting 
-any radio button.. it should change the nav-bar section of the parent to the relevant stuff. It is not happening. 
+Ask me any clarifying questions you have 
 
-Ask me any clarifying questions you have before you proceed. 
-parent schedule-oath.component.html: 
-<div class="oath-scheduler-page">
-    <div class="nav-pane">
-        <div class="side-bar-heading">Oath Scheduler</div>
+schedule-oath-personal-info.component.html file: 
+<section class="so-personal-info">
+    <!-- Non-blocking skeleton -->
+    <div class="skeleton" *ngIf="loading" aria-hidden="true">Loading…</div>
 
-        <div class="pages-list" *ngIf="stepState as s">
-            <div class="step personal-information">
-                <img [src]="s.personalInformation.icon" alt="Personal Information" class="icon" />
-                <span class="step-link" [ngClass]="s.personalInformation.textClass">Mode of Oath</span>
-            </div>
+    <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="next()" novalidate>
+        <div class="welcome">Welcome {{profile?.firstName}},</div>
+        <div class="welcome post-salutation">
+            Your oath is due latest by <u>{{profile?.oathDueDateUtc | date:'MMM dd, yyyy \'by\' hh:mm a' }}</u> local time.
+            Please confirm your information below, select the mode of oath and proceed.
+        </div>
 
-            <div class="step date-time">
-                <img [src]="s.dateTime.icon" alt="Date & Time" class="icon" />
-                <span class="step-link" [ngClass]="s.dateTime.textClass">Date &amp; Time</span>
-            </div>
-
-            <div class="step confirm-reservation">
-                <img [src]="s.confirmReservation.icon" alt="Confirm Reservation" class="icon" />
-                <span class="step-link" [ngClass]="s.confirmReservation.textClass">Confirm Reservation</span>
-            </div>
-
-            <div class="step reservation-confirmation">
-                <img [src]="s.reservationConfirmation.icon" alt="Reservation Confirmation" class="icon" />
-                <span class="step-link" [ngClass]="s.reservationConfirmation.textClass">Reservation Confirmation</span>
+        <div class="profile-information-section">
+            <div class="profile-information-heading">Profile Information</div>
+            <div class="profile-information-data">
+                <div class="data-column">
+                    <div class="data-row label-heading">Name</div>
+                    <div class="data-row">{{profile?.firstName}}</div>
+                </div>
+                <div class="data-column">
+                    <div class="data-row label-heading">Date of Birth</div>
+                    <div class="data-row">{{dobDisplay}}</div>
+                </div>
+                <div class="data-column">
+                    <div class="data-row label-heading">Email</div>
+                    <div class="data-row">{{store.snapshot.email}}</div>
+                </div>
+                <div class="data-column">
+                    <div class="data-row label-heading">Phone</div>
+                    <div class="data-row">{{phone1Display}}</div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="details-area">
-        <div #notificationContainer [ngClass]="notificationContainerClass"></div>
-        <router-outlet></router-outlet>
-    </div>
-</div>
-parent schedule-oath.component.ts file:
-import { Component, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
-import { Router, NavigationEnd, NavigationStart } from '@angular/router';
-import { filter, Subscription } from 'rxjs';
-import { NotificationRef, NotificationService } from '@progress/kendo-angular-notification';
-import { OathStepState, OathStepTrackerService } from '../../services/helper-services/oath-schedule-step-tracker/oath-step-tracker.service';
+        <div class="visit-types">
+            <div class="profile-information-heading">Mode of Oath <sup class="asterisk">*</sup></div>
+            <div class="options">
+                <div class="option" *ngFor="let opt of visitOptions">
+                    <kendo-radiobutton formControlName="visitTypeId"
+                                       [name]="'visitTypeId'"
+                                       [value]="'' + opt.id"
+                                       (click)="onRadioClick('' + opt.id, $event)"
+                                       (blur)="onRadioBlur()">
+                    </kendo-radiobutton>
 
+                    <!-- Whole label remains clickable -->
+                    <label class="text"
+                           [class.selected]="form.value.visitTypeId === '' + opt.id"
+                           (click)="onRadioClick('' + opt.id, $event)">
+                        <div class="title">{{ opt.label }}</div>
+                        <div class="help" *ngIf="opt.help">{{ opt.help }}</div>
+                    </label>
+                </div>
+            </div>
 
-@Component({
-    selector: 'app-schedule-oath',
-    templateUrl: './schedule-oath.component.html',
-    styleUrl: './schedule-oath.component.css'
-})
-export class ScheduleOathComponent implements OnInit, OnDestroy {
-    @ViewChild('notificationContainer', { read: ViewContainerRef, static: true }) notificationContainer!: ViewContainerRef;
+            <div class="error" *ngIf="submitted && form.get('visitTypeId')?.invalid">
+                Please select a visit type to continue.
+            </div>
+        </div>
 
-    stepState!: OathStepState;
-    notificationContainerClass = 'notification-component';
-    private routeSub!: Subscription;
-    private stepSub!: Subscription;
-    private childNotificationSub!: Subscription;
-    private lastNotificationRef: NotificationRef | null = null;
-
-    constructor(
-        private router: Router,
-        private notificationService: NotificationService,
-        private stepTracker: OathStepTrackerService
-    ) { }
-
-    ngOnInit(): void {
-        // Bridge child -> parent notifications
-        this.childNotificationSub = this.stepTracker.childNotification$.subscribe(n => {
-            if (!n) return;
-            this.triggerNotification(n.message, n.className);
-        });
-
-        // Keep a local copy of step state for template
-        this.stepSub = this.stepTracker.stepState$.subscribe(s => this.stepState = s);
-
-        // Clear notifications on nav start
-        this.router.events.pipe(filter(e => e instanceof NavigationStart))
-            .subscribe(() => {
-                if (this.notificationContainer) this.notificationContainer.clear();
-                if (this.lastNotificationRef) { this.lastNotificationRef.hide(); this.lastNotificationRef = null; }
-            });
-
-        // Update step visuals per current child route
-        this.routeSub = this.router.events.pipe(
-            filter((e): e is NavigationEnd => e instanceof NavigationEnd)
-        ).subscribe(e => {
-            const seg = e.url.split('/').pop() || '';
-            // style hook; optional per route
-            if (seg.includes('personal-information')) this.notificationContainerClass = 'notification-component personal-information';
-            else if (seg.includes('date-time')) this.notificationContainerClass = 'notification-component date-time';
-            else if (seg.includes('confirm')) this.notificationContainerClass = 'notification-component confirm';
-            else if (seg.includes('confirmation')) this.notificationContainerClass = 'notification-component confirmation';
-            else this.notificationContainerClass = 'notification-component';
-
-            this.stepTracker.updateStatesForRoute(seg);
-        });
-    }
-
-    private triggerNotification(message: string, className: string): void {
-        if (this.lastNotificationRef) this.lastNotificationRef.hide();
-        this.lastNotificationRef = this.notificationService.show({
-            content: message,
-            cssClass: className,
-            animation: { type: 'fade', duration: 200 },
-            hideAfter: 200,
-            position: { horizontal: 'center', vertical: 'top' },
-            closable: true,
-            width: 500,
-            appendTo: this.notificationContainer,
-        });
-    }
-
-    ngOnDestroy(): void {
-        if (this.routeSub) this.routeSub.unsubscribe();
-        if (this.stepSub) this.stepSub.unsubscribe();
-        if (this.childNotificationSub) this.childNotificationSub.unsubscribe();
-    }
-}
-oath-step-tracker.service.ts file:
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-
-export interface StepStyle {
-    icon: string;
-    textClass: string;
-}
-
-export interface OathStepState {
-    personalInformation: StepStyle;
-    dateTime: StepStyle;
-    confirmReservation: StepStyle;
-    reservationConfirmation: StepStyle;
-}
-
-export interface ChildNotification {
-    message: string;
-    className: string;
-}
-
-@Injectable({ providedIn: 'root' })
-export class OathStepTrackerService {
-    // Icons and classes (reuse names from registration)
-    private readonly ICONS = {
-        v1: `assets/v1.svg`,
-        v2: `assets/v2.svg`,
-        v3: `assets/v3.svg`,
-        v4: `assets/v4.svg`,
-        uv2: `assets/uv2.svg`,
-        uv3: `assets/uv3.svg`,
-        uv4: `assets/uv4.svg`,
-        done: `assets/done.svg`,
-    };
-
-    private readonly STYLES = {
-        activeBold: 'step-text-active',
-        inactive: 'step-text-inactive',
-        completed: 'step-text-completed',
-    };
-
-    private stepStateSource = new BehaviorSubject<OathStepState>(this.initial());
-    stepState$ = this.stepStateSource.asObservable();
-
-    // Child -> parent notifications (optional, like registration)
-    private childNotificationSubject = new BehaviorSubject<ChildNotification | null>(null);
-    childNotification$ = this.childNotificationSubject.asObservable();
-
-    triggerChildNotification(message: string, className: string): void {
-        this.childNotificationSubject.next({ message, className });
-    }
-
-    /** Deterministic route-based mapping (implements your rule #6). */
-    updateStatesForRoute(routeSegment: string): void {
-        switch (routeSegment) {
-            case 'personal-information':
-                this.stepStateSource.next({
-                    personalInformation: { icon: this.ICONS.v1, textClass: this.STYLES.activeBold },
-                    dateTime: { icon: this.ICONS.uv2, textClass: this.STYLES.inactive },
-                    confirmReservation: { icon: this.ICONS.uv3, textClass: this.STYLES.inactive },
-                    reservationConfirmation: { icon: this.ICONS.uv4, textClass: this.STYLES.inactive },
-                });
-                break;
-
-            case 'date-time':
-                this.stepStateSource.next({
-                    personalInformation: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-                    dateTime: { icon: this.ICONS.v2, textClass: this.STYLES.activeBold },
-                    confirmReservation: { icon: this.ICONS.uv3, textClass: this.STYLES.inactive },
-                    reservationConfirmation: { icon: this.ICONS.uv4, textClass: this.STYLES.inactive },
-                });
-                break;
-
-            case 'confirm':
-            case 'confirm-reservation':
-                this.stepStateSource.next({
-                    personalInformation: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-                    dateTime: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-                    confirmReservation: { icon: this.ICONS.v3, textClass: this.STYLES.activeBold },
-                    reservationConfirmation: { icon: this.ICONS.uv4, textClass: this.STYLES.inactive },
-                });
-                break;
-
-            case 'confirmation':
-                this.stepStateSource.next({
-                    personalInformation: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-                    dateTime: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-                    confirmReservation: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-                    reservationConfirmation: { icon: this.ICONS.v4, textClass: this.STYLES.activeBold },
-                });
-                break;
-
-            default:
-                // keep initial
-                this.stepStateSource.next(this.initial());
-                break;
-        }
-    }
-
-    /** Called by children on the action that truly marks completion. */
-    completePersonalAndActivateDateTime(): void {
-        this.stepStateSource.next({
-            personalInformation: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-            dateTime: { icon: this.ICONS.v2, textClass: this.STYLES.activeBold },
-            confirmReservation: { icon: this.ICONS.uv3, textClass: this.STYLES.inactive },
-            reservationConfirmation: { icon: this.ICONS.uv4, textClass: this.STYLES.inactive },
-        });
-    }
-
-    completeDateTimeAndActivateConfirm(): void {
-        this.stepStateSource.next({
-            personalInformation: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-            dateTime: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-            confirmReservation: { icon: this.ICONS.v3, textClass: this.STYLES.activeBold },
-            reservationConfirmation: { icon: this.ICONS.uv4, textClass: this.STYLES.inactive },
-        });
-    }
-
-    completeConfirmAndActivateFinal(): void {
-        this.stepStateSource.next({
-            personalInformation: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-            dateTime: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-            confirmReservation: { icon: this.ICONS.done, textClass: this.STYLES.completed },
-            reservationConfirmation: { icon: this.ICONS.v4, textClass: this.STYLES.activeBold },
-        });
-    }
-
-    reset(): void {
-        this.stepStateSource.next(this.initial());
-        this.childNotificationSubject.next(null);
-    }
-
-    private initial(): OathStepState {
-        return {
-            personalInformation: { icon: this.ICONS.v1, textClass: this.STYLES.activeBold },
-            dateTime: { icon: this.ICONS.uv2, textClass: this.STYLES.inactive },
-            confirmReservation: { icon: this.ICONS.uv3, textClass: this.STYLES.inactive },
-            reservationConfirmation: { icon: this.ICONS.uv4, textClass: this.STYLES.inactive },
-        };
-    }
-}
-The first child component schedule-oath-personal-information.component.ts file: 
+        <div class="actions">
+            <button type="button" kendoButton class="previous-button" (click)="cancel()">Previous</button>
+            <button type="submit" kendoButton class="forward-button" [disabled]="form.invalid">Next</button>
+        </div>
+    </form>
+</section>
+schedule-oath-personal-info.component.ts file:
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -479,16 +286,767 @@ export class ScheduleOathPersonalInfoComponent implements OnInit, OnDestroy {
                 raw: v
             });
         }
-        const order: VisitCode[] = ['InPerson', 'External', 'Virtual'];
+        const order: VisitCode[] = ['InPerson', 'Virtual','External'];
         return opts.sort((a, b) => order.indexOf(a.code) - order.indexOf(b.code));
     }
 
     private defaultVisitOptions(): VisitVM[] {
         return [
             { id: 1, code: 'InPerson', label: 'In Person', help: 'at a location closer to you' },
-            { id: 2, code: 'External', label: 'External', help: 'I will find my own commissioner to qualify' },
-            { id: 3, code: 'Virtual', label: 'Virtual', help: 'with a virtual oath you maybe able to schedule an oath at any location' }
+            { id: 2, code: 'Virtual', label: 'Virtual', help: 'with a virtual oath you maybe able to schedule an oath at any location' },
+            { id: 3, code: 'External', label: 'External', help: 'I will find my own commissioner to qualify' }
         ];
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+}
+schedule-oath.service.ts file:
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+
+import {
+    NotaryProfileDto,
+    VisitTypeDto,
+    OfficeDto,
+    ReservationSlotDto,
+    SlotFilterDto,          // UI filter (date range, etc.)
+    HoldResponseDto,        // contains appointmentId, holdEndTimeUtc
+    ConfirmReservationDto,  // contains appointmentId, disclaimerAccepted
+    ReservationConfirmationDto, // confirm response
+} from '../../model/schedule-oath/schedule-oath.models';
+
+type PageDirection = 'current' | 'next' | 'prev';
+
+interface StartResponse {
+    profile: NotaryProfileDto;
+    visitTypes: VisitTypeDto[];
+}
+
+interface SlotSearchRequest {
+    applicantId: number;
+    visitTypeId: number;
+    weekOf: string;                // 'YYYY-MM-DD' (UTC date; server normalizes to Monday)
+    pageDirection: PageDirection;  // 'current' | 'next' | 'prev'
+    officeId?: number;
+    timeOfDay?: 'AM' | 'PM' | 'Any' | 'morning' | 'afternoon' | 'evening' | 'all';
+}
+
+interface SlotSearchResponse {
+    weekStartUtc: string;          // ISO
+    weekEndUtc: string;            // ISO
+    slots: ReservationSlotDto[];   // your UI shape
+}
+
+@Injectable({ providedIn: 'root' })
+export class ScheduleOathService {
+    private readonly base = `${environment.apiurl}/api/ExternalReservations`;
+
+    constructor(private http: HttpClient) { }
+
+    // -------------------------
+    // Error handling
+    // -------------------------
+    private handleError(err: HttpErrorResponse): Observable<never> {
+        const message =
+            (err?.error && (err.error.title || err.error.message)) ||
+            err?.statusText ||
+            'Request failed';
+        return throwError(() => ({ ...err, message }));
+    }
+
+    // -------------------------
+    // Step 1: start/profile + visit types
+    // GET /api/ExternalReservations/start?applicantId=&email=
+    // -------------------------
+    start(applicantId: number, email: string): Observable<StartResponse> {
+        const params = new HttpParams()
+            .set('applicantId', String(applicantId))
+            .set('email', email);
+
+        return this.http.get<any>(`${this.base}/start`, { params }).pipe(
+            map(res => {
+                const profile: NotaryProfileDto =
+                    res?.profile ?? res?.notaryProfile ?? res?.data?.profile ?? null;
+                const visitTypes: VisitTypeDto[] =
+                    res?.visitTypes ?? res?.allowedVisitTypes ?? res?.data?.visitTypes ?? [];
+                return { profile, visitTypes };
+            }),
+            catchError(err => this.handleError(err))
+        );
+    }
+
+    /** Convenience: just the profile (calls start under the hood). */
+    getNotaryProfileByIdAndEmail(applicantId: number, email: string): Observable<NotaryProfileDto> {
+        return this.start(applicantId, email).pipe(
+            map(r => r.profile),
+            catchError(err => this.handleError(err))
+        );
+    }
+
+    // -------------------------
+    // Optional: lookups
+    // GET /api/ExternalReservations/offices
+    // -------------------------
+    getOffices(): Observable<OfficeDto[]> {
+        return this.http
+            .get<OfficeDto[]>(`${this.base}/offices`)
+            .pipe(catchError(err => this.handleError(err)));
+    }
+
+    // -------------------------
+    // Step 2: search weekly slots
+    // POST /api/ExternalReservations/search-slots
+    // -------------------------
+    searchWeeklySlots(req: SlotSearchRequest): Observable<SlotSearchResponse> {
+        return this.http
+            .post<SlotSearchResponse>(`${this.base}/search-slots`, req)
+            .pipe(catchError(err => this.handleError(err)));
+    }
+
+    /**
+     * Back-compat wrapper for UIs that still pass a date range.
+     * We translate the range into a week-of (Monday) + 'current' page,
+     * call weekly search, then (optionally) filter by start/end locally.
+     */
+    getAvailableSlots(filter: Partial<SlotFilterDto> & Record<string, any>): Observable<ReservationSlotDto[]> {
+        const applicantId = Number(this.pick(filter, 'applicantId', 'ApplicantId') ?? 0);
+        const visitTypeId = Number(this.pick(filter, 'visitTypeId', 'VisitTypeId') ?? 0);
+        const officeId = this.numOrUndef(this.pick(filter, 'officeId', 'OfficeId'));
+        const timeOfDay = (this.pick(filter, 'timeOfDay', 'TimeOfDay') ?? '').toString().trim() || undefined;
+
+        const startRaw = this.pick(filter, 'startDateUtc', 'StartDateUtc', 'startDate', 'fromDate');
+        const endRaw = this.pick(filter, 'endDateUtc', 'EndDateUtc', 'endDate', 'toDate');
+        const start = startRaw ? new Date(startRaw) : new Date();
+        const weekOf = this.mondayIso(start);
+
+        const req: SlotSearchRequest = {
+            applicantId,
+            visitTypeId,
+            weekOf,
+            pageDirection: 'current',
+            ...(officeId ? { officeId } : {}),
+            ...(timeOfDay ? { timeOfDay } : {})
+        };
+
+        return this.searchWeeklySlots(req).pipe(
+            map(resp => {
+                if (!startRaw || !endRaw) return resp.slots;
+
+                const from = new Date(startRaw).getTime();
+                const to = new Date(endRaw).getTime();
+
+                // ✅ Use model's UTC fields; fallback if backend returns legacy shapes.
+                return resp.slots.filter((s) => {
+                    const [sStartMs, sEndMs] = this.slotRangeMillis(s);
+                    // if we couldn't parse, keep the slot (be permissive) or exclude – choose policy:
+                    if (!Number.isFinite(sStartMs) || !Number.isFinite(sEndMs)) return false;
+                    return sEndMs > from && sStartMs < to; // overlap
+                });
+            }),
+            catchError(err => this.handleError(err))
+        );
+    }
+
+    // -------------------------
+    // Step 3: holds
+    // POST /api/ExternalReservations/holds
+    // DELETE /api/ExternalReservations/holds/{holdId}
+    // -------------------------
+    setHold(reservationSlotId: number, applicantId: number): Observable<HoldResponseDto> {
+        const body = { applicantId, reservationSlotId };
+        return this.http
+            .post<HoldResponseDto>(`${this.base}/holds`, body)
+            .pipe(catchError(err => this.handleError(err)));
+    }
+
+    releaseHold(holdId: number): Observable<void> {
+        return this.http
+            .delete<void>(`${this.base}/holds/${holdId}`)
+            .pipe(catchError(err => this.handleError(err)));
+    }
+
+    // -------------------------
+    // Step 4: confirm
+    // POST /api/ExternalReservations/confirm?appointmentId=&disclaimerAccepted=
+    // -------------------------
+    confirmReservation(payload: ConfirmReservationDto): Observable<ReservationConfirmationDto> {
+        const params = new HttpParams()
+            .set('appointmentId', String((payload as any).appointmentId))
+            .set('disclaimerAccepted', String((payload as any).disclaimerAccepted ?? true));
+
+        return this.http
+            .post<ReservationConfirmationDto>(`${this.base}/confirm`, null, { params })
+            .pipe(catchError(err => this.handleError(err)));
+    }
+
+    // -------------------------
+    // Optional: reservations (history/upcoming)
+    // GET /api/ExternalReservations/applicants/{applicantId}/reservations
+    // DELETE /api/ExternalReservations/reservations/{reservationId}?reason=
+    // -------------------------
+    getReservations(applicantId: number) {
+        return this.http
+            .get<any[]>(`${this.base}/applicants/${applicantId}/reservations`)
+            .pipe(catchError(err => this.handleError(err)));
+    }
+
+    cancelReservation(reservationId: number, reason?: string) {
+        const params = reason ? new HttpParams().set('reason', reason) : undefined;
+        return this.http
+            .delete<void>(`${this.base}/reservations/${reservationId}`, { params })
+            .pipe(catchError(err => this.handleError(err)));
+    }
+
+    // -------------------------
+    // helpers
+    // -------------------------
+    private pick(obj: Record<string, any>, ...keys: string[]) {
+        for (const k of keys) {
+            const v = obj?.[k];
+            if (v !== undefined && v !== null && v !== '') return v;
+        }
+        return undefined;
+    }
+
+    private numOrUndef(v: any): number | undefined {
+        const n = Number(v);
+        return Number.isFinite(n) && n > 0 ? n : undefined;
+    }
+
+    /** Returns 'YYYY-MM-DD' (UTC) for the Monday of the week containing `d`. */
+    private mondayIso(d: Date): string {
+        const utc = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+        const dow = utc.getUTCDay() || 7; // Sun=0 -> 7
+        if (dow !== 1) utc.setUTCDate(utc.getUTCDate() - (dow - 1));
+        const y = utc.getUTCFullYear();
+        const m = String(utc.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(utc.getUTCDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    /**
+     * Parse a slot's start/end in milliseconds, supporting both:
+     * - current model fields: startTimeUtc / endTimeUtc (ISO)
+     * - legacy fields: scheduleDate + startTime / endTime (HH:mm:ss)
+     */
+    private slotRangeMillis(slot: ReservationSlotDto): [number, number] {
+        const s: any = slot as any;
+
+        const startIso =
+            s.startTimeUtc || s.startUtc ||
+            (s.scheduleDate && s.startTime ? `${s.scheduleDate}T${s.startTime}Z` : undefined);
+
+        const endIso =
+            s.endTimeUtc || s.endUtc ||
+            (s.scheduleDate && s.endTime ? `${s.scheduleDate}T${s.endTime}Z` : undefined);
+
+        const startMs = startIso ? Date.parse(startIso) : Number.NaN;
+        const endMs = endIso ? Date.parse(endIso) : Number.NaN;
+
+        return [startMs, endMs];
+    }
+}
+schedule-oath.state.ts file:
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { NotaryProfileDto } from '../../model/schedule-oath/schedule-oath.models';
+
+export interface ScheduleOathState {
+    applicantId: number | null;
+    email: string | null;
+    profile: NotaryProfileDto | null;
+    appointmentId: number | null;
+    visitTypeId: number | null;
+    selectedSlot: any;
+    holdEndTimeUtc: string | null;
+    confirmation: any;
+}
+
+const initialState: ScheduleOathState = {
+    applicantId: null,
+    email: null,
+    profile: null,
+    appointmentId: null,
+    visitTypeId: null,
+    selectedSlot: null,
+    holdEndTimeUtc: null,
+    confirmation: null
+};
+
+const STORAGE_KEY = 'so_state';
+
+function loadFromStorage(): ScheduleOathState {
+    try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (!raw) return initialState;
+        const parsed = JSON.parse(raw);
+        return { ...initialState, ...parsed };
+    } catch {
+        return initialState;
+    }
+}
+
+@Injectable({ providedIn: 'root' })
+export class ScheduleOathStore {
+    private subj = new BehaviorSubject<ScheduleOathState>(loadFromStorage());
+    readonly state$ = this.subj.asObservable();
+
+    get snapshot(): ScheduleOathState {
+        return this.subj.value;
+    }
+
+    patch(p: Partial<ScheduleOathState>): void {
+        const next = { ...this.subj.value, ...p };
+        this.subj.next(next);
+        try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { }
+    }
+
+    reset(): void {
+        this.subj.next({ ...initialState });
+        try { sessionStorage.removeItem(STORAGE_KEY); } catch { }
+    }
+}
+step - 2 schedule-oath-date-time.component.html file: 
+<div class="wrapper" *ngIf="!loading; else busy">
+    <div class="header">
+        <h2>Pick a Date & Time</h2>
+        <div class="week-label" *ngIf="weekLabel">{{ weekLabel }}</div>
+
+        <div class="controls">
+            <label>
+                Office:
+                <select class="k-input"
+                        [ngModel]="selectedOfficeId"
+                        (ngModelChange)="selectedOfficeId = $event; onOfficeChange()">
+                    <option *ngFor="let o of offices; trackBy: trackOffice" [value]="o.officeId">
+                        {{ officeLabel(o) }}
+                    </option>
+                </select>
+            </label>
+
+            <div class="spacer"></div>
+
+            <button kendoButton look="flat" (click)="goWeek('prev')" aria-label="Previous week">previous</button>
+            <button kendoButton look="flat" (click)="goWeek('current')" aria-label="This week">This Week</button>
+            <button kendoButton look="flat" (click)="goWeek('next')" aria-label="Next week">next</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- Add the eventClick binding to allow users to select an appointment slot -->
+        <kendo-scheduler [kendoSchedulerBinding]="events"
+                         [selectedDate]="selectedDate"
+                         (eventClick)="onEventClick($event)"
+                         style="height: 650px">
+            <kendo-scheduler-week-view [slotDuration]="30"></kendo-scheduler-week-view>
+        </kendo-scheduler>
+
+        <div class="error" *ngIf="errorMsg">{{ errorMsg }}</div>
+    </div>
+
+    <div class="hold" *ngIf="hold as h">
+        <h3>Selected Slot</h3>
+        <p>Appointment ID: <strong>{{ h.appointmentId }}</strong></p>
+
+        <label class="disclaimer">
+            <input type="checkbox" [(ngModel)]="acceptedDisclaimer" />
+            I understand this hold will be released if I don't confirm promptly.
+        </label>
+
+        <div class="hold-actions">
+            <button kendoButton (click)="releaseHold()">Release Hold</button>
+            <button kendoButton
+                    themeColor="primary"
+                    [disabled]="!acceptedDisclaimer || confirming"
+                    (click)="confirm()">
+                Confirm Reservation
+            </button>
+        </div>
+    </div>
+</div>
+
+<ng-template #busy>
+    <div class="busy">
+        <kendo-loader type="infinite-spinner"></kendo-loader>
+        <div>Loading available offices and slots...</div>
+    </div>
+</ng-template>
+schedule-oath-date-time.component.ts file:
+import {
+    Component,
+    OnDestroy,
+    OnInit,
+    ChangeDetectionStrategy,
+    ChangeDetectorRef
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+import { ScheduleOathService } from '../../services/schedule-oath/schedule-oath.service';
+import {
+    OfficeDto,
+    ReservationSlotDto,
+    HoldResponseDto,
+    ReservationConfirmationDto
+} from '../../model/schedule-oath/schedule-oath.models';
+import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
+import { OathStepTrackerService } from '../../services/helper-services/oath-schedule-step-tracker/oath-step-tracker.service';
+
+type Dir = 'current' | 'next' | 'prev';
+
+export type SchedulerItem = {
+    id: number;
+    slotId: number;
+    title: string;
+    start: Date;
+    end: Date;
+    isAllDay: boolean;
+};
+
+function isValidDate(d: Date): boolean {
+    return d instanceof Date && !Number.isNaN(d.getTime());
+}
+
+@Component({
+    selector: 'app-schedule-oath-date-time',
+    templateUrl: './schedule-oath-date-time.component.html',
+    styleUrls: ['./schedule-oath-date-time.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
+    loading = true;
+    errorMsg = '';
+
+    offices: OfficeDto[] = [];
+    selectedOfficeId: number | null = null;
+
+    /** Events bound to the Scheduler via [kendoSchedulerBinding] */
+    events: SchedulerItem[] = [];
+    selectedDate: Date = new Date();
+
+    weekLabel = '';
+    hold: HoldResponseDto | null = null;
+    acceptedDisclaimer = false;
+    confirming = false;
+
+    private applicantId = 0;
+    private email = '';
+    private visitTypeId = 0;
+    private destroy$ = new Subject<void>();
+
+    private static readonly MAX_EVENTS = 1000;
+
+    constructor(
+        private route: ActivatedRoute,
+        private router: Router,
+        private svc: ScheduleOathService,
+        public store: ScheduleOathStore,
+        private cdr: ChangeDetectorRef,
+        private stepTracker: OathStepTrackerService
+    ) { }
+
+    ngOnInit(): void {
+        const qp = this.route.snapshot.queryParamMap;
+        this.applicantId =
+            Number(qp.get('applicantId')) || this.store.snapshot.applicantId || 0;
+        this.email = qp.get('email') || this.store.snapshot.email || '';
+        this.visitTypeId =
+            Number(qp.get('visitTypeId')) || this.store.snapshot.visitTypeId || 0;
+
+        if (!this.applicantId || !this.email || !this.visitTypeId) {
+            this.loading = false;
+            this.errorMsg =
+                'Missing required data (applicantId / email / visitTypeId).';
+            this.cdr.markForCheck();
+            return;
+        }
+
+        // Persist for refreshes
+        this.store.patch({
+            applicantId: this.applicantId,
+            email: this.email,
+            visitTypeId: this.visitTypeId
+        });
+
+        this.loadOffices(() => this.loadSlotsWithFallback());
+    }
+
+    // ---------- data loads ----------
+    private loadOffices(onDone?: () => void) {
+        this.svc
+            .getOffices()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (offices) => {
+                    this.offices = (offices || []).filter(
+                        (o) => (o as any).isActive ?? true
+                    );
+                    if (!this.selectedOfficeId && this.offices.length) {
+                        this.selectedOfficeId = this.offices[0].officeId;
+                    }
+                },
+                error: () => { },
+                complete: () => {
+                    if (onDone) onDone();
+                    this.cdr.markForCheck();
+                }
+            });
+    }
+
+    loadSlotsWithFallback(): void {
+        this.loading = true;
+        this.errorMsg = '';
+        const weekOf = this.mondayIso(new Date());
+
+        // current week
+        this.searchWeek(weekOf, 'current', () => {
+            if (this.events.length) {
+                this.loading = false;
+                this.cdr.markForCheck();
+                return;
+            }
+            // next week
+            this.searchWeek(weekOf, 'next', () => {
+                this.loading = false;
+                if (!this.events.length) {
+                    this.errorMsg =
+                        'No available slots for this or next week. Try a different week or office.';
+                }
+                this.cdr.markForCheck();
+            });
+        });
+    }
+
+    private searchWeek(weekOf: string, dir: Dir, done?: () => void): void {
+        const req: any = {
+            applicantId: this.applicantId,
+            visitTypeId: this.visitTypeId,
+            weekOf,
+            // Keep your lowercase pageDirection since your sample shows that payload
+            pageDirection: dir
+        };
+        if (this.selectedOfficeId) req.officeId = this.selectedOfficeId;
+
+        this.svc
+            .searchWeeklySlots(req)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (resp) => {
+                    // Type-safe: your SlotSearchResponse exposes weekStartUtc / weekEndUtc / slots
+                    const startIso: string | undefined = resp?.weekStartUtc;
+                    const endIso: string | undefined = resp?.weekEndUtc;
+
+                    const wkStart = startIso ? new Date(startIso) : null;
+                    const wkEnd = endIso ? new Date(endIso) : null;
+
+                    if (!wkStart || !isValidDate(wkStart) || !wkEnd || !isValidDate(wkEnd)) {
+                        this.events = [];
+                        this.errorMsg = 'Server returned invalid week dates.';
+                        return;
+                    }
+
+                    this.selectedDate = wkStart;
+                    this.weekLabel = this.formatWeekLabel(startIso!, endIso!);
+
+                    const rawSlots: any[] = Array.isArray(resp?.slots) ? resp.slots : [];
+
+                    const items: SchedulerItem[] = rawSlots
+                        .map((s: any) => {
+                            const startUTC =
+                                s.startTimeUtc ??
+                                (s.scheduleDate && s.startTime
+                                    ? `${s.scheduleDate}T${s.startTime}Z`
+                                    : null) ??
+                                s.start;
+                            const endUTC =
+                                s.endTimeUtc ??
+                                (s.scheduleDate && s.endTime
+                                    ? `${s.scheduleDate}T${s.endTime}Z`
+                                    : null) ??
+                                s.end;
+
+                            if (!startUTC || !endUTC) return null;
+
+                            const start = new Date(startUTC);
+                            const end = new Date(endUTC);
+                            if (!isValidDate(start) || !isValidDate(end)) return null;
+
+                            const id = Number(s.reservationSlotId ?? s.slotId ?? s.id ?? 0);
+
+                            return {
+                                id,
+                                slotId: id,
+                                title: s.title ?? 'Available',
+                                start,
+                                end,
+                                isAllDay: false
+                            };
+                        })
+                        .filter((x): x is SchedulerItem => !!x)
+                        .sort((a, b) => a.start.getTime() - b.start.getTime())
+                        .slice(0, ScheduleOathDateTimeComponent.MAX_EVENTS);
+
+                    this.events = items;
+                    this.errorMsg = this.events.length
+                        ? ''
+                        : 'No available slots for this week. Try another week or office.';
+                },
+                error: (err) => {
+                    this.errorMsg = err?.message || 'Failed to load slots.';
+                    if (done) done();
+                    this.cdr.markForCheck();
+                },
+                complete: () => {
+                    if (done) done();
+                    this.cdr.markForCheck();
+                }
+            });
+    }
+
+    // ---------- interactions ----------
+    onOfficeChange(): void {
+        this.loadSlotsWithFallback();
+    }
+
+    goWeek(dir: Dir): void {
+        this.loading = true;
+        const weekOf = this.mondayIso(new Date());
+        this.searchWeek(weekOf, dir, () => {
+            this.loading = false;
+            this.cdr.markForCheck();
+        });
+    }
+
+    onEventClick(e: any): void {
+        // Only used if/when you add (eventClick) back
+        const data = e?.event?.dataItem as SchedulerItem | undefined;
+        if (!data) return;
+        this.holdSlotById(data.slotId);
+    }
+
+    holdSlotById(slotId: number): void {
+        if (!this.applicantId) return;
+        this.hold = null;
+        this.acceptedDisclaimer = false;
+
+        this.svc
+            .setHold(slotId, this.applicantId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (h) => {
+                    this.hold = h;
+
+                    // Find the selected slot details from current events (for display on confirm page)
+                    const chosen = this.events.find(ev => ev.slotId === slotId) || null;
+
+                    // Persist for the confirm step/page
+                    this.store.patch({
+                        appointmentId: (h as any).appointmentId ?? null,
+                        holdEndTimeUtc: (h as any).holdEndTimeUtc ?? null, // backend may or may not return this
+                        selectedSlot: chosen
+                            ? {
+                                reservationSlotId: chosen.slotId,
+                                startTimeUtc: chosen.start?.toISOString?.() ?? null,
+                                endTimeUtc: chosen.end?.toISOString?.() ?? null,
+                                title: chosen.title ?? 'Available'
+                            }
+                            : null
+                    });
+
+                    this.cdr.markForCheck();
+                },
+                error: (err) => {
+                    this.errorMsg = err?.message || 'Unable to hold slot.';
+                    this.cdr.markForCheck();
+                }
+            });
+    }
+
+    releaseHold(): void {
+        if (!this.hold) return;
+        this.svc
+            .releaseHold((this.hold as any).appointmentId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: () => {
+                    this.hold = null;
+                    this.cdr.markForCheck();
+                },
+                error: () => {
+                    this.hold = null;
+                    this.cdr.markForCheck();
+                }
+            });
+    }
+
+    confirm(): void {
+        if (!this.hold || !this.acceptedDisclaimer || this.confirming) return;
+        this.confirming = true;
+        this.cdr.markForCheck();
+
+        this.svc
+            .confirmReservation({
+                appointmentId: (this.hold as any).appointmentId,
+                disclaimerAccepted: true
+            } as any)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (conf: ReservationConfirmationDto) => {
+                    this.stepTracker.completeDateTimeAndActivateConfirm();
+                    this.router.navigate(['/schedule-oath/confirmation'], {
+                        queryParams: {
+                            reservationId: (conf as any).reservationId,
+                            confirmationNumber: (conf as any).confirmationNumber
+                        }
+                    });
+                },
+                error: (err) => {
+                    this.errorMsg = err?.message || 'Unable to confirm reservation.';
+                    this.confirming = false;
+                    this.cdr.markForCheck();
+                },
+                complete: () => {
+                    this.confirming = false;
+                    this.cdr.markForCheck();
+                }
+            });
+    }
+
+    // ---------- helpers ----------
+    officeLabel(o: OfficeDto): string {
+        const a = o as any;
+        return a.value ?? a.name ?? a.description ?? `Office ${o.officeId}`;
+    }
+    trackOffice(_i: number, o: OfficeDto) {
+        return o?.officeId;
+    }
+
+    private mondayIso(d: Date): string {
+        const utc = new Date(
+            Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+        );
+        const dow = utc.getUTCDay() || 7;
+        if (dow !== 1) utc.setUTCDate(utc.getUTCDate() - (dow - 1));
+        const y = utc.getUTCFullYear(),
+            m = String(utc.getUTCMonth() + 1).padStart(2, '0'),
+            day = String(utc.getUTCDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+    private formatWeekLabel(startIso: string, endIso: string): string {
+        try {
+            const s = new Date(startIso),
+                e = new Date(endIso);
+            const fmt = (d: Date) =>
+                d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            return `${fmt(s)}-${fmt(e)}, ${e.getFullYear()}`;
+        } catch {
+            return '';
+        }
     }
 
     ngOnDestroy(): void {
