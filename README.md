@@ -1,301 +1,576 @@
-Goal: Look at the code here and tell me what the code is doing on click on the next button and what network call is being made ask me to 
-paste the code for a certain service or a certain component or a certain model if you need it. The end result you should be able to explain
-what is going here on click of next. 
+Goal: Solve the issue that is popping up when I click on a slot 
+Details: When the page loads and all the slots load with it.. and I click on a slot.. the consolelogging is happening.. but there is an 
+error in the console and the hidden div is not getting displayed. WHat is happenign? I will post the html, ts and service files take a 
+look, and fix the issue 
 
-Ask me any clarifying questions you have 
+Ask any clarifying questions you have before you start implementing a fix 
 
-schedule-oath-personal-info.component.html file: 
-<section class="so-personal-info">
-    <!-- Non-blocking skeleton -->
-    <div class="skeleton" *ngIf="loading" aria-hidden="true">Loading…</div>
+html file: 
+<div class="wrapper" *ngIf="!loading; else busy">
+    <h2 class="date-time-heading">Select a Date and Time</h2>
+    <div class="header">
+        <!-- Filters -->
+        <div class="filters">
+            <kendo-dropdownlist [data]="officeFilterOptions"
+                                textField="text"
+                                valueField="value"
+                                [value]="selectedOfficeIdFilter"
+                                [valuePrimitive]="true"
+                                (valueChange)="onOfficeFilterChange($event)">
+            </kendo-dropdownlist>
 
-    <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="next()" novalidate>
-        <div class="welcome">Welcome {{profile?.firstName}},</div>
-        <div class="welcome post-salutation">
-            Your oath is due latest by <u>{{profile?.oathDueDateUtc | date:'MMM dd, yyyy \'by\' hh:mm a' }}</u> local time.
-            Please confirm your information below, select the mode of oath and proceed.
+            <kendo-dropdownlist [data]="timeOfDayOptions"
+                                textField="text"
+                                valueField="value"
+                                [value]="timeOfDayFilter"
+                                [valuePrimitive]="true"
+                                (valueChange)="onTimeOfDayChange($event)">
+            </kendo-dropdownlist>
+            <div class="week-label" *ngIf="weekLabel">{{ weekLabel }}</div>
         </div>
+    </div>
 
-        <div class="profile-information-section">
-            <div class="profile-information-heading">Profile Information</div>
-            <div class="profile-information-data">
-                <div class="data-column">
-                    <div class="data-row label-heading">Name</div>
-                    <div class="data-row">{{profile?.firstName}}</div>
+    <div class="board-row">
+        <button kendoButton fillMode="flat" class="nav-btn prev" (click)="goPrevWeek()">&larr; Previous week</button>
+
+        <div class="grid-board">
+            <!-- 5 fixed columns (Mon–Fri). Each column scrolls independently. -->
+            <div class="day-col" *ngFor="let day of daysVm">
+                <div class="day-header">
+                    <div class="day-name">{{ day.label }}</div>
+                    <div class="day-date">{{ day.subLabel }}</div>
                 </div>
-                <div class="data-column">
-                    <div class="data-row label-heading">Date of Birth</div>
-                    <div class="data-row">{{dobDisplay}}</div>
-                </div>
-                <div class="data-column">
-                    <div class="data-row label-heading">Email</div>
-                    <div class="data-row">{{store.snapshot.email}}</div>
-                </div>
-                <div class="data-column">
-                    <div class="data-row label-heading">Phone</div>
-                    <div class="data-row">{{phone1Display}}</div>
+
+                <div class="tiles">
+                    <button kendoButton
+                            *ngFor="let t of day.tiles"
+                            class="slot-tile"
+                            [ngClass]="{ 'selected': t.slotId === selectedSlotId }"
+                            (click)="onTileClick(t)">
+                        <div class="time">{{ t.timeLabel }}</div>
+                        <div class="loc">{{ t.officeName }}</div>
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div class="visit-types">
-            <div class="profile-information-heading">Mode of Oath <sup class="asterisk">*</sup></div>
-            <div class="options">
-                <div class="option" *ngFor="let opt of visitOptions">
-                    <kendo-radiobutton formControlName="visitTypeId"
-                                       [name]="'visitTypeId'"
-                                       [value]="'' + opt.id"
-                                       (click)="onRadioClick('' + opt.id, $event)"
-                                       (blur)="onRadioBlur()">
-                    </kendo-radiobutton>
+        <button kendoButton fillMode="flat" class="nav-btn next" (click)="goNextWeek()">Next week &rarr;</button>
+    </div>
 
-                    <!-- Whole label remains clickable -->
-                    <label class="text"
-                           [class.selected]="form.value.visitTypeId === '' + opt.id"
-                           (click)="onRadioClick('' + opt.id, $event)">
-                        <div class="title">{{ opt.label }}</div>
-                        <div class="help" *ngIf="opt.help">{{ opt.help }}</div>
-                    </label>
-                </div>
-            </div>
+    <!-- Hold panel (unchanged behavior) -->
+    <div class="hold" *ngIf="hold as h">
+        <h3>Selected Slot</h3>
+        <p>Appointment ID: <strong>{{ h.appointmentId }}</strong></p>
 
-            <div class="error" *ngIf="submitted && form.get('visitTypeId')?.invalid">
-                Please select a visit type to continue.
-            </div>
+        <label class="disclaimer">
+            <input type="checkbox" [(ngModel)]="acceptedDisclaimer" />
+            I understand this hold will be released if I don't confirm promptly.
+        </label>
+
+        <div class="hold-actions">
+            <button kendoButton (click)="releaseHold()">Release Hold</button>
+            <button kendoButton
+                    themeColor="primary"
+                    [disabled]="!acceptedDisclaimer || confirming"
+                    (click)="confirm()">
+                Confirm Reservation
+            </button>
         </div>
+    </div>
 
-        <div class="actions">
-            <button type="button" kendoButton class="previous-button" (click)="cancel()">Previous</button>
-            <button type="submit" kendoButton class="forward-button" [disabled]="form.invalid">Next</button>
-        </div>
-    </form>
-</section>
-schedule-oath-personal-info.component.ts file:
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
+</div>
+
+<ng-template #busy>
+    <div class="busy">
+        <kendo-loader type="infinite-spinner"></kendo-loader>
+        <div>Loading available offices and slots...</div>
+    </div>
+</ng-template>
+ts file:
+import {
+    Component,
+    OnDestroy,
+    OnInit,
+    ChangeDetectionStrategy,
+    ChangeDetectorRef
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { timeout, finalize } from 'rxjs/operators';
-
 import { ScheduleOathService } from '../../services/schedule-oath/schedule-oath.service';
+import {
+    OfficeDto,
+    HoldResponseDto,
+    ReservationConfirmationDto
+} from '../../model/schedule-oath/schedule-oath.models';
 import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
-import { NotaryProfileDto, VisitTypeDto } from '../../model/schedule-oath/schedule-oath.models';
 import { OathStepTrackerService } from '../../services/helper-services/oath-schedule-step-tracker/oath-step-tracker.service';
 
-type VisitCode = 'InPerson' | 'External' | 'Virtual';
-type VisitVM = { id: number; code: VisitCode; label: string; help: string; raw?: VisitTypeDto };
+type Dir = 'current' | 'next' | 'prev';
+
+type TileVM = {
+    slotId: number;
+    start: Date;
+    timeLabel: string;
+    officeId: number | null;
+    officeName: string;
+    raw: any;
+};
+
+type DayVM = {
+    key: string;       // YYYY-MM-DD
+    label: string;     // Monday
+    subLabel: string;  // May 5
+    tiles: TileVM[];
+};
 
 @Component({
-    selector: 'app-schedule-oath-personal-info',
-    templateUrl: './schedule-oath-personal-info.component.html',
-    styleUrls: ['./schedule-oath-personal-info.component.css']
+    selector: 'app-schedule-oath-date-time',
+    templateUrl: './schedule-oath-date-time.component.html',
+    styleUrls: ['./schedule-oath-date-time.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ScheduleOathPersonalInfoComponent implements OnInit, OnDestroy {
-    form!: FormGroup;
-    submitted = false;
-
-    profile: NotaryProfileDto | null = null;
-    visitOptions: VisitVM[] = [];
+export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
     loading = true;
-    dobDisplay: string = '';
-    phone1Display: string = '';
+    errorMsg = '';
 
+    offices: OfficeDto[] = [];
+    selectedOfficeId: number | null = null; // initial office for API calls
+
+    // NEW: filter state (UI only)
+    officeFilterOptions: { text: string; value: number | null }[] = [];
+    selectedOfficeIdFilter: number | null = null; // null = All locations
+
+    timeOfDayOptions = [
+        { text: 'All available', value: 'All' as const },
+        { text: 'AM', value: 'AM' as const },
+        { text: 'PM', value: 'PM' as const }
+    ];
+    timeOfDayFilter: 'All' | 'AM' | 'PM' = 'All';
+
+    // View model for grid
+    daysVm: DayVM[] = [];
+    selectedSlotId: number | null = null;
+
+    // server/flow state
+    weekLabel = '';
+    hold: HoldResponseDto | null = null;
+    acceptedDisclaimer = false;
+    confirming = false;
+
+    private applicantId = 0;
+    private email = '';
+    private visitTypeId = 0;
     private destroy$ = new Subject<void>();
 
+    // track the currently viewed week (use server response)
+    private currentWeekStartIso: string | null = null;
+
     constructor(
-        private fb: FormBuilder,
-        private service: ScheduleOathService,
-        public store: ScheduleOathStore,
+        private route: ActivatedRoute,
         private router: Router,
+        private svc: ScheduleOathService,
+        public store: ScheduleOathStore,
+        private cdr: ChangeDetectorRef,
         private stepTracker: OathStepTrackerService
     ) { }
 
     ngOnInit(): void {
-        const qp = new URLSearchParams(window.location.search);
-        const applicantId = Number(qp.get('applicantId')) || this.store.snapshot.applicantId || 0;
+        const qp = this.route.snapshot.queryParamMap;
+        this.applicantId = Number(qp.get('applicantId')) || this.store.snapshot.applicantId || 0;
+        this.email = qp.get('email') || this.store.snapshot.email || '';
+        this.visitTypeId = Number(qp.get('visitTypeId')) || this.store.snapshot.visitTypeId || 0;
 
-        const emailFromUrl = (qp.get('email') || '').trim();
-        const emailFromSession = (sessionStorage.getItem('Email') || '').trim();
-        const email = emailFromUrl || emailFromSession || this.store.snapshot.email || '';
-        const firstName = this.store.snapshot.profile?.firstName;
-        const isModifyMode = (qp.get('modify') || 'false').toLowerCase() === 'true';
-        this.getDobandPhone();
-
-        // If URL missing email but available in session, rewrite once (supports deep links)
-        if (applicantId && !emailFromUrl && emailFromSession) {
-            this.router.navigate([], {
-                queryParams: { email: emailFromSession },
-                queryParamsHandling: 'merge',
-                replaceUrl: true
-            });
+        if (!this.applicantId || !this.email || !this.visitTypeId) {
+            this.loading = false;
+            this.errorMsg = 'Missing required data (applicantId / email / visitTypeId).';
+            this.cdr.markForCheck();
             return;
         }
 
-        if (!applicantId) { this.loading = false; alert('Missing applicant id.'); return; }
-        if (!email) { this.loading = false; alert('Missing email address. Please re-login or open from Profile Homepage.'); return; }
-
-        // No disabled-on-load — control is enabled from the start
-        this.form = this.fb.group({
-            visitTypeId: new FormControl(
-                this.store.snapshot.visitTypeId != null && isModifyMode
-                    ? String(this.store.snapshot.visitTypeId)  // only preselect in modify mode
-                    : '',                                      // otherwise leave empty
-                Validators.required
-            )
+        // Persist for refreshes
+        this.store.patch({
+            applicantId: this.applicantId,
+            email: this.email,
+            visitTypeId: this.visitTypeId
         });
 
-        // Show defaults immediately
-        this.visitOptions = this.defaultVisitOptions();
+        this.loadOffices(() => this.loadSlotsWithFallback());
+    }
 
-        // Persist identity early
-        this.store.patch({ applicantId, email });
+    // ---------------- data loads ----------------
+    private loadOffices(onDone?: () => void) {
+        this.svc.getOffices().pipe(takeUntil(this.destroy$)).subscribe({
+            next: (offices) => {
+                this.offices = (offices || []).filter(o => (o as any).isActive ?? true);
 
-        // Load profile + visit types; just flip loading off in finalize()
-        this.service.start(applicantId, email)
-            .pipe(
-                takeUntil(this.destroy$),
-                timeout(5000),
-                finalize(() => {
-                    // runs on success OR error — no enable/disable here
-                    this.loading = false;
-                })
-            )
+                // API location dropdown (All + office values)
+                this.officeFilterOptions = [
+                    { text: 'All locations', value: null },
+                    ...this.offices.map(o => ({ text: (o as any).value ?? o.name ?? `Office ${o.officeId}`, value: o.officeId }))
+                ];
+
+                if (!this.selectedOfficeId && this.offices.length) {
+                    this.selectedOfficeId = this.offices[0].officeId;
+                }
+            },
+            error: () => { },
+            complete: () => { if (onDone) onDone(); this.cdr.markForCheck(); }
+        });
+    }
+
+    loadSlotsWithFallback(): void {
+        this.loading = true;
+        this.errorMsg = '';
+
+        const weekOf = this.currentWeekStartIso
+            ? new Date(this.currentWeekStartIso)
+            : new Date(); // first load = "current" from today
+
+        const weekOfIso = this.mondayIso(weekOf);
+
+        // current week
+        this.searchWeek(weekOfIso, 'current', () => {
+            if (this.daysVm.some(d => d.tiles.length)) {
+                this.loading = false;
+                this.cdr.markForCheck();
+                return;
+            }
+            // next week
+            this.searchWeek(weekOfIso, 'next', () => {
+                this.loading = false;
+                this.cdr.markForCheck();
+            });
+        });
+    }
+
+    private searchWeek(weekOf: string, dir: Dir, done?: () => void): void {
+        const req: any = {
+            applicantId: this.applicantId,
+            visitTypeId: this.visitTypeId,
+            weekOf,
+            pageDirection: dir
+        };
+        if (this.selectedOfficeId) req.officeId = this.selectedOfficeId;
+
+        this.svc.searchWeeklySlots(req).pipe(takeUntil(this.destroy$)).subscribe({
+            next: (resp: any) => {
+                const startIso: string | undefined = resp?.weekStartUtc ?? resp?.weekStart ?? resp?.weekStartISO;
+                const endIso: string | undefined = resp?.weekEndUtc ?? resp?.weekEnd ?? resp?.weekEndISO;
+
+                if (!startIso || !endIso) {
+                    this.daysVm = this.emptyWeek();
+                    this.weekLabel = '';
+                    return;
+                }
+
+                this.currentWeekStartIso = startIso;
+                this.weekLabel = this.formatWeekLabel(startIso, endIso);
+
+                const rawSlots: any[] = Array.isArray(resp?.slots) ? resp.slots : [];
+                const tiles = this.toTiles(rawSlots);
+                const filtered = this.applyFilters(tiles);
+                this.daysVm = this.groupIntoDays(filtered, startIso);
+            },
+            error: (err) => {
+                this.errorMsg = err?.message || 'Failed to load slots.';
+            },
+            complete: () => { if (done) done(); this.cdr.markForCheck(); }
+        });
+    }
+
+    // ---------------- filters & transforms ----------------
+    onOfficeFilterChange(val: number | null) {
+        this.selectedOfficeIdFilter = val;
+        this.refreshViewOnly();
+    }
+
+    onTimeOfDayChange(val: 'All' | 'AM' | 'PM') {
+        this.timeOfDayFilter = val;
+        this.refreshViewOnly();
+    }
+
+    private refreshViewOnly() {
+        // Rebuild day VM from last known raw slots: we don’t store raw; instead reload for simplicity.
+        // If you prefer, keep the last `tiles` array in a field and re-run `applyFilters` + `groupIntoDays`.
+        const weekOfIso = this.currentWeekStartIso ? this.mondayIso(new Date(this.currentWeekStartIso)) : this.mondayIso(new Date());
+        this.searchWeek(weekOfIso, 'current');
+    }
+
+    private toTiles(rawSlots: any[]): TileVM[] {
+        const officeNameById = (id: number | null | undefined) => {
+            if (!id) return '—';
+            const o = this.offices.find(x => x.officeId === id);
+            return (o as any)?.value ?? (o as any)?.name ?? `Office ${id}`;
+        };
+
+        const parseStart = (s: any): Date | null => {
+            const utc = s.startTimeUtc || s.startUtc;
+            if (utc) {
+                const d = new Date(utc);
+                return Number.isNaN(d.getTime()) ? null : d;
+            }
+            const sd = s.scheduleDate, st = s.startTime;
+            if (sd && st) {
+                const guess = new Date(`${sd}T${st}Z`);
+                return Number.isNaN(guess.getTime()) ? null : guess;
+            }
+            return null;
+        };
+
+        return rawSlots
+            .map(s => {
+                const start = parseStart(s);
+                if (!start) return null;
+
+                const slotId = Number(s.reservationSlotId ?? s.slotId ?? s.id ?? 0);
+                const officeId = s.office?.officeId ?? s.officeId ?? null;
+                const officeName = s.office?.value ?? officeNameById(officeId);
+
+                return {
+                    slotId,
+                    start,
+                    timeLabel: this.formatTime(start),
+                    officeId,
+                    officeName,
+                    raw: s
+                } as TileVM;
+            })
+            .filter((x): x is TileVM => !!x)
+            .sort((a, b) => {
+                const t = a.start.getTime() - b.start.getTime();
+                if (t !== 0) return t;
+                return a.officeName.localeCompare(b.officeName);
+            });
+    }
+
+    private applyFilters(list: TileVM[]): TileVM[] {
+        let out = list;
+
+        if (this.selectedOfficeIdFilter != null) {
+            out = out.filter(t => t.officeId === this.selectedOfficeIdFilter);
+        }
+
+        if (this.timeOfDayFilter === 'AM') {
+            out = out.filter(t => t.start.getHours() < 12);
+        } else if (this.timeOfDayFilter === 'PM') {
+            out = out.filter(t => t.start.getHours() >= 12);
+        }
+
+        return out;
+    }
+
+    private groupIntoDays(tiles: TileVM[], weekStartIso: string): DayVM[] {
+        // Build 5 days starting at server week start
+        const start = new Date(weekStartIso);
+        const days: DayVM[] = Array.from({ length: 5 }).map((_, i) => {
+            const d = new Date(start);
+            d.setUTCDate(start.getUTCDate() + i);
+            const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+            return {
+                key,
+                label: d.toLocaleDateString(undefined, { weekday: 'long' }),
+                subLabel: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+                tiles: []
+            };
+        });
+
+        // Group tiles by date key
+        const byKey = new Map<string, TileVM[]>();
+        for (const t of tiles) {
+            const k = t.start.toISOString().slice(0, 10);
+            if (!byKey.has(k)) byKey.set(k, []);
+            byKey.get(k)!.push(t);
+        }
+
+        for (const d of days) {
+            d.tiles = (byKey.get(d.key) || []).slice(); // already sorted
+        }
+
+        return days;
+    }
+
+    // ---------------- interactions ----------------
+    onTileClick(t: TileVM): void {
+        //  Console-log it in backend response shape
+        const slotPayload = {
+            reservationSlotId: t.raw?.reservationSlotId ?? t.slotId,
+            reservationId: t.raw?.reservationId ?? 0,
+            office: {
+                officeId: t.officeId ?? 0,
+                value: t.officeName
+            },
+            visitTypeId: t.raw?.visitTypeId ?? 0,
+            scheduleDate: t.raw?.scheduleDate ?? t.start.toISOString().slice(0, 10),
+            startTime: t.raw?.startTime ?? this.formatTime(t.start),
+            endTime: t.raw?.endTime ?? ''
+        };
+
+        console.log('Slot clicked (API shape):', slotPayload);
+
+        // existing selection/hold behavior below 
+        if (this.selectedSlotId === t.slotId) {
+            this.selectedSlotId = null;
+            if (this.hold) this.releaseHold();
+            return;
+        }
+
+        this.selectedSlotId = t.slotId;
+        this.holdSlotById(t.slotId);
+    }
+
+    onOfficeChange(): void {
+        // kept for compatibility (not used by new UI)
+        this.loadSlotsWithFallback();
+    }
+
+    goPrevWeek(): void {
+        const base = this.currentWeekStartIso
+            ? new Date(this.currentWeekStartIso)
+            : new Date();
+        this.searchWeek(this.mondayIso(base), 'prev');
+    }
+
+    goNextWeek(): void {
+        const base = this.currentWeekStartIso
+            ? new Date(this.currentWeekStartIso)
+            : new Date();
+        this.searchWeek(this.mondayIso(base), 'next');
+    }
+
+    holdSlotById(slotId: number): void {
+        if (!this.applicantId) return;
+        this.hold = null;
+        this.acceptedDisclaimer = false;
+
+        this.svc.setHold(slotId, this.applicantId).pipe(takeUntil(this.destroy$)).subscribe({
+            next: (h) => {
+                this.hold = h;
+
+                // persist minimal selection in the store for confirm step
+                const chosen = this.findTile(slotId);
+                this.store.patch({
+                    appointmentId: (h as any).appointmentId ?? null,
+                    holdEndTimeUtc: (h as any).holdEndTimeUtc ?? null,
+                    selectedSlot: chosen
+                        ? {
+                            reservationSlotId: chosen.slotId,
+                            startTimeUtc: chosen.start.toISOString(),
+                            endTimeUtc: null,
+                            title: 'Available',
+                            officeName: chosen.officeName
+                        }
+                        : null
+                });
+
+                this.cdr.markForCheck();
+            },
+            error: (err) => {
+                this.errorMsg = err?.message || 'Unable to hold slot.';
+                this.cdr.markForCheck();
+            }
+        });
+    }
+
+    releaseHold(): void {
+        if (!this.hold) return;
+        this.svc.releaseHold((this.hold as any).appointmentId).pipe(takeUntil(this.destroy$)).subscribe({
+            next: () => {
+                this.hold = null;
+                this.cdr.markForCheck();
+            },
+            error: () => {
+                this.hold = null;
+                this.cdr.markForCheck();
+            }
+        });
+    }
+
+    confirm(): void {
+        if (!this.hold || !this.acceptedDisclaimer || this.confirming) return;
+        this.confirming = true;
+        this.cdr.markForCheck();
+
+        this.svc.confirmReservation({
+            appointmentId: (this.hold as any).appointmentId,
+            disclaimerAccepted: true
+        } as any)
+            .pipe(takeUntil(this.destroy$))
             .subscribe({
-                next: (res) => {
-                    this.profile = res.profile ?? null;
-
-                    const normalized = this.normalizeVisitTypes(res.visitTypes ?? []);
-                    if (normalized.length) this.visitOptions = normalized;
-
-                    // Default selection if none persisted
-                    const saved = this.store.snapshot.visitTypeId;
-                    if (isModifyMode && saved && !this.form.value.visitTypeId) {
-                        this.form.patchValue({ visitTypeId: String(saved) }, { emitEvent: false });
-                    }
-
-                    // Persist profile for downstream steps
-                    this.store.patch({ profile: this.profile });
+                next: (conf: ReservationConfirmationDto) => {
+                    this.stepTracker.completeDateTimeAndActivateConfirm();
+                    this.router.navigate(['/schedule-oath/confirmation'], {
+                        queryParams: {
+                            reservationId: (conf as any).reservationId,
+                            confirmationNumber: (conf as any).confirmationNumber
+                        }
+                    });
                 },
-                error: () => {
-                    // Keep defaults; still let user proceed
-                    alert('Issue in saving');
+                error: (err) => {
+                    this.errorMsg = err?.message || 'Unable to confirm reservation.';
+                    this.confirming = false;
+                    this.cdr.markForCheck();
+                },
+                complete: () => {
+                    this.confirming = false;
+                    this.cdr.markForCheck();
                 }
             });
     }
 
-    getDobandPhone(): void {
-        const raw = sessionStorage.getItem('ProfileDetails');
+    // ---------------- helpers ----------------
+    private findTile(slotId: number): TileVM | null {
+        for (const d of this.daysVm) {
+            const t = d.tiles.find(x => x.slotId === slotId);
+            if (t) return t;
+        }
+        return null;
+    }
 
-        if (raw) {
-            try {
-                const profile = JSON.parse(raw);
-                const personalInfo = profile?.userHomeProfileDto?.personalInfoDetails;
+    private mondayIso(d: Date): string {
+        const utc = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+        const dow = utc.getUTCDay() || 7;
+        if (dow !== 1) utc.setUTCDate(utc.getUTCDate() - (dow - 1));
+        const y = utc.getUTCFullYear(),
+            m = String(utc.getUTCMonth() + 1).padStart(2, '0'),
+            day = String(utc.getUTCDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
 
-                this.dobDisplay = personalInfo?.dateOfBirthDisplay ?? null;
-                this.phone1Display = personalInfo?.phone1Display ?? null;
-            } catch (err) {
-                console.error('Invalid ProfileDetails JSON', err);
-            }
-        } else {
-            console.warn('No ProfileDetails found in sessionStorage');
+    private formatWeekLabel(startIso: string, endIso: string): string {
+        try {
+            const s = new Date(startIso);
+            const e = new Date(endIso);
+
+            const fmt = (d: Date) =>
+                d.toLocaleDateString(undefined, {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+
+            return `${fmt(s)} - ${fmt(e)}`;
+        } catch {
+            return '';
         }
     }
 
-    onRadioClick(id: string, event: Event): void {
-        const ctrl = this.form.get('visitTypeId');
-        if (!ctrl) return;
-
-        const current = ctrl.value;
-        if (current === id) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            setTimeout(() => {
-                ctrl.setValue('', { emitEvent: true });
-                ctrl.markAsPristine();
-                ctrl.markAsUntouched();
-                ctrl.updateValueAndValidity({ emitEvent: true });
-            });
-        } else {
-            ctrl.setValue(id, { emitEvent: true });
-        }
+    private formatTime(d: Date): string {
+        return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
     }
 
-    onRadioBlur(): void {
-        const ctrl = this.form.get('visitTypeId');
-        if (!ctrl) return;
-        if (!ctrl.value) {
-            ctrl.markAsPristine();
-            ctrl.markAsUntouched();
-        }
-    }
-
-    next(): void {
-        this.submitted = true;
-        if (this.form.invalid) {
-            this.form.markAllAsTouched();
-            return;
-        }
-
-        const visitTypeId = Number(this.form.value.visitTypeId);
-        const { applicantId, email } = this.store.snapshot;
-
-        this.store.patch({
-            visitTypeId,
-            selectedSlot: null,
-            holdEndTimeUtc: null,
-            confirmation: null
+    private emptyWeek(): DayVM[] {
+        const start = new Date();
+        const monday = new Date(this.mondayIso(start));
+        return Array.from({ length: 5 }).map((_, i) => {
+            const d = new Date(monday);
+            d.setUTCDate(monday.getUTCDate() + i);
+            return {
+                key: d.toISOString().slice(0, 10),
+                label: d.toLocaleDateString(undefined, { weekday: 'long' }),
+                subLabel: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+                tiles: []
+            };
         });
-
-        this.stepTracker.completePersonalAndActivateDateTime();
-
-        this.router.navigate(['/schedule-oath/date-time'], {
-            queryParams: { applicantId, email, visitTypeId }
-        });
-    }
-
-    cancel(): void {
-        this.router.navigate(['/profile-homepage']);
-    }
-
-    // ---------- Helpers ----------
-    private normalizeVisitTypes(list: VisitTypeDto[]): VisitVM[] {
-        const onlyActive = (list || []).filter((v: any) => (v?.isActive ?? v?.IsActive ?? true));
-        const toId = (v: any) => Number(v?.visitTypeId ?? v?.VisitTypeId ?? v?.id ?? 0);
-        const toCode = (v: any): VisitCode | null => {
-            const c = String(v?.code ?? v?.Code ?? v?.value ?? '').toLowerCase();
-            if (c === 'inperson') return 'InPerson';
-            if (c === 'external') return 'External';
-            if (c === 'virtual') return 'Virtual';
-            return null;
-        };
-
-        const opts: VisitVM[] = [];
-        for (const v of onlyActive) {
-            const id = toId(v);
-            const code = toCode(v);
-            if (!id || !code) continue;
-            opts.push({
-                id,
-                code,
-                label: code === 'InPerson' ? 'In Person' : code,
-                help:
-                    code === 'InPerson' ? 'at a location closer to you' :
-                        code === 'External' ? 'I will find my own commissioner to qualify' :
-                            'with a virtual oath you maybe able to schedule an oath at any location',
-                raw: v
-            });
-        }
-        const order: VisitCode[] = ['InPerson', 'Virtual','External'];
-        return opts.sort((a, b) => order.indexOf(a.code) - order.indexOf(b.code));
-    }
-
-    private defaultVisitOptions(): VisitVM[] {
-        return [
-            { id: 1, code: 'InPerson', label: 'In Person', help: 'at a location closer to you' },
-            { id: 2, code: 'Virtual', label: 'Virtual', help: 'with a virtual oath you maybe able to schedule an oath at any location' },
-            { id: 3, code: 'External', label: 'External', help: 'I will find my own commissioner to qualify' }
-        ];
     }
 
     ngOnDestroy(): void {
@@ -303,7 +578,7 @@ export class ScheduleOathPersonalInfoComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 }
-schedule-oath.service.ts file:
+service.ts file:
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -552,7 +827,7 @@ export class ScheduleOathService {
         return [startMs, endMs];
     }
 }
-schedule-oath.state.ts file:
+scheduler-oath.state.ts file:
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { NotaryProfileDto } from '../../model/schedule-oath/schedule-oath.models';
@@ -610,447 +885,5 @@ export class ScheduleOathStore {
     reset(): void {
         this.subj.next({ ...initialState });
         try { sessionStorage.removeItem(STORAGE_KEY); } catch { }
-    }
-}
-step - 2 schedule-oath-date-time.component.html file: 
-<div class="wrapper" *ngIf="!loading; else busy">
-    <div class="header">
-        <h2>Pick a Date & Time</h2>
-        <div class="week-label" *ngIf="weekLabel">{{ weekLabel }}</div>
-
-        <div class="controls">
-            <label>
-                Office:
-                <select class="k-input"
-                        [ngModel]="selectedOfficeId"
-                        (ngModelChange)="selectedOfficeId = $event; onOfficeChange()">
-                    <option *ngFor="let o of offices; trackBy: trackOffice" [value]="o.officeId">
-                        {{ officeLabel(o) }}
-                    </option>
-                </select>
-            </label>
-
-            <div class="spacer"></div>
-
-            <button kendoButton look="flat" (click)="goWeek('prev')" aria-label="Previous week">previous</button>
-            <button kendoButton look="flat" (click)="goWeek('current')" aria-label="This week">This Week</button>
-            <button kendoButton look="flat" (click)="goWeek('next')" aria-label="Next week">next</button>
-        </div>
-    </div>
-
-    <div class="content">
-        <!-- Add the eventClick binding to allow users to select an appointment slot -->
-        <kendo-scheduler [kendoSchedulerBinding]="events"
-                         [selectedDate]="selectedDate"
-                         (eventClick)="onEventClick($event)"
-                         style="height: 650px">
-            <kendo-scheduler-week-view [slotDuration]="30"></kendo-scheduler-week-view>
-        </kendo-scheduler>
-
-        <div class="error" *ngIf="errorMsg">{{ errorMsg }}</div>
-    </div>
-
-    <div class="hold" *ngIf="hold as h">
-        <h3>Selected Slot</h3>
-        <p>Appointment ID: <strong>{{ h.appointmentId }}</strong></p>
-
-        <label class="disclaimer">
-            <input type="checkbox" [(ngModel)]="acceptedDisclaimer" />
-            I understand this hold will be released if I don't confirm promptly.
-        </label>
-
-        <div class="hold-actions">
-            <button kendoButton (click)="releaseHold()">Release Hold</button>
-            <button kendoButton
-                    themeColor="primary"
-                    [disabled]="!acceptedDisclaimer || confirming"
-                    (click)="confirm()">
-                Confirm Reservation
-            </button>
-        </div>
-    </div>
-</div>
-
-<ng-template #busy>
-    <div class="busy">
-        <kendo-loader type="infinite-spinner"></kendo-loader>
-        <div>Loading available offices and slots...</div>
-    </div>
-</ng-template>
-schedule-oath-date-time.component.ts file:
-import {
-    Component,
-    OnDestroy,
-    OnInit,
-    ChangeDetectionStrategy,
-    ChangeDetectorRef
-} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
-import { ScheduleOathService } from '../../services/schedule-oath/schedule-oath.service';
-import {
-    OfficeDto,
-    ReservationSlotDto,
-    HoldResponseDto,
-    ReservationConfirmationDto
-} from '../../model/schedule-oath/schedule-oath.models';
-import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
-import { OathStepTrackerService } from '../../services/helper-services/oath-schedule-step-tracker/oath-step-tracker.service';
-
-type Dir = 'current' | 'next' | 'prev';
-
-export type SchedulerItem = {
-    id: number;
-    slotId: number;
-    title: string;
-    start: Date;
-    end: Date;
-    isAllDay: boolean;
-};
-
-function isValidDate(d: Date): boolean {
-    return d instanceof Date && !Number.isNaN(d.getTime());
-}
-
-@Component({
-    selector: 'app-schedule-oath-date-time',
-    templateUrl: './schedule-oath-date-time.component.html',
-    styleUrls: ['./schedule-oath-date-time.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
-})
-export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
-    loading = true;
-    errorMsg = '';
-
-    offices: OfficeDto[] = [];
-    selectedOfficeId: number | null = null;
-
-    /** Events bound to the Scheduler via [kendoSchedulerBinding] */
-    events: SchedulerItem[] = [];
-    selectedDate: Date = new Date();
-
-    weekLabel = '';
-    hold: HoldResponseDto | null = null;
-    acceptedDisclaimer = false;
-    confirming = false;
-
-    private applicantId = 0;
-    private email = '';
-    private visitTypeId = 0;
-    private destroy$ = new Subject<void>();
-
-    private static readonly MAX_EVENTS = 1000;
-
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private svc: ScheduleOathService,
-        public store: ScheduleOathStore,
-        private cdr: ChangeDetectorRef,
-        private stepTracker: OathStepTrackerService
-    ) { }
-
-    ngOnInit(): void {
-        const qp = this.route.snapshot.queryParamMap;
-        this.applicantId =
-            Number(qp.get('applicantId')) || this.store.snapshot.applicantId || 0;
-        this.email = qp.get('email') || this.store.snapshot.email || '';
-        this.visitTypeId =
-            Number(qp.get('visitTypeId')) || this.store.snapshot.visitTypeId || 0;
-
-        if (!this.applicantId || !this.email || !this.visitTypeId) {
-            this.loading = false;
-            this.errorMsg =
-                'Missing required data (applicantId / email / visitTypeId).';
-            this.cdr.markForCheck();
-            return;
-        }
-
-        // Persist for refreshes
-        this.store.patch({
-            applicantId: this.applicantId,
-            email: this.email,
-            visitTypeId: this.visitTypeId
-        });
-
-        this.loadOffices(() => this.loadSlotsWithFallback());
-    }
-
-    // ---------- data loads ----------
-    private loadOffices(onDone?: () => void) {
-        this.svc
-            .getOffices()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (offices) => {
-                    this.offices = (offices || []).filter(
-                        (o) => (o as any).isActive ?? true
-                    );
-                    if (!this.selectedOfficeId && this.offices.length) {
-                        this.selectedOfficeId = this.offices[0].officeId;
-                    }
-                },
-                error: () => { },
-                complete: () => {
-                    if (onDone) onDone();
-                    this.cdr.markForCheck();
-                }
-            });
-    }
-
-    loadSlotsWithFallback(): void {
-        this.loading = true;
-        this.errorMsg = '';
-        const weekOf = this.mondayIso(new Date());
-
-        // current week
-        this.searchWeek(weekOf, 'current', () => {
-            if (this.events.length) {
-                this.loading = false;
-                this.cdr.markForCheck();
-                return;
-            }
-            // next week
-            this.searchWeek(weekOf, 'next', () => {
-                this.loading = false;
-                if (!this.events.length) {
-                    this.errorMsg =
-                        'No available slots for this or next week. Try a different week or office.';
-                }
-                this.cdr.markForCheck();
-            });
-        });
-    }
-
-    private searchWeek(weekOf: string, dir: Dir, done?: () => void): void {
-        const req: any = {
-            applicantId: this.applicantId,
-            visitTypeId: this.visitTypeId,
-            weekOf,
-            // Keep your lowercase pageDirection since your sample shows that payload
-            pageDirection: dir
-        };
-        if (this.selectedOfficeId) req.officeId = this.selectedOfficeId;
-
-        this.svc
-            .searchWeeklySlots(req)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (resp) => {
-                    // Type-safe: your SlotSearchResponse exposes weekStartUtc / weekEndUtc / slots
-                    const startIso: string | undefined = resp?.weekStartUtc;
-                    const endIso: string | undefined = resp?.weekEndUtc;
-
-                    const wkStart = startIso ? new Date(startIso) : null;
-                    const wkEnd = endIso ? new Date(endIso) : null;
-
-                    if (!wkStart || !isValidDate(wkStart) || !wkEnd || !isValidDate(wkEnd)) {
-                        this.events = [];
-                        this.errorMsg = 'Server returned invalid week dates.';
-                        return;
-                    }
-
-                    this.selectedDate = wkStart;
-                    this.weekLabel = this.formatWeekLabel(startIso!, endIso!);
-
-                    const rawSlots: any[] = Array.isArray(resp?.slots) ? resp.slots : [];
-
-                    const items: SchedulerItem[] = rawSlots
-                        .map((s: any) => {
-                            const startUTC =
-                                s.startTimeUtc ??
-                                (s.scheduleDate && s.startTime
-                                    ? `${s.scheduleDate}T${s.startTime}Z`
-                                    : null) ??
-                                s.start;
-                            const endUTC =
-                                s.endTimeUtc ??
-                                (s.scheduleDate && s.endTime
-                                    ? `${s.scheduleDate}T${s.endTime}Z`
-                                    : null) ??
-                                s.end;
-
-                            if (!startUTC || !endUTC) return null;
-
-                            const start = new Date(startUTC);
-                            const end = new Date(endUTC);
-                            if (!isValidDate(start) || !isValidDate(end)) return null;
-
-                            const id = Number(s.reservationSlotId ?? s.slotId ?? s.id ?? 0);
-
-                            return {
-                                id,
-                                slotId: id,
-                                title: s.title ?? 'Available',
-                                start,
-                                end,
-                                isAllDay: false
-                            };
-                        })
-                        .filter((x): x is SchedulerItem => !!x)
-                        .sort((a, b) => a.start.getTime() - b.start.getTime())
-                        .slice(0, ScheduleOathDateTimeComponent.MAX_EVENTS);
-
-                    this.events = items;
-                    this.errorMsg = this.events.length
-                        ? ''
-                        : 'No available slots for this week. Try another week or office.';
-                },
-                error: (err) => {
-                    this.errorMsg = err?.message || 'Failed to load slots.';
-                    if (done) done();
-                    this.cdr.markForCheck();
-                },
-                complete: () => {
-                    if (done) done();
-                    this.cdr.markForCheck();
-                }
-            });
-    }
-
-    // ---------- interactions ----------
-    onOfficeChange(): void {
-        this.loadSlotsWithFallback();
-    }
-
-    goWeek(dir: Dir): void {
-        this.loading = true;
-        const weekOf = this.mondayIso(new Date());
-        this.searchWeek(weekOf, dir, () => {
-            this.loading = false;
-            this.cdr.markForCheck();
-        });
-    }
-
-    onEventClick(e: any): void {
-        // Only used if/when you add (eventClick) back
-        const data = e?.event?.dataItem as SchedulerItem | undefined;
-        if (!data) return;
-        this.holdSlotById(data.slotId);
-    }
-
-    holdSlotById(slotId: number): void {
-        if (!this.applicantId) return;
-        this.hold = null;
-        this.acceptedDisclaimer = false;
-
-        this.svc
-            .setHold(slotId, this.applicantId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (h) => {
-                    this.hold = h;
-
-                    // Find the selected slot details from current events (for display on confirm page)
-                    const chosen = this.events.find(ev => ev.slotId === slotId) || null;
-
-                    // Persist for the confirm step/page
-                    this.store.patch({
-                        appointmentId: (h as any).appointmentId ?? null,
-                        holdEndTimeUtc: (h as any).holdEndTimeUtc ?? null, // backend may or may not return this
-                        selectedSlot: chosen
-                            ? {
-                                reservationSlotId: chosen.slotId,
-                                startTimeUtc: chosen.start?.toISOString?.() ?? null,
-                                endTimeUtc: chosen.end?.toISOString?.() ?? null,
-                                title: chosen.title ?? 'Available'
-                            }
-                            : null
-                    });
-
-                    this.cdr.markForCheck();
-                },
-                error: (err) => {
-                    this.errorMsg = err?.message || 'Unable to hold slot.';
-                    this.cdr.markForCheck();
-                }
-            });
-    }
-
-    releaseHold(): void {
-        if (!this.hold) return;
-        this.svc
-            .releaseHold((this.hold as any).appointmentId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: () => {
-                    this.hold = null;
-                    this.cdr.markForCheck();
-                },
-                error: () => {
-                    this.hold = null;
-                    this.cdr.markForCheck();
-                }
-            });
-    }
-
-    confirm(): void {
-        if (!this.hold || !this.acceptedDisclaimer || this.confirming) return;
-        this.confirming = true;
-        this.cdr.markForCheck();
-
-        this.svc
-            .confirmReservation({
-                appointmentId: (this.hold as any).appointmentId,
-                disclaimerAccepted: true
-            } as any)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (conf: ReservationConfirmationDto) => {
-                    this.stepTracker.completeDateTimeAndActivateConfirm();
-                    this.router.navigate(['/schedule-oath/confirmation'], {
-                        queryParams: {
-                            reservationId: (conf as any).reservationId,
-                            confirmationNumber: (conf as any).confirmationNumber
-                        }
-                    });
-                },
-                error: (err) => {
-                    this.errorMsg = err?.message || 'Unable to confirm reservation.';
-                    this.confirming = false;
-                    this.cdr.markForCheck();
-                },
-                complete: () => {
-                    this.confirming = false;
-                    this.cdr.markForCheck();
-                }
-            });
-    }
-
-    // ---------- helpers ----------
-    officeLabel(o: OfficeDto): string {
-        const a = o as any;
-        return a.value ?? a.name ?? a.description ?? `Office ${o.officeId}`;
-    }
-    trackOffice(_i: number, o: OfficeDto) {
-        return o?.officeId;
-    }
-
-    private mondayIso(d: Date): string {
-        const utc = new Date(
-            Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
-        );
-        const dow = utc.getUTCDay() || 7;
-        if (dow !== 1) utc.setUTCDate(utc.getUTCDate() - (dow - 1));
-        const y = utc.getUTCFullYear(),
-            m = String(utc.getUTCMonth() + 1).padStart(2, '0'),
-            day = String(utc.getUTCDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-    }
-    private formatWeekLabel(startIso: string, endIso: string): string {
-        try {
-            const s = new Date(startIso),
-                e = new Date(endIso);
-            const fmt = (d: Date) =>
-                d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-            return `${fmt(s)}-${fmt(e)}, ${e.getFullYear()}`;
-        } catch {
-            return '';
-        }
-    }
-
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
     }
 }
