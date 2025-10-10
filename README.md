@@ -1,18 +1,91 @@
-Bug: When I click on the slot.. nothing is happening on the front end and I am seeing this error on the console. What to do? 
-Error: I attached the screenshot 
-Request Object: {
-    "reservationSlotId": 966,
-    "reservationId": 67,
-    "office": {
-        "officeId": 1,
-        "value": "Boston"
-    },
-    "visitTypeId": 1,
-    "scheduleDate": "2025-10-06",
-    "startTime": "09:00:00",
-    "endTime": "09:30:00"
-}
-Ts file code: 
+Issue: When the page slots load and I click on a slot.. the hidden section below the grid appears. I then click on the disclaimer 
+and click confirm reservation.. it should take me to the schedule-oath-confirm page. But instead it is taking me to the paersonal 
+information page with the applicantId and email in the query params and says loading.. there are no errors in the UI console as well. 
+
+Fix this. 
+
+schedule-oath-date-time.component.html file:
+<div class="wrapper" *ngIf="!loading; else busy">
+    <h2 class="date-time-heading">Select a Date and Time</h2>
+    <div class="header">
+        <!-- Filters -->
+        <div class="filters">
+            <kendo-dropdownlist [data]="officeFilterOptions"
+                                textField="text"
+                                valueField="value"
+                                [value]="selectedOfficeIdFilter"
+                                [valuePrimitive]="true"
+                                (valueChange)="onOfficeFilterChange($event)">
+            </kendo-dropdownlist>
+
+            <kendo-dropdownlist [data]="timeOfDayOptions"
+                                textField="text"
+                                valueField="value"
+                                [value]="timeOfDayFilter"
+                                [valuePrimitive]="true"
+                                (valueChange)="onTimeOfDayChange($event)">
+            </kendo-dropdownlist>
+            <div class="week-label" *ngIf="weekLabel">{{ weekLabel }}</div>
+        </div>
+    </div>
+
+    <div class="board-row">
+        <button kendoButton fillMode="flat" class="nav-btn prev" (click)="goPrevWeek()">&larr; Previous week</button>
+
+        <div class="grid-board">
+            <!-- 5 fixed columns (Mon–Fri). Each column scrolls independently. -->
+            <div class="day-col" *ngFor="let day of daysVm">
+                <div class="day-header">
+                    <div class="day-name">{{ day.label }}</div>
+                    <div class="day-date">{{ day.subLabel }}</div>
+                </div>
+
+                <div class="tiles">
+                    <button kendoButton
+                            *ngFor="let t of day.tiles"
+                            class="slot-tile"
+                            [ngClass]="{ 'selected': t.slotId === selectedSlotId }"
+                            (click)="onTileClick(t)">
+                        <div class="time">{{ t.timeLabel }}</div>
+                        <div class="loc">{{ t.officeName }}</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button kendoButton fillMode="flat" class="nav-btn next" (click)="goNextWeek()">Next week &rarr;</button>
+    </div>
+
+    <!-- Hold panel (unchanged behavior) -->
+    <div class="hold" *ngIf="hold as h">
+        <h3>Selected Slot</h3>
+        <p>Appointment ID: <strong>{{ h.appointmentId }}</strong></p>
+
+        <label class="disclaimer">
+            <input type="checkbox" [(ngModel)]="acceptedDisclaimer" />
+            I understand this hold will be released if I don't confirm promptly.
+        </label>
+
+        <div class="hold-actions">
+            <button kendoButton (click)="releaseHold()">Release Hold</button>
+            <button kendoButton
+                    themeColor="primary"
+                    [disabled]="!acceptedDisclaimer || confirming"
+                    (click)="confirm()">
+                Confirm Reservation
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<ng-template #busy>
+    <div class="busy">
+        <kendo-loader type="infinite-spinner"></kendo-loader>
+        <div>Loading available offices and slots...</div>
+    </div>
+</ng-template>
+schedule-oath-date-time.component.ts file: 
 import {
     Component,
     OnDestroy,
@@ -526,87 +599,359 @@ export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 }
-html file: 
-<div class="wrapper" *ngIf="!loading; else busy">
-    <h2 class="date-time-heading">Select a Date and Time</h2>
-    <div class="header">
-        <!-- Filters -->
-        <div class="filters">
-            <kendo-dropdownlist [data]="officeFilterOptions"
-                                textField="text"
-                                valueField="value"
-                                [value]="selectedOfficeIdFilter"
-                                [valuePrimitive]="true"
-                                (valueChange)="onOfficeFilterChange($event)">
-            </kendo-dropdownlist>
+schedule-oath-confirm.component.html file:
+<div class="container">
+    <h2>Schedule Oath – Confirm Reservation</h2>
 
-            <kendo-dropdownlist [data]="timeOfDayOptions"
-                                textField="text"
-                                valueField="value"
-                                [value]="timeOfDayFilter"
-                                [valuePrimitive]="true"
-                                (valueChange)="onTimeOfDayChange($event)">
-            </kendo-dropdownlist>
-            <div class="week-label" *ngIf="weekLabel">{{ weekLabel }}</div>
-        </div>
+    <div class="hold-banner" [class.expired]="expired">
+        Time remaining to hold appointment: <strong>{{ remaining }}</strong>
     </div>
 
-    <div class="board-row">
-        <button kendoButton fillMode="flat" class="nav-btn prev" (click)="goPrevWeek()">&larr; Previous week</button>
-
-        <div class="grid-board">
-            <!-- 5 fixed columns (Mon–Fri). Each column scrolls independently. -->
-            <div class="day-col" *ngFor="let day of daysVm">
-                <div class="day-header">
-                    <div class="day-name">{{ day.label }}</div>
-                    <div class="day-date">{{ day.subLabel }}</div>
+    <kendo-card *ngIf="!expired">
+        <kendo-card-body>
+            <div class="grid-2">
+                <div>
+                    <label>Location</label>
+                    <div>{{ slot?.officeName || '-' }}</div>
                 </div>
-
-                <div class="tiles">
-                    <button kendoButton
-                            *ngFor="let t of day.tiles"
-                            class="slot-tile"
-                            [ngClass]="{ 'selected': t.slotId === selectedSlotId }"
-                            (click)="onTileClick(t)">
-                        <div class="time">{{ t.timeLabel }}</div>
-                        <div class="loc">{{ t.officeName }}</div>
-                    </button>
+                <div>
+                    <label>Date</label>
+                    <div>{{ startIso | date:'MM/dd/yyyy' }}</div>
+                </div>
+                <div>
+                    <label>Start Time</label>
+                    <div>{{ startIso | date:'shortTime' }}</div>
+                </div>
+                <div>
+                    <label>End Time</label>
+                    <div>{{ endIso | date:'shortTime' }}</div>
                 </div>
             </div>
-        </div>
 
-        <button kendoButton fillMode="flat" class="nav-btn next" (click)="goNextWeek()">Next week &rarr;</button>
-    </div>
+            <div class="disclaimer">
+                <kendo-checkbox [(ngModel)]="disclaimerAccepted"></kendo-checkbox>
+                <span>I acknowledge the disclaimer and agree to the terms.</span>
+            </div>
 
-    <!-- Hold panel (unchanged behavior) -->
-    <div class="hold" *ngIf="hold as h">
-        <h3>Selected Slot</h3>
-        <p>Appointment ID: <strong>{{ h.appointmentId }}</strong></p>
-
-        <label class="disclaimer">
-            <input type="checkbox" [(ngModel)]="acceptedDisclaimer" />
-            I understand this hold will be released if I don't confirm promptly.
-        </label>
-
-        <div class="hold-actions">
-            <button kendoButton (click)="releaseHold()">Release Hold</button>
-            <button kendoButton
-                    themeColor="primary"
-                    [disabled]="!acceptedDisclaimer || confirming"
-                    (click)="confirm()">
+            <button kendoButton themeColor="primary"
+                    (click)="confirm()"
+                    [disabled]="!disclaimerAccepted || expired">
                 Confirm Reservation
             </button>
+        </kendo-card-body>
+    </kendo-card>
+
+    <div *ngIf="expired" class="expired-note">
+        Your hold has expired. Please go back and select another available slot.
+        <div class="mt-12">
+            <button kendoButton (click)="goBackToSlots()">Back to Slots</button>
         </div>
     </div>
-
 </div>
+schedule-oath-confirm.component.ts file: 
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { interval, Subject, takeUntil } from 'rxjs';
+import { ScheduleOathService } from '../../services/schedule-oath/schedule-oath.service';
+import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
+import { OathStepTrackerService } from '../../services/helper-services/oath-schedule-step-tracker/oath-step-tracker.service';
 
-<ng-template #busy>
-    <div class="busy">
-        <kendo-loader type="infinite-spinner"></kendo-loader>
-        <div>Loading available offices and slots...</div>
-    </div>
-</ng-template>
+@Component({
+    selector: 'app-schedule-oath-confirm',
+    templateUrl: './schedule-oath-confirm.component.html',
+    styleUrls: ['./schedule-oath-confirm.component.css']
+})
+export class ScheduleOathConfirmComponent implements OnInit, OnDestroy {
+    disclaimerAccepted = false;
+    holdExpiresAt!: Date;
+    remaining = '';
+    expired = false;
+
+    private destroy$ = new Subject<void>();
+
+    constructor(
+        public store: ScheduleOathStore,
+        private service: ScheduleOathService,
+        public router: Router,
+        private zone: NgZone,
+        private stepTracker: OathStepTrackerService
+    ) { }
+
+    get slot() { return this.store.snapshot.selectedSlot; }
+    get startIso() { return this.slot?.startTimeUtc ?? null; }
+    get endIso() { return this.slot?.endTimeUtc ?? null; }
+
+    ngOnInit(): void {
+        const s = this.store.snapshot;
+        if (!s.selectedSlot || !s.holdEndTimeUtc) {
+            this.router.navigate(['/schedule-oath/date-time']);
+            return;
+        }
+        this.holdExpiresAt = new Date(s.holdEndTimeUtc);
+
+        this.zone.runOutsideAngular(() => {
+            interval(1000).pipe(takeUntil(this.destroy$)).subscribe(() => {
+                const diff = this.holdExpiresAt.getTime() - Date.now();
+                this.expired = diff <= 0;
+                this.remaining = this.formatDiff(Math.max(diff, 0));
+            });
+        });
+    }
+
+    private formatDiff(ms: number): string {
+        const total = Math.floor(ms / 1000);
+        const m = Math.floor(total / 60).toString().padStart(2, '0');
+        const s = (total % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    goBackToSlots() { this.router.navigate(['/schedule-oath/date-time']); }
+
+    confirm() {
+        const s = this.store.snapshot;
+        if (this.expired) { this.goBackToSlots(); return; }
+
+        // Must have an appointmentId to confirm
+        if (!s.appointmentId) { this.goBackToSlots(); return; }
+
+        this.service.confirmReservation({
+            appointmentId: s.appointmentId,
+            disclaimerAccepted: this.disclaimerAccepted
+        }).subscribe({
+            next: conf => {
+                this.store.patch({ confirmation: conf });
+                this.stepTracker.completeConfirmAndActivateFinal();
+                this.router.navigate(['/schedule-oath/confirmation']);
+            },
+            error: (err) => {
+                if (err?.status === 409) this.goBackToSlots();
+                else alert('Failed to confirm reservation.');
+            }
+        });
+    }
+
+    ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
+}
+app-routing.module.ts file: 
+import { NgModule } from '@angular/core';
+import { ExtraOptions, RouterModule, Routes } from '@angular/router';
+import { LoginComponent } from './pages/login/login.component';
+import { EnterpinComponent } from './pages/enterpin/enterpin.component';
+import { AccountRegistrationComponent } from './pages/account-registration/account-registration.component';
+import { EmailVerificationComponent } from './components/email-verification/email-verification.component';
+import { PersonalInformationComponent } from './components/personal-information/personal-information.component';
+import { AccountConfirmationComponent } from './components/account-confirmation/account-confirmation.component';
+import { authGuard } from './guards/auth.guard';
+import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
+import { registrationAuthGuardGuard } from './guards/registration-guard/registration-auth-guard.guard';
+import { ProfileHomepageComponent } from './pages/profile-homepage/profile-homepage.component';
+import { NewAppPersonalInformationComponent } from './components/new-app-personal-information/new-app-personal-information.component';
+import { NewAppAddressComponent } from './components/new-app-address/new-app-address.component';
+import { NewAppApplicationInformationComponent } from './components/new-app-application-information/new-app-application-information.component';
+import { NewAppReferencesComponent } from './components/new-app-references/new-app-references.component';
+import { NewAppAdditionalInformationComponent } from './components/new-app-additional-information/new-app-additional-information.component';
+import { NewAppApplicationReviewComponent } from './components/new-app-application-review/new-app-application-review.component';
+import { NewAppAttestationComponent } from './components/new-app-attestation/new-app-attestation.component';
+import { NewAppConfirmationComponent } from './components/new-app-confirmation/new-app-confirmation.component';
+import { NotaryApplicationComponent } from './pages/notary-application/notary-application.component';
+import { ScheduleOathComponent } from './pages/schedule-oath/schedule-oath.component';
+import { ApplicationAddressGuard } from './guards/notary-application/application-address.guard';
+import { UnauthorizedPageComponent } from './pages/unauthorized-page/unauthorized-page.component';
+import { NotaryAcknowledgementComponent } from './components/remote-notary-acknowledgement/notary-acknowledgement.component';
+import { ApplyNotaryApplicationComponent } from './pages/remote-apply-notary-application/apply-notary-application.component';
+import { SelectPartnerComponent } from './components/remote-notary-partner/select-partner.component';
+import { UpdateLoginInformationComponent } from './pages/update-login-information/update-login-information.component';
+import { UpdateLoginConfirmComponent } from './components/update-login-confirm/update-login-confirm.component';
+import { UpdateLoginNewEmailComponent } from './components/update-login-new-email/update-login-new-email.component';
+import { UpdateLoginVerifyEmailComponent } from './components/update-login-verify-email/update-login-verify-email.component';
+import { UpdateLoginInfoComponent } from './components/update-login-info/update-login-info.component';
+import { RemoteConfirmationComponent } from './components/remote-notary-confirmation/remote-confirmation.component';
+import { UpdateExternalProfileComponent } from './pages/update-external-profile/update-external-profile.component';
+import { FindNotaryComponent } from './pages/find-notary/find-notary.component';
+import { ScheduleOathPersonalInfoComponent } from './components/schedule-oath-personal-info/schedule-oath-personal-info.component';
+import { ScheduleOathDateTimeComponent } from './components/schedule-oath-date-time/schedule-oath-date-time.component';
+import { ScheduleOathGuard } from './guards/schedule-oath/schedule-oath.guard';
+import { ScheduleOathConfirmComponent } from './components/schedule-oath-confirm/schedule-oath-confirm.component';
+import { ScheduleOathConfirmationComponent } from './components/schedule-oath-confirmation/schedule-oath-confirmation.component';
+
+const routerOptions: ExtraOptions = {
+    scrollPositionRestoration: 'top', // <- this scrolls to top on navigation
+    anchorScrolling: 'enabled',       // optional: for anchor (#id) scrolling
+    scrollOffset: [0, 0],             // optional: x, y offset
+};
+
+const routes: Routes = [
+    { path: '', redirectTo: '/login', pathMatch: 'full' },
+    {
+        path: 'login',
+        component: LoginComponent,
+        runGuardsAndResolvers: 'always',
+        canActivate: [authGuard]  // Existing auth guard
+    },
+    {
+        path: 'find-notary',
+        component: FindNotaryComponent,
+        runGuardsAndResolvers: 'always',
+        canActivate: [authGuard]
+    },
+    {
+        path: 'enterpin',
+        component: EnterpinComponent,
+        canActivate: [authGuard],
+        runGuardsAndResolvers: 'always'
+    },
+    { path: 'session-expired', component: SessionExpiredComponent },
+    { path: 'unauthorized', component: UnauthorizedPageComponent },
+    {
+        path: 'account-registration',
+        component: AccountRegistrationComponent,
+        children: [
+            { path: '', redirectTo: 'email-verification', pathMatch: 'full' },
+            {
+                path: 'email-verification',
+                component: EmailVerificationComponent,
+                canActivate: [registrationAuthGuardGuard]
+            },
+            {
+                path: 'personal-information',
+                component: PersonalInformationComponent,
+                canActivate: [registrationAuthGuardGuard]
+            },
+            {
+                path: 'account-confirmation',
+                component: AccountConfirmationComponent,
+                canActivate: [registrationAuthGuardGuard]
+            },
+        ],
+    },
+    {
+        path: 'profile-homepage',
+        component: ProfileHomepageComponent,
+        canActivate: [authGuard]
+    },
+    {
+        path: 'update-profile',
+        component: UpdateExternalProfileComponent,
+        // canActivate: [authGuard]
+    },
+
+    {
+        path: 'notary-application',
+        component: NotaryApplicationComponent,
+        canActivate: [authGuard],
+        children: [
+            { path: '', redirectTo: 'personal-information', pathMatch: 'full' },
+            {
+                path: 'personal-information',
+                component: NewAppPersonalInformationComponent
+            },
+            {
+                path: 'address',
+                canActivate: [ApplicationAddressGuard],
+                component: NewAppAddressComponent
+            },
+            {
+                path: 'application-information',
+                canActivate: [ApplicationAddressGuard],
+                component: NewAppApplicationInformationComponent
+            },
+            {
+                path: 'references',
+                canActivate: [ApplicationAddressGuard],
+                component: NewAppReferencesComponent
+            },
+            {
+                path: 'additional-information',
+                canActivate: [ApplicationAddressGuard],
+                component: NewAppAdditionalInformationComponent
+            },
+            {
+                path: 'application-review',
+                canActivate: [ApplicationAddressGuard],
+                component: NewAppApplicationReviewComponent
+            },
+            {
+                path: 'attestation',
+                canActivate: [ApplicationAddressGuard],
+                component: NewAppAttestationComponent
+            },
+            {
+                path: 'confirmation',
+                canActivate: [ApplicationAddressGuard],
+                component: NewAppConfirmationComponent
+            },
+        ],
+    },
+    { 
+        path: 'remote-application',
+        component: ApplyNotaryApplicationComponent,
+        canActivate: [],
+        children: [
+            { path: '', redirectTo: 'notary-acknowledgement', pathMatch: 'full' },
+            {
+                path: 'notary-acknowledgement',
+                component: NotaryAcknowledgementComponent
+            },
+            {
+                path: 'select-partner',
+                component: SelectPartnerComponent
+            },
+            {
+                path: 'confirmation',
+                component: RemoteConfirmationComponent
+            }
+        ]
+    },
+    {
+        path: 'schedule-oath',
+        component: ScheduleOathComponent,
+        children: [
+            { path: '', redirectTo: 'personal-information', pathMatch: 'full' },
+            { path: 'personal-information', component: ScheduleOathPersonalInfoComponent },
+            { path: 'date-time', component: ScheduleOathDateTimeComponent, canActivate: [ScheduleOathGuard] },
+            { path: 'confirm', component: ScheduleOathConfirmComponent, canActivate: [ScheduleOathGuard] },
+            { path: 'confirmation', component: ScheduleOathConfirmationComponent, canActivate: [ScheduleOathGuard] }
+        ]
+    },
+    {
+        path: 'hack-path',
+        component: ScheduleOathConfirmationComponent
+    },
+    {
+        path: 'update-login',
+        component: UpdateLoginInformationComponent,
+        canActivate: [authGuard],
+        children: [
+            { path: '', redirectTo: 'update-login-information', pathMatch: 'full' },
+            {
+                path: 'updateEmail',
+                component: UpdateLoginInfoComponent,
+          //      canActivate: [registrationAuthGuardGuard]
+            },
+            {
+                path: 'enterEmail',
+                component: UpdateLoginNewEmailComponent,
+     //           canActivate: [registrationAuthGuardGuard]
+            },
+            {
+                path: 'verifyEmail',
+                component: UpdateLoginVerifyEmailComponent,
+     //           canActivate: [registrationAuthGuardGuard]
+            },
+            {
+                path: 'confirmEmail',
+                component: UpdateLoginConfirmComponent
+            }
+        ],
+    },
+    { path: '**', redirectTo: '/session-expired', pathMatch: 'full' },
+];
+
+@NgModule({
+    imports: [RouterModule.forRoot(routes)],
+    exports: [RouterModule]
+})
+export class AppRoutingModule { }
 service.ts file:
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
