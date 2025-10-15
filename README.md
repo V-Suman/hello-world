@@ -1,91 +1,284 @@
-Issue: When the page slots load and I click on a slot.. the hidden section below the grid appears. I then click on the disclaimer 
-and click confirm reservation.. it should take me to the schedule-oath-confirm page. But instead it is taking me to the paersonal 
-information page with the applicantId and email in the query params and says loading.. there are no errors in the UI console as well. 
+Goal: To integrate other options in the oath-scheduler app. 
+Details: Up Until now.. we only integrated the In-person flow for the oath-scheduler. Now, we will need to add 2 more 
+flows. Virtual and External. In this prompt.. we will only deal with Virtual flow. 
+The overall approach is same for virtual flow.. but there are few changes. I will mention the changes step by step: 
 
-Fix this. 
+In Step - 1: We will need to pass the currently selected radio button from the schedule-oath-personal-info to 
+schedule-oath-date-time component. 
+In Step - 2: When we make the call to the offices endpoint.. and the offices endpoint returns the data like this [
+  {
+    "officeId": 1,
+    "code": null,
+    "value": "Boston",
+    "description": null,
+    "isActive": true
+  },
+  {
+    "officeId": 2,
+    "code": null,
+    "value": "Fall River",
+    "description": null,
+    "isActive": true
+  },
+  {
+    "officeId": 3,
+    "code": null,
+    "value": "Springfield",
+    "description": null,
+    "isActive": true
+  },
+  {
+    "officeId": 4,
+    "code": null,
+    "value": "Virtual",
+    "description": null,
+    "isActive": true
+  }
+] we should not be displaying the virtual option when the user selected radio button in person in step - 1.. similarly 
+when the user selected the option virtual in step -1 we should not be displaying the springfield, boston etc slots. So 
+at that point when the user selected cirtual in step - 1 the dropdown should have only one value and that value is 
+defaulted to virtual and we also make an automatic call to the backend search-slots with that officeId.
+in Step - 3 : Just make sure you are passing a flag form previous step to this step and to downstreams as the 
+downstream pages only have text based toggles that I can do it myself. 
+in Step - 4 : Again. Pass a simple toggle from page 3 to here. 
 
-schedule-oath-date-time.component.html file:
-<div class="wrapper" *ngIf="!loading; else busy">
-    <h2 class="date-time-heading">Select a Date and Time</h2>
-    <div class="header">
-        <!-- Filters -->
-        <div class="filters">
-            <kendo-dropdownlist [data]="officeFilterOptions"
-                                textField="text"
-                                valueField="value"
-                                [value]="selectedOfficeIdFilter"
-                                [valuePrimitive]="true"
-                                (valueChange)="onOfficeFilterChange($event)">
-            </kendo-dropdownlist>
+Ask any clarifying questions you have before you implement. 
 
-            <kendo-dropdownlist [data]="timeOfDayOptions"
-                                textField="text"
-                                valueField="value"
-                                [value]="timeOfDayFilter"
-                                [valuePrimitive]="true"
-                                (valueChange)="onTimeOfDayChange($event)">
-            </kendo-dropdownlist>
-            <div class="week-label" *ngIf="weekLabel">{{ weekLabel }}</div>
-        </div>
-    </div>
+step - 1 schedule-oath-personal-info.component.ts file: 
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+import { timeout, finalize } from 'rxjs/operators';
 
-    <div class="board-row">
-        <button kendoButton fillMode="flat" class="nav-btn prev" (click)="goPrevWeek()">&larr; Previous week</button>
+import { ScheduleOathService } from '../../services/schedule-oath/schedule-oath.service';
+import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
+import { NotaryProfileDto, VisitTypeDto } from '../../model/schedule-oath/schedule-oath.models';
+import { OathStepTrackerService } from '../../services/helper-services/oath-schedule-step-tracker/oath-step-tracker.service';
 
-        <div class="grid-board">
-            <!-- 5 fixed columns (Mon–Fri). Each column scrolls independently. -->
-            <div class="day-col" *ngFor="let day of daysVm">
-                <div class="day-header">
-                    <div class="day-name">{{ day.label }}</div>
-                    <div class="day-date">{{ day.subLabel }}</div>
-                </div>
+type VisitCode = 'InPerson' | 'External' | 'Virtual';
+type VisitVM = { id: number; code: VisitCode; label: string; help: string; raw?: VisitTypeDto };
 
-                <div class="tiles">
-                    <button kendoButton
-                            *ngFor="let t of day.tiles"
-                            class="slot-tile"
-                            [ngClass]="{ 'selected': t.slotId === selectedSlotId }"
-                            (click)="onTileClick(t)">
-                        <div class="time">{{ t.timeLabel }}</div>
-                        <div class="loc">{{ t.officeName }}</div>
-                    </button>
-                </div>
-            </div>
-        </div>
+@Component({
+    selector: 'app-schedule-oath-personal-info',
+    templateUrl: './schedule-oath-personal-info.component.html',
+    styleUrls: ['./schedule-oath-personal-info.component.css']
+})
+export class ScheduleOathPersonalInfoComponent implements OnInit, OnDestroy {
+    form!: FormGroup;
+    submitted = false;
 
-        <button kendoButton fillMode="flat" class="nav-btn next" (click)="goNextWeek()">Next week &rarr;</button>
-    </div>
+    profile: NotaryProfileDto | null = null;
+    visitOptions: VisitVM[] = [];
+    loading = true;
+    dobDisplay: string = '';
+    phone1Display: string = '';
 
-    <!-- Hold panel (unchanged behavior) -->
-    <div class="hold" *ngIf="hold as h">
-        <h3>Selected Slot</h3>
-        <p>Appointment ID: <strong>{{ h.appointmentId }}</strong></p>
+    private destroy$ = new Subject<void>();
 
-        <label class="disclaimer">
-            <input type="checkbox" [(ngModel)]="acceptedDisclaimer" />
-            I understand this hold will be released if I don't confirm promptly.
-        </label>
+    constructor(
+        private fb: FormBuilder,
+        private service: ScheduleOathService,
+        public store: ScheduleOathStore,
+        private router: Router,
+        private stepTracker: OathStepTrackerService
+    ) { }
 
-        <div class="hold-actions">
-            <button kendoButton (click)="releaseHold()">Release Hold</button>
-            <button kendoButton
-                    themeColor="primary"
-                    [disabled]="!acceptedDisclaimer || confirming"
-                    (click)="confirm()">
-                Confirm Reservation
-            </button>
-        </div>
-    </div>
+    ngOnInit(): void {
+        const qp = new URLSearchParams(window.location.search);
+        const applicantId = Number(qp.get('applicantId')) || this.store.snapshot.applicantId || 0;
 
-</div>
+        const emailFromUrl = (qp.get('email') || '').trim();
+        const emailFromSession = (sessionStorage.getItem('Email') || '').trim();
+        const email = emailFromUrl || emailFromSession || this.store.snapshot.email || '';
+        const firstName = this.store.snapshot.profile?.firstName;
+        const isModifyMode = (qp.get('modify') || 'false').toLowerCase() === 'true';
+        this.getDobandPhone();
 
-<ng-template #busy>
-    <div class="busy">
-        <kendo-loader type="infinite-spinner"></kendo-loader>
-        <div>Loading available offices and slots...</div>
-    </div>
-</ng-template>
-schedule-oath-date-time.component.ts file: 
+        // If URL missing email but available in session, rewrite once (supports deep links)
+        if (applicantId && !emailFromUrl && emailFromSession) {
+            this.router.navigate([], {
+                queryParams: { email: emailFromSession },
+                queryParamsHandling: 'merge',
+                replaceUrl: true
+            });
+            return;
+        }
+
+        if (!applicantId) { this.loading = false; alert('Missing applicant id.'); return; }
+        if (!email) { this.loading = false; alert('Missing email address. Please re-login or open from Profile Homepage.'); return; }
+
+        // No disabled-on-load — control is enabled from the start
+        this.form = this.fb.group({
+            visitTypeId: new FormControl(
+                this.store.snapshot.visitTypeId != null && isModifyMode
+                    ? String(this.store.snapshot.visitTypeId)  // only preselect in modify mode
+                    : '',                                      // otherwise leave empty
+                Validators.required
+            )
+        });
+
+        // Show defaults immediately
+        this.visitOptions = this.defaultVisitOptions();
+
+        // Persist identity early
+        this.store.patch({ applicantId, email });
+
+        // Load profile + visit types; just flip loading off in finalize()
+        this.service.start(applicantId, email)
+            .pipe(
+                takeUntil(this.destroy$),
+                timeout(5000),
+                finalize(() => {
+                    // runs on success OR error — no enable/disable here
+                    this.loading = false;
+                })
+            )
+            .subscribe({
+                next: (res) => {
+                    this.profile = res.profile ?? null;
+
+                    const normalized = this.normalizeVisitTypes(res.visitTypes ?? []);
+                    if (normalized.length) this.visitOptions = normalized;
+
+                    // Default selection if none persisted
+                    const saved = this.store.snapshot.visitTypeId;
+                    if (isModifyMode && saved && !this.form.value.visitTypeId) {
+                        this.form.patchValue({ visitTypeId: String(saved) }, { emitEvent: false });
+                    }
+
+                    // Persist profile for downstream steps
+                    this.store.patch({ profile: this.profile });
+                },
+                error: () => {
+                    // Keep defaults; still let user proceed
+                    alert('Issue in saving');
+                }
+            });
+    }
+
+    getDobandPhone(): void {
+        const raw = sessionStorage.getItem('ProfileDetails');
+
+        if (raw) {
+            try {
+                const profile = JSON.parse(raw);
+                const personalInfo = profile?.userHomeProfileDto?.personalInfoDetails;
+
+                this.dobDisplay = personalInfo?.dateOfBirthDisplay ?? null;
+                this.phone1Display = personalInfo?.phone1Display ?? null;
+            } catch (err) {
+                console.error('Invalid ProfileDetails JSON', err);
+            }
+        } else {
+            console.warn('No ProfileDetails found in sessionStorage');
+        }
+    }
+
+    onRadioClick(id: string, event: Event): void {
+        const ctrl = this.form.get('visitTypeId');
+        console.log('Radio', ctrl?.value);
+        if (!ctrl) return;
+
+        const current = ctrl.value;
+        if (current === id) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            setTimeout(() => {
+                ctrl.setValue('', { emitEvent: true });
+                ctrl.markAsPristine();
+                ctrl.markAsUntouched();
+                ctrl.updateValueAndValidity({ emitEvent: true });
+            });
+        } else {
+            ctrl.setValue(id, { emitEvent: true });
+        }
+    }
+
+    onRadioBlur(): void {
+        const ctrl = this.form.get('visitTypeId');
+        if (!ctrl) return;
+        if (!ctrl.value) {
+            ctrl.markAsPristine();
+            ctrl.markAsUntouched();
+        }
+    }
+
+    next(): void {
+        this.submitted = true;
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
+        }
+
+        const visitTypeId = Number(this.form.value.visitTypeId);
+        const { applicantId, email } = this.store.snapshot;
+
+        this.store.patch({
+            visitTypeId,
+            selectedSlot: null,
+            holdEndTimeUtc: null,
+            confirmation: null
+        });
+
+        this.stepTracker.completePersonalAndActivateDateTime();
+
+        this.router.navigate(['/schedule-oath/date-time'], {
+            queryParams: { applicantId, email, visitTypeId }
+        });
+    }
+
+    cancel(): void {
+        this.router.navigate(['/profile-homepage']);
+    }
+
+    // ---------- Helpers ----------
+    private normalizeVisitTypes(list: VisitTypeDto[]): VisitVM[] {
+        const onlyActive = (list || []).filter((v: any) => (v?.isActive ?? v?.IsActive ?? true));
+        const toId = (v: any) => Number(v?.visitTypeId ?? v?.VisitTypeId ?? v?.id ?? 0);
+        const toCode = (v: any): VisitCode | null => {
+            const c = String(v?.code ?? v?.Code ?? v?.value ?? '').toLowerCase();
+            if (c === 'inperson') return 'InPerson';
+            if (c === 'external') return 'External';
+            if (c === 'virtual') return 'Virtual';
+            return null;
+        };
+
+        const opts: VisitVM[] = [];
+        for (const v of onlyActive) {
+            const id = toId(v);
+            const code = toCode(v);
+            if (!id || !code) continue;
+            opts.push({
+                id,
+                code,
+                label: code === 'InPerson' ? 'In Person' : code,
+                help:
+                    code === 'InPerson' ? 'at a location closer to you' :
+                        code === 'External' ? 'I will find my own commissioner to qualify' :
+                            'with a virtual oath you maybe able to schedule an oath at any location',
+                raw: v
+            });
+        }
+        const order: VisitCode[] = ['InPerson', 'Virtual','External'];
+        return opts.sort((a, b) => order.indexOf(a.code) - order.indexOf(b.code));
+    }
+
+    private defaultVisitOptions(): VisitVM[] {
+        return [
+            { id: 1, code: 'InPerson', label: 'In Person', help: 'at a location closer to you' },
+            { id: 2, code: 'Virtual', label: 'Virtual', help: 'with a virtual oath you maybe able to schedule an oath at any location' },
+            { id: 3, code: 'External', label: 'External', help: 'I will find my own commissioner to qualify' }
+        ];
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+}
+step - 2 schedule-oath-date-time.component.ts file: 
 import {
     Component,
     OnDestroy,
@@ -155,7 +348,8 @@ export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
     hold: HoldResponseDto | null = null;
     acceptedDisclaimer = false;
     confirming = false;
-
+    circum = true;
+    dialogVisible = false;
     private applicantId = 0;
     private email = '';
     private visitTypeId = 0;
@@ -462,8 +656,8 @@ export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
 
         this.svc.setHold(slotId, this.applicantId).pipe(takeUntil(this.destroy$)).subscribe({
             next: (h) => {
+                this.openDialog();
                 this.hold = h;
-
                 // persist minimal selection in the store for confirm step
                 const chosen = this.findTile(slotId);
                 this.store.patch({
@@ -588,10 +782,32 @@ export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
         });
     }
 
+    goToConfirm(): void {
+        // must have a hold to proceed
+        if (!this.hold) { return; }
+
+        // mark steps and navigate to the Confirm page
+        this.stepTracker.completeDateTimeAndActivateConfirm();
+        this.router.navigate(['/schedule-oath/confirm']);
+    }
+
     private hhmmss(d: Date): string {
         const h = String(d.getHours()).padStart(2, '0');
         const m = String(d.getMinutes()).padStart(2, '0');
         return `${h}:${m}:00`;
+    }
+
+    onCancel(): void {
+        this.openDialog();
+    }
+
+    openDialog(): void {
+        this.dialogVisible = true;
+    }
+
+    closeDialog(): void {
+        this.releaseHold();
+        this.dialogVisible = false;
     }
 
     ngOnDestroy(): void {
@@ -599,59 +815,10 @@ export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 }
-schedule-oath-confirm.component.html file:
-<div class="container">
-    <h2>Schedule Oath – Confirm Reservation</h2>
-
-    <div class="hold-banner" [class.expired]="expired">
-        Time remaining to hold appointment: <strong>{{ remaining }}</strong>
-    </div>
-
-    <kendo-card *ngIf="!expired">
-        <kendo-card-body>
-            <div class="grid-2">
-                <div>
-                    <label>Location</label>
-                    <div>{{ slot?.officeName || '-' }}</div>
-                </div>
-                <div>
-                    <label>Date</label>
-                    <div>{{ startIso | date:'MM/dd/yyyy' }}</div>
-                </div>
-                <div>
-                    <label>Start Time</label>
-                    <div>{{ startIso | date:'shortTime' }}</div>
-                </div>
-                <div>
-                    <label>End Time</label>
-                    <div>{{ endIso | date:'shortTime' }}</div>
-                </div>
-            </div>
-
-            <div class="disclaimer">
-                <kendo-checkbox [(ngModel)]="disclaimerAccepted"></kendo-checkbox>
-                <span>I acknowledge the disclaimer and agree to the terms.</span>
-            </div>
-
-            <button kendoButton themeColor="primary"
-                    (click)="confirm()"
-                    [disabled]="!disclaimerAccepted || expired">
-                Confirm Reservation
-            </button>
-        </kendo-card-body>
-    </kendo-card>
-
-    <div *ngIf="expired" class="expired-note">
-        Your hold has expired. Please go back and select another available slot.
-        <div class="mt-12">
-            <button kendoButton (click)="goBackToSlots()">Back to Slots</button>
-        </div>
-    </div>
-</div>
-schedule-oath-confirm.component.ts file: 
+step - 3 schedule-oath-confirm.component.ts file: 
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { interval, Subject, takeUntil } from 'rxjs';
+import { interval, startWith, Subject, takeUntil } from 'rxjs';
 import { ScheduleOathService } from '../../services/schedule-oath/schedule-oath.service';
 import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
 import { OathStepTrackerService } from '../../services/helper-services/oath-schedule-step-tracker/oath-step-tracker.service';
@@ -689,13 +856,11 @@ export class ScheduleOathConfirmComponent implements OnInit, OnDestroy {
         }
         this.holdExpiresAt = new Date(s.holdEndTimeUtc);
 
-        this.zone.runOutsideAngular(() => {
-            interval(1000).pipe(takeUntil(this.destroy$)).subscribe(() => {
+            interval(1000).pipe(startWith(0), takeUntil(this.destroy$)).subscribe(() => {
                 const diff = this.holdExpiresAt.getTime() - Date.now();
                 this.expired = diff <= 0;
                 this.remaining = this.formatDiff(Math.max(diff, 0));
             });
-        });
     }
 
     private formatDiff(ms: number): string {
@@ -732,472 +897,68 @@ export class ScheduleOathConfirmComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
 }
-app-routing.module.ts file: 
-import { NgModule } from '@angular/core';
-import { ExtraOptions, RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './pages/login/login.component';
-import { EnterpinComponent } from './pages/enterpin/enterpin.component';
-import { AccountRegistrationComponent } from './pages/account-registration/account-registration.component';
-import { EmailVerificationComponent } from './components/email-verification/email-verification.component';
-import { PersonalInformationComponent } from './components/personal-information/personal-information.component';
-import { AccountConfirmationComponent } from './components/account-confirmation/account-confirmation.component';
-import { authGuard } from './guards/auth.guard';
-import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
-import { registrationAuthGuardGuard } from './guards/registration-guard/registration-auth-guard.guard';
-import { ProfileHomepageComponent } from './pages/profile-homepage/profile-homepage.component';
-import { NewAppPersonalInformationComponent } from './components/new-app-personal-information/new-app-personal-information.component';
-import { NewAppAddressComponent } from './components/new-app-address/new-app-address.component';
-import { NewAppApplicationInformationComponent } from './components/new-app-application-information/new-app-application-information.component';
-import { NewAppReferencesComponent } from './components/new-app-references/new-app-references.component';
-import { NewAppAdditionalInformationComponent } from './components/new-app-additional-information/new-app-additional-information.component';
-import { NewAppApplicationReviewComponent } from './components/new-app-application-review/new-app-application-review.component';
-import { NewAppAttestationComponent } from './components/new-app-attestation/new-app-attestation.component';
-import { NewAppConfirmationComponent } from './components/new-app-confirmation/new-app-confirmation.component';
-import { NotaryApplicationComponent } from './pages/notary-application/notary-application.component';
-import { ScheduleOathComponent } from './pages/schedule-oath/schedule-oath.component';
-import { ApplicationAddressGuard } from './guards/notary-application/application-address.guard';
-import { UnauthorizedPageComponent } from './pages/unauthorized-page/unauthorized-page.component';
-import { NotaryAcknowledgementComponent } from './components/remote-notary-acknowledgement/notary-acknowledgement.component';
-import { ApplyNotaryApplicationComponent } from './pages/remote-apply-notary-application/apply-notary-application.component';
-import { SelectPartnerComponent } from './components/remote-notary-partner/select-partner.component';
-import { UpdateLoginInformationComponent } from './pages/update-login-information/update-login-information.component';
-import { UpdateLoginConfirmComponent } from './components/update-login-confirm/update-login-confirm.component';
-import { UpdateLoginNewEmailComponent } from './components/update-login-new-email/update-login-new-email.component';
-import { UpdateLoginVerifyEmailComponent } from './components/update-login-verify-email/update-login-verify-email.component';
-import { UpdateLoginInfoComponent } from './components/update-login-info/update-login-info.component';
-import { RemoteConfirmationComponent } from './components/remote-notary-confirmation/remote-confirmation.component';
-import { UpdateExternalProfileComponent } from './pages/update-external-profile/update-external-profile.component';
-import { FindNotaryComponent } from './pages/find-notary/find-notary.component';
-import { ScheduleOathPersonalInfoComponent } from './components/schedule-oath-personal-info/schedule-oath-personal-info.component';
-import { ScheduleOathDateTimeComponent } from './components/schedule-oath-date-time/schedule-oath-date-time.component';
-import { ScheduleOathGuard } from './guards/schedule-oath/schedule-oath.guard';
-import { ScheduleOathConfirmComponent } from './components/schedule-oath-confirm/schedule-oath-confirm.component';
-import { ScheduleOathConfirmationComponent } from './components/schedule-oath-confirmation/schedule-oath-confirmation.component';
+step - 4 schedule-oath-confirmation.component.ts file
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
 
-const routerOptions: ExtraOptions = {
-    scrollPositionRestoration: 'top', // <- this scrolls to top on navigation
-    anchorScrolling: 'enabled',       // optional: for anchor (#id) scrolling
-    scrollOffset: [0, 0],             // optional: x, y offset
-};
-
-const routes: Routes = [
-    { path: '', redirectTo: '/login', pathMatch: 'full' },
-    {
-        path: 'login',
-        component: LoginComponent,
-        runGuardsAndResolvers: 'always',
-        canActivate: [authGuard]  // Existing auth guard
-    },
-    {
-        path: 'find-notary',
-        component: FindNotaryComponent,
-        runGuardsAndResolvers: 'always',
-        canActivate: [authGuard]
-    },
-    {
-        path: 'enterpin',
-        component: EnterpinComponent,
-        canActivate: [authGuard],
-        runGuardsAndResolvers: 'always'
-    },
-    { path: 'session-expired', component: SessionExpiredComponent },
-    { path: 'unauthorized', component: UnauthorizedPageComponent },
-    {
-        path: 'account-registration',
-        component: AccountRegistrationComponent,
-        children: [
-            { path: '', redirectTo: 'email-verification', pathMatch: 'full' },
-            {
-                path: 'email-verification',
-                component: EmailVerificationComponent,
-                canActivate: [registrationAuthGuardGuard]
-            },
-            {
-                path: 'personal-information',
-                component: PersonalInformationComponent,
-                canActivate: [registrationAuthGuardGuard]
-            },
-            {
-                path: 'account-confirmation',
-                component: AccountConfirmationComponent,
-                canActivate: [registrationAuthGuardGuard]
-            },
-        ],
-    },
-    {
-        path: 'profile-homepage',
-        component: ProfileHomepageComponent,
-        canActivate: [authGuard]
-    },
-    {
-        path: 'update-profile',
-        component: UpdateExternalProfileComponent,
-        // canActivate: [authGuard]
-    },
-
-    {
-        path: 'notary-application',
-        component: NotaryApplicationComponent,
-        canActivate: [authGuard],
-        children: [
-            { path: '', redirectTo: 'personal-information', pathMatch: 'full' },
-            {
-                path: 'personal-information',
-                component: NewAppPersonalInformationComponent
-            },
-            {
-                path: 'address',
-                canActivate: [ApplicationAddressGuard],
-                component: NewAppAddressComponent
-            },
-            {
-                path: 'application-information',
-                canActivate: [ApplicationAddressGuard],
-                component: NewAppApplicationInformationComponent
-            },
-            {
-                path: 'references',
-                canActivate: [ApplicationAddressGuard],
-                component: NewAppReferencesComponent
-            },
-            {
-                path: 'additional-information',
-                canActivate: [ApplicationAddressGuard],
-                component: NewAppAdditionalInformationComponent
-            },
-            {
-                path: 'application-review',
-                canActivate: [ApplicationAddressGuard],
-                component: NewAppApplicationReviewComponent
-            },
-            {
-                path: 'attestation',
-                canActivate: [ApplicationAddressGuard],
-                component: NewAppAttestationComponent
-            },
-            {
-                path: 'confirmation',
-                canActivate: [ApplicationAddressGuard],
-                component: NewAppConfirmationComponent
-            },
-        ],
-    },
-    { 
-        path: 'remote-application',
-        component: ApplyNotaryApplicationComponent,
-        canActivate: [],
-        children: [
-            { path: '', redirectTo: 'notary-acknowledgement', pathMatch: 'full' },
-            {
-                path: 'notary-acknowledgement',
-                component: NotaryAcknowledgementComponent
-            },
-            {
-                path: 'select-partner',
-                component: SelectPartnerComponent
-            },
-            {
-                path: 'confirmation',
-                component: RemoteConfirmationComponent
-            }
-        ]
-    },
-    {
-        path: 'schedule-oath',
-        component: ScheduleOathComponent,
-        children: [
-            { path: '', redirectTo: 'personal-information', pathMatch: 'full' },
-            { path: 'personal-information', component: ScheduleOathPersonalInfoComponent },
-            { path: 'date-time', component: ScheduleOathDateTimeComponent, canActivate: [ScheduleOathGuard] },
-            { path: 'confirm', component: ScheduleOathConfirmComponent, canActivate: [ScheduleOathGuard] },
-            { path: 'confirmation', component: ScheduleOathConfirmationComponent, canActivate: [ScheduleOathGuard] }
-        ]
-    },
-    {
-        path: 'hack-path',
-        component: ScheduleOathConfirmationComponent
-    },
-    {
-        path: 'update-login',
-        component: UpdateLoginInformationComponent,
-        canActivate: [authGuard],
-        children: [
-            { path: '', redirectTo: 'update-login-information', pathMatch: 'full' },
-            {
-                path: 'updateEmail',
-                component: UpdateLoginInfoComponent,
-          //      canActivate: [registrationAuthGuardGuard]
-            },
-            {
-                path: 'enterEmail',
-                component: UpdateLoginNewEmailComponent,
-     //           canActivate: [registrationAuthGuardGuard]
-            },
-            {
-                path: 'verifyEmail',
-                component: UpdateLoginVerifyEmailComponent,
-     //           canActivate: [registrationAuthGuardGuard]
-            },
-            {
-                path: 'confirmEmail',
-                component: UpdateLoginConfirmComponent
-            }
-        ],
-    },
-    { path: '**', redirectTo: '/session-expired', pathMatch: 'full' },
-];
-
-@NgModule({
-    imports: [RouterModule.forRoot(routes)],
-    exports: [RouterModule]
+@Component({
+    selector: 'app-schedule-oath-confirmation',
+    templateUrl: './schedule-oath-confirmation.component.html',
+    styleUrls: ['./schedule-oath-confirmation.component.css']
 })
-export class AppRoutingModule { }
-service.ts file:
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
 
-import {
-    NotaryProfileDto,
-    VisitTypeDto,
-    OfficeDto,
-    ReservationSlotDto,
-    SlotFilterDto,          // UI filter (date range, etc.)
-    HoldResponseDto,        // contains appointmentId, holdEndTimeUtc
-    ConfirmReservationDto,  // contains appointmentId, disclaimerAccepted
-    ReservationConfirmationDto, // confirm response
-} from '../../model/schedule-oath/schedule-oath.models';
 
-type PageDirection = 'current' | 'next' | 'prev';
+export class ScheduleOathConfirmationComponent {
+    mockData = {
+        "confirmationNumber": "12",
+        "officeName": "Boston",
+        "startTimeUtc": "2021-05-16T04:10:23.000Z",
+        "endTimeUtc": "2021-05-16T05:10:23.000Z"
+    }
+    copied = false;
+    constructor(public store: ScheduleOathStore, public router: Router) {
 
-interface StartResponse {
-    profile: NotaryProfileDto;
-    visitTypes: VisitTypeDto[];
-}
-
-interface SlotSearchRequest {
-    applicantId: number;
-    visitTypeId: number;
-    weekOf: string;                // 'YYYY-MM-DD' (UTC date; server normalizes to Monday)
-    pageDirection: PageDirection;  // 'current' | 'next' | 'prev'
-    officeId?: number;
-    timeOfDay?: 'AM' | 'PM' | 'Any' | 'morning' | 'afternoon' | 'evening' | 'all';
-}
-
-interface SlotSearchResponse {
-    weekStartUtc: string;          // ISO
-    weekEndUtc: string;            // ISO
-    slots: ReservationSlotDto[];   // your UI shape
-}
-
-@Injectable({ providedIn: 'root' })
-export class ScheduleOathService {
-    private readonly base = `${environment.apiurl}/api/ExternalReservations`;
-
-    constructor(private http: HttpClient) { }
-
-    // -------------------------
-    // Error handling
-    // -------------------------
-    private handleError(err: HttpErrorResponse): Observable<never> {
-        const message =
-            (err?.error && (err.error.title || err.error.message)) ||
-            err?.statusText ||
-            'Request failed';
-        return throwError(() => ({ ...err, message }));
     }
 
-    // -------------------------
-    // Step 1: start/profile + visit types
-    // GET /api/ExternalReservations/start?applicantId=&email=
-    // -------------------------
-    start(applicantId: number, email: string): Observable<StartResponse> {
-        const params = new HttpParams()
-            .set('applicantId', String(applicantId))
-            .set('email', email);
-
-        return this.http.get<any>(`${this.base}/start`, { params }).pipe(
-            map(res => {
-                const profile: NotaryProfileDto =
-                    res?.profile ?? res?.notaryProfile ?? res?.data?.profile ?? null;
-                const visitTypes: VisitTypeDto[] =
-                    res?.visitTypes ?? res?.allowedVisitTypes ?? res?.data?.visitTypes ?? [];
-                return { profile, visitTypes };
-            }),
-            catchError(err => this.handleError(err))
-        );
+    print() { window.print(); }
+    done() {
+        this.store.reset();  
+        this.router.navigate(['/']);
     }
 
-    /** Convenience: just the profile (calls start under the hood). */
-    getNotaryProfileByIdAndEmail(applicantId: number, email: string): Observable<NotaryProfileDto> {
-        return this.start(applicantId, email).pipe(
-            map(r => r.profile),
-            catchError(err => this.handleError(err))
-        );
-    }
+    async copyConf(text: string | number | null | undefined) {
+        const value = (text ?? '').toString().trim();
+        if (!value) return;
 
-    // -------------------------
-    // Optional: lookups
-    // GET /api/ExternalReservations/offices
-    // -------------------------
-    getOffices(): Observable<OfficeDto[]> {
-        return this.http
-            .get<OfficeDto[]>(`${this.base}/offices`)
-            .pipe(catchError(err => this.handleError(err)));
-    }
-
-    // -------------------------
-    // Step 2: search weekly slots
-    // POST /api/ExternalReservations/search-slots
-    // -------------------------
-    searchWeeklySlots(req: SlotSearchRequest): Observable<SlotSearchResponse> {
-        return this.http
-            .post<SlotSearchResponse>(`${this.base}/search-slots`, req)
-            .pipe(catchError(err => this.handleError(err)));
-    }
-
-    /**
-     * Back-compat wrapper for UIs that still pass a date range.
-     * We translate the range into a week-of (Monday) + 'current' page,
-     * call weekly search, then (optionally) filter by start/end locally.
-     */
-    getAvailableSlots(filter: Partial<SlotFilterDto> & Record<string, any>): Observable<ReservationSlotDto[]> {
-        const applicantId = Number(this.pick(filter, 'applicantId', 'ApplicantId') ?? 0);
-        const visitTypeId = Number(this.pick(filter, 'visitTypeId', 'VisitTypeId') ?? 0);
-        const officeId = this.numOrUndef(this.pick(filter, 'officeId', 'OfficeId'));
-        const timeOfDay = (this.pick(filter, 'timeOfDay', 'TimeOfDay') ?? '').toString().trim() || undefined;
-
-        const startRaw = this.pick(filter, 'startDateUtc', 'StartDateUtc', 'startDate', 'fromDate');
-        const endRaw = this.pick(filter, 'endDateUtc', 'EndDateUtc', 'endDate', 'toDate');
-        const start = startRaw ? new Date(startRaw) : new Date();
-        const weekOf = this.mondayIso(start);
-
-        const req: SlotSearchRequest = {
-            applicantId,
-            visitTypeId,
-            weekOf,
-            pageDirection: 'current',
-            ...(officeId ? { officeId } : {}),
-            ...(timeOfDay ? { timeOfDay } : {})
-        };
-
-        return this.searchWeeklySlots(req).pipe(
-            map(resp => {
-                if (!startRaw || !endRaw) return resp.slots;
-
-                const from = new Date(startRaw).getTime();
-                const to = new Date(endRaw).getTime();
-
-                // ✅ Use model's UTC fields; fallback if backend returns legacy shapes.
-                return resp.slots.filter((s) => {
-                    const [sStartMs, sEndMs] = this.slotRangeMillis(s);
-                    // if we couldn't parse, keep the slot (be permissive) or exclude – choose policy:
-                    if (!Number.isFinite(sStartMs) || !Number.isFinite(sEndMs)) return false;
-                    return sEndMs > from && sStartMs < to; // overlap
-                });
-            }),
-            catchError(err => this.handleError(err))
-        );
-    }
-
-    // -------------------------
-    // Step 3: holds
-    // POST /api/ExternalReservations/holds
-    // DELETE /api/ExternalReservations/holds/{holdId}
-    // -------------------------
-    setHold(reservationSlotId: number, applicantId: number): Observable<HoldResponseDto> {
-        const body = { applicantId, reservationSlotId };
-        return this.http
-            .post<HoldResponseDto>(`${this.base}/holds`, body)
-            .pipe(catchError(err => this.handleError(err)));
-    }
-
-    releaseHold(holdId: number): Observable<void> {
-        return this.http
-            .delete<void>(`${this.base}/holds/${holdId}`)
-            .pipe(catchError(err => this.handleError(err)));
-    }
-
-    // -------------------------
-    // Step 4: confirm
-    // POST /api/ExternalReservations/confirm?appointmentId=&disclaimerAccepted=
-    // -------------------------
-    confirmReservation(payload: ConfirmReservationDto): Observable<ReservationConfirmationDto> {
-        const params = new HttpParams()
-            .set('appointmentId', String((payload as any).appointmentId))
-            .set('disclaimerAccepted', String((payload as any).disclaimerAccepted ?? true));
-
-        return this.http
-            .post<ReservationConfirmationDto>(`${this.base}/confirm`, null, { params })
-            .pipe(catchError(err => this.handleError(err)));
-    }
-
-    // -------------------------
-    // Optional: reservations (history/upcoming)
-    // GET /api/ExternalReservations/applicants/{applicantId}/reservations
-    // DELETE /api/ExternalReservations/reservations/{reservationId}?reason=
-    // -------------------------
-    getReservations(applicantId: number) {
-        return this.http
-            .get<any[]>(`${this.base}/applicants/${applicantId}/reservations`)
-            .pipe(catchError(err => this.handleError(err)));
-    }
-
-    cancelReservation(reservationId: number, reason?: string) {
-        const params = reason ? new HttpParams().set('reason', reason) : undefined;
-        return this.http
-            .delete<void>(`${this.base}/reservations/${reservationId}`, { params })
-            .pipe(catchError(err => this.handleError(err)));
-    }
-
-    // -------------------------
-    // helpers
-    // -------------------------
-    private pick(obj: Record<string, any>, ...keys: string[]) {
-        for (const k of keys) {
-            const v = obj?.[k];
-            if (v !== undefined && v !== null && v !== '') return v;
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(value);
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = value;
+                // keep off-screen but selectable
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            }
+            this.showCopiedHint();
+        } catch (err) {
+            console.error('Copy failed:', err);
         }
-        return undefined;
     }
 
-    private numOrUndef(v: any): number | undefined {
-        const n = Number(v);
-        return Number.isFinite(n) && n > 0 ? n : undefined;
+    private showCopiedHint() {
+        this.copied = true;
+        setTimeout(() => (this.copied = false), 1500);
     }
+    startOver() { this.router.navigate(['/schedule-oath']); }
 
-    /** Returns 'YYYY-MM-DD' (UTC) for the Monday of the week containing `d`. */
-    private mondayIso(d: Date): string {
-        const utc = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-        const dow = utc.getUTCDay() || 7; // Sun=0 -> 7
-        if (dow !== 1) utc.setUTCDate(utc.getUTCDate() - (dow - 1));
-        const y = utc.getUTCFullYear();
-        const m = String(utc.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(utc.getUTCDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-    }
-
-    /**
-     * Parse a slot's start/end in milliseconds, supporting both:
-     * - current model fields: startTimeUtc / endTimeUtc (ISO)
-     * - legacy fields: scheduleDate + startTime / endTime (HH:mm:ss)
-     */
-    private slotRangeMillis(slot: ReservationSlotDto): [number, number] {
-        const s: any = slot as any;
-
-        const startIso =
-            s.startTimeUtc || s.startUtc ||
-            (s.scheduleDate && s.startTime ? `${s.scheduleDate}T${s.startTime}Z` : undefined);
-
-        const endIso =
-            s.endTimeUtc || s.endUtc ||
-            (s.scheduleDate && s.endTime ? `${s.scheduleDate}T${s.endTime}Z` : undefined);
-
-        const startMs = startIso ? Date.parse(startIso) : Number.NaN;
-        const endMs = endIso ? Date.parse(endIso) : Number.NaN;
-
-        return [startMs, endMs];
+    takeToProfilePage() {
+        this.router.navigate(['/profile-homepage']);
     }
 }
