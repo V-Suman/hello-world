@@ -1,284 +1,121 @@
-Goal: To integrate other options in the oath-scheduler app. 
-Details: Up Until now.. we only integrated the In-person flow for the oath-scheduler. Now, we will need to add 2 more 
-flows. Virtual and External. In this prompt.. we will only deal with Virtual flow. 
-The overall approach is same for virtual flow.. but there are few changes. I will mention the changes step by step: 
+Issue: When the schedule-oath-confirm component loads up.. the slot hold timer is already running.. depending on how 
+long the user took to interact with the kendo-dialog in the schedule-oath-date-time component. We want to display the 
+time remaining on the kendo-dialog box as well.. so that the user knows that their timer has started. 
 
-In Step - 1: We will need to pass the currently selected radio button from the schedule-oath-personal-info to 
-schedule-oath-date-time component. 
-In Step - 2: When we make the call to the offices endpoint.. and the offices endpoint returns the data like this [
-  {
-    "officeId": 1,
-    "code": null,
-    "value": "Boston",
-    "description": null,
-    "isActive": true
-  },
-  {
-    "officeId": 2,
-    "code": null,
-    "value": "Fall River",
-    "description": null,
-    "isActive": true
-  },
-  {
-    "officeId": 3,
-    "code": null,
-    "value": "Springfield",
-    "description": null,
-    "isActive": true
-  },
-  {
-    "officeId": 4,
-    "code": null,
-    "value": "Virtual",
-    "description": null,
-    "isActive": true
-  }
-] we should not be displaying the virtual option when the user selected radio button in person in step - 1.. similarly 
-when the user selected the option virtual in step -1 we should not be displaying the springfield, boston etc slots. So 
-at that point when the user selected cirtual in step - 1 the dropdown should have only one value and that value is 
-defaulted to virtual and we also make an automatic call to the backend search-slots with that officeId.
-in Step - 3 : Just make sure you are passing a flag form previous step to this step and to downstreams as the 
-downstream pages only have text based toggles that I can do it myself. 
-in Step - 4 : Again. Pass a simple toggle from page 3 to here. 
+Details: When the user clicks on a tile in schedule-oath-date-time component we throw up a kendo-dialogbox and start 
+the countdown timer in the background but not display it to the user until the user lands on the next page.. by the 
+time that happens some time has already elapsed. Instead why don't we just show the timer on the kendo-dialog also
+that way there is uniformity. 
 
-Ask any clarifying questions you have before you implement. 
+Remember.. the logic in the schedule-oath-confirm component stays as is.. we just want to add the countdown timer 
+to the kendo-dialogbox as well. Just a small line which shows countdown that winds down. 
 
-step - 1 schedule-oath-personal-info.component.ts file: 
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
-import { timeout, finalize } from 'rxjs/operators';
+Ask me clarifying questions before you get started 
 
-import { ScheduleOathService } from '../../services/schedule-oath/schedule-oath.service';
-import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
-import { NotaryProfileDto, VisitTypeDto } from '../../model/schedule-oath/schedule-oath.models';
-import { OathStepTrackerService } from '../../services/helper-services/oath-schedule-step-tracker/oath-step-tracker.service';
+step 2 date and time html file: 
+<div class="wrapper" *ngIf="!loading; else busy">
+    <h2 class="date-time-heading">Select a Date and Time</h2>
+    <div class="header">
+        <!-- Filters -->
+        <div class="filters">
+            <kendo-dropdownlist [data]="officeFilterOptions"
+                                textField="text"
+                                valueField="value"
+                                [value]="selectedOfficeIdFilter"
+                                [valuePrimitive]="true"
+                                (valueChange)="onOfficeFilterChange($event)"
+                                [disabled]="isVirtualMode">
+            </kendo-dropdownlist>
 
-type VisitCode = 'InPerson' | 'External' | 'Virtual';
-type VisitVM = { id: number; code: VisitCode; label: string; help: string; raw?: VisitTypeDto };
+            <kendo-dropdownlist [data]="timeOfDayOptions"
+                                textField="text"
+                                valueField="value"
+                                [value]="timeOfDayFilter"
+                                [valuePrimitive]="true"
+                                (valueChange)="onTimeOfDayChange($event)">
+            </kendo-dropdownlist>
+            <div class="week-label" *ngIf="weekLabel">{{ weekLabel }}</div>
+        </div>
+    </div>
 
-@Component({
-    selector: 'app-schedule-oath-personal-info',
-    templateUrl: './schedule-oath-personal-info.component.html',
-    styleUrls: ['./schedule-oath-personal-info.component.css']
-})
-export class ScheduleOathPersonalInfoComponent implements OnInit, OnDestroy {
-    form!: FormGroup;
-    submitted = false;
+    <div class="board-row">
+        <button kendoButton fillMode="flat" class="nav-btn prev" (click)="goPrevWeek()">&larr; Previous week</button>
 
-    profile: NotaryProfileDto | null = null;
-    visitOptions: VisitVM[] = [];
-    loading = true;
-    dobDisplay: string = '';
-    phone1Display: string = '';
+        <div class="grid-board">
+            <!-- 5 fixed columns (Mon–Fri). Each column scrolls independently. -->
+            <div class="day-col" *ngFor="let day of daysVm">
+                <div class="day-header">
+                    <div class="day-name">{{ day.label }}</div>
+                    <div class="day-date">{{ day.subLabel }}</div>
+                </div>
 
-    private destroy$ = new Subject<void>();
+                <div class="tiles">
+                    <button kendoButton
+                            *ngFor="let t of day.tiles"
+                            class="slot-tile"
+                            [ngClass]="{ 'selected': t.slotId === selectedSlotId }"
+                            (click)="onTileClick(t)">
+                        <div class="time">{{ t.timeLabel }}</div>
+                        <div class="loc">{{ t.officeName }}</div>
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    constructor(
-        private fb: FormBuilder,
-        private service: ScheduleOathService,
-        public store: ScheduleOathStore,
-        private router: Router,
-        private stepTracker: OathStepTrackerService
-    ) { }
+        <button kendoButton fillMode="flat" class="nav-btn next" (click)="goNextWeek()">Next week &rarr;</button>
+    </div>
 
-    ngOnInit(): void {
-        const qp = new URLSearchParams(window.location.search);
-        const applicantId = Number(qp.get('applicantId')) || this.store.snapshot.applicantId || 0;
+    <!-- Hold panel (unchanged behavior) -->
+    <!--<div class="hold" *ngIf="hold as h">
+        <h3>Selected Slot</h3>
+        <p>Appointment ID: <strong>{{ h.appointmentId }}</strong></p>
 
-        const emailFromUrl = (qp.get('email') || '').trim();
-        const emailFromSession = (sessionStorage.getItem('Email') || '').trim();
-        const email = emailFromUrl || emailFromSession || this.store.snapshot.email || '';
-        const firstName = this.store.snapshot.profile?.firstName;
-        const isModifyMode = (qp.get('modify') || 'false').toLowerCase() === 'true';
-        this.getDobandPhone();
+        <label class="disclaimer">
+            <input type="checkbox" [(ngModel)]="acceptedDisclaimer" />
+            I understand this hold will be released if I don't confirm promptly.
+        </label>
 
-        // If URL missing email but available in session, rewrite once (supports deep links)
-        if (applicantId && !emailFromUrl && emailFromSession) {
-            this.router.navigate([], {
-                queryParams: { email: emailFromSession },
-                queryParamsHandling: 'merge',
-                replaceUrl: true
-            });
-            return;
-        }
+        <div class="hold-actions">
+            <button kendoButton (click)="releaseHold()">Release Hold</button>
+            <button kendoButton
+                    themeColor="primary"
+                    [disabled]="!acceptedDisclaimer || confirming"
+                    (click)="goToConfirm()">
+                Confirm Reservation
+            </button>
+        </div>
+    </div>-->
+    <kendo-dialog *ngIf="dialogVisible" (close)="closeDialog()" title=" " [width]="480">
+        <ng-container>
+            <div class="dialog-header">
+                <h3>Slot Selection Confirmation</h3>
+                <button class="dialog-close" (click)="closeDialog()">X</button>
+            </div>
+            <div class="dialog-body">
+                <div class="disclaimer">
+                    <p>Appointment ID: <strong>{{ hold?.appointmentId }}</strong></p>
+                    <div class="input-and-label">
+                        <input type="checkbox" [(ngModel)]="acceptedDisclaimer" />
+                        I understand this hold will be released if I don't confirm promptly.
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-actions">
+                <button kendoButton class="release-hold" (click)="closeDialog()">Release Hold</button>
+                <button kendoButton class="confirm-reservation" [disabled]="!acceptedDisclaimer || confirming" (click)="goToConfirm()">Confirm Reservation</button>
+            </div>
+        </ng-container>
+    </kendo-dialog>
 
-        if (!applicantId) { this.loading = false; alert('Missing applicant id.'); return; }
-        if (!email) { this.loading = false; alert('Missing email address. Please re-login or open from Profile Homepage.'); return; }
+</div>
 
-        // No disabled-on-load — control is enabled from the start
-        this.form = this.fb.group({
-            visitTypeId: new FormControl(
-                this.store.snapshot.visitTypeId != null && isModifyMode
-                    ? String(this.store.snapshot.visitTypeId)  // only preselect in modify mode
-                    : '',                                      // otherwise leave empty
-                Validators.required
-            )
-        });
-
-        // Show defaults immediately
-        this.visitOptions = this.defaultVisitOptions();
-
-        // Persist identity early
-        this.store.patch({ applicantId, email });
-
-        // Load profile + visit types; just flip loading off in finalize()
-        this.service.start(applicantId, email)
-            .pipe(
-                takeUntil(this.destroy$),
-                timeout(5000),
-                finalize(() => {
-                    // runs on success OR error — no enable/disable here
-                    this.loading = false;
-                })
-            )
-            .subscribe({
-                next: (res) => {
-                    this.profile = res.profile ?? null;
-
-                    const normalized = this.normalizeVisitTypes(res.visitTypes ?? []);
-                    if (normalized.length) this.visitOptions = normalized;
-
-                    // Default selection if none persisted
-                    const saved = this.store.snapshot.visitTypeId;
-                    if (isModifyMode && saved && !this.form.value.visitTypeId) {
-                        this.form.patchValue({ visitTypeId: String(saved) }, { emitEvent: false });
-                    }
-
-                    // Persist profile for downstream steps
-                    this.store.patch({ profile: this.profile });
-                },
-                error: () => {
-                    // Keep defaults; still let user proceed
-                    alert('Issue in saving');
-                }
-            });
-    }
-
-    getDobandPhone(): void {
-        const raw = sessionStorage.getItem('ProfileDetails');
-
-        if (raw) {
-            try {
-                const profile = JSON.parse(raw);
-                const personalInfo = profile?.userHomeProfileDto?.personalInfoDetails;
-
-                this.dobDisplay = personalInfo?.dateOfBirthDisplay ?? null;
-                this.phone1Display = personalInfo?.phone1Display ?? null;
-            } catch (err) {
-                console.error('Invalid ProfileDetails JSON', err);
-            }
-        } else {
-            console.warn('No ProfileDetails found in sessionStorage');
-        }
-    }
-
-    onRadioClick(id: string, event: Event): void {
-        const ctrl = this.form.get('visitTypeId');
-        console.log('Radio', ctrl?.value);
-        if (!ctrl) return;
-
-        const current = ctrl.value;
-        if (current === id) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            setTimeout(() => {
-                ctrl.setValue('', { emitEvent: true });
-                ctrl.markAsPristine();
-                ctrl.markAsUntouched();
-                ctrl.updateValueAndValidity({ emitEvent: true });
-            });
-        } else {
-            ctrl.setValue(id, { emitEvent: true });
-        }
-    }
-
-    onRadioBlur(): void {
-        const ctrl = this.form.get('visitTypeId');
-        if (!ctrl) return;
-        if (!ctrl.value) {
-            ctrl.markAsPristine();
-            ctrl.markAsUntouched();
-        }
-    }
-
-    next(): void {
-        this.submitted = true;
-        if (this.form.invalid) {
-            this.form.markAllAsTouched();
-            return;
-        }
-
-        const visitTypeId = Number(this.form.value.visitTypeId);
-        const { applicantId, email } = this.store.snapshot;
-
-        this.store.patch({
-            visitTypeId,
-            selectedSlot: null,
-            holdEndTimeUtc: null,
-            confirmation: null
-        });
-
-        this.stepTracker.completePersonalAndActivateDateTime();
-
-        this.router.navigate(['/schedule-oath/date-time'], {
-            queryParams: { applicantId, email, visitTypeId }
-        });
-    }
-
-    cancel(): void {
-        this.router.navigate(['/profile-homepage']);
-    }
-
-    // ---------- Helpers ----------
-    private normalizeVisitTypes(list: VisitTypeDto[]): VisitVM[] {
-        const onlyActive = (list || []).filter((v: any) => (v?.isActive ?? v?.IsActive ?? true));
-        const toId = (v: any) => Number(v?.visitTypeId ?? v?.VisitTypeId ?? v?.id ?? 0);
-        const toCode = (v: any): VisitCode | null => {
-            const c = String(v?.code ?? v?.Code ?? v?.value ?? '').toLowerCase();
-            if (c === 'inperson') return 'InPerson';
-            if (c === 'external') return 'External';
-            if (c === 'virtual') return 'Virtual';
-            return null;
-        };
-
-        const opts: VisitVM[] = [];
-        for (const v of onlyActive) {
-            const id = toId(v);
-            const code = toCode(v);
-            if (!id || !code) continue;
-            opts.push({
-                id,
-                code,
-                label: code === 'InPerson' ? 'In Person' : code,
-                help:
-                    code === 'InPerson' ? 'at a location closer to you' :
-                        code === 'External' ? 'I will find my own commissioner to qualify' :
-                            'with a virtual oath you maybe able to schedule an oath at any location',
-                raw: v
-            });
-        }
-        const order: VisitCode[] = ['InPerson', 'Virtual','External'];
-        return opts.sort((a, b) => order.indexOf(a.code) - order.indexOf(b.code));
-    }
-
-    private defaultVisitOptions(): VisitVM[] {
-        return [
-            { id: 1, code: 'InPerson', label: 'In Person', help: 'at a location closer to you' },
-            { id: 2, code: 'Virtual', label: 'Virtual', help: 'with a virtual oath you maybe able to schedule an oath at any location' },
-            { id: 3, code: 'External', label: 'External', help: 'I will find my own commissioner to qualify' }
-        ];
-    }
-
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
-}
-step - 2 schedule-oath-date-time.component.ts file: 
+<ng-template #busy>
+    <div class="busy">
+        <kendo-loader type="infinite-spinner"></kendo-loader>
+        <div>Loading available offices and slots...</div>
+    </div>
+</ng-template>
+date and time ts file: 
 import {
     Component,
     OnDestroy,
@@ -369,6 +206,7 @@ export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         const qp = this.route.snapshot.queryParamMap;
+        const visitMode = (qp.get('visitMode') as any) || this.store.snapshot.visitMode || 'inPerson';
         this.applicantId = Number(qp.get('applicantId')) || this.store.snapshot.applicantId || 0;
         this.email = qp.get('email') || this.store.snapshot.email || '';
         this.visitTypeId = Number(qp.get('visitTypeId')) || this.store.snapshot.visitTypeId || 0;
@@ -384,7 +222,7 @@ export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
         this.store.patch({
             applicantId: this.applicantId,
             email: this.email,
-            visitTypeId: this.visitTypeId
+            visitTypeId: this.visitTypeId, visitMode 
         });
 
         this.loadOffices(() => this.loadSlotsWithFallback());
@@ -394,21 +232,46 @@ export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
     private loadOffices(onDone?: () => void) {
         this.svc.getOffices().pipe(takeUntil(this.destroy$)).subscribe({
             next: (offices) => {
-                this.offices = (offices || []).filter(o => (o as any).isActive ?? true);
+                const all = (offices || []).filter(o => (o as any).isActive ?? true);
 
-                // API location dropdown (All + office values)
-                this.officeFilterOptions = [
-                    { text: 'All locations', value: null },
-                    ...this.offices.map(o => ({ text: (o as any).value ?? o.name ?? `Office ${o.officeId}`, value: o.officeId }))
-                ];
+                if (this.isVirtualMode) {
+                    // find the virtual office by value and/or id
+                    const virtual = all.find(o => (o as any).value === 'Virtual' || o.officeId === 4);
+                    if (!virtual) {
+                        alert('Virtual scheduling is not available right now. Please choose another option.');
+                        this.router.navigate(['/schedule-oath/personal-information'], { queryParamsHandling: 'preserve' });
+                        return;
+                    }
+                    this.offices = [virtual];
+                    this.selectedOfficeId = virtual.officeId;
+                    this.selectedOfficeIdFilter = virtual.officeId;
 
-                if (!this.selectedOfficeId && this.offices.length) {
-                    this.selectedOfficeId = this.offices[0].officeId;
+                    // single, disabled dropdown
+                    this.officeFilterOptions = [{ text: (virtual as any).value ?? 'Virtual', value: virtual.officeId }];
+                } else {
+                    // In-person or external → hide Virtual
+                    this.offices = all.filter(o => ((o as any).value ?? '').toLowerCase() !== 'virtual');
+
+                    this.officeFilterOptions = [
+                        { text: 'All locations', value: null },
+                        ...this.offices.map(o => ({ text: (o as any).value ?? o.name ?? `Office ${o.officeId}`, value: o.officeId }))
+                    ];
+
+                    if (!this.selectedOfficeId && this.offices.length) {
+                        this.selectedOfficeId = this.offices[0].officeId;
+                    }
                 }
             },
             error: () => { },
             complete: () => { if (onDone) onDone(); this.cdr.markForCheck(); }
         });
+    }
+
+    public get isVirtualMode(): boolean {
+        // prefer query param then store (supports deep link/back)
+        const qpMode = this.route.snapshot.queryParamMap.get('visitMode') as any;
+        const mode = (qpMode || this.store.snapshot.visitMode) as ('inPerson' | 'virtual' | 'external' | undefined);
+        return mode === 'virtual';
     }
 
     /** Make a local Date at local midnight for the same calendar day as an ISO string */
@@ -815,7 +678,111 @@ export class ScheduleOathDateTimeComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 }
-step - 3 schedule-oath-confirm.component.ts file: 
+step 3 confirm component html file: 
+<div class="container">
+    <div class="hold-banner" [class.expired]="expired">
+        Time remaining to hold appointment: <strong>{{ remaining }}</strong>
+    </div>
+    <div class="confirm-reservation-heading">Confirm your reservation</div>
+    <div class="not-quite">Your appointment is not quite done. Please read and confirm the details below.</div>
+    <!--<kendo-card *ngIf="!expired">
+        <kendo-card-body>
+            <div class="grid-2">
+                <div>
+                    <label>Location</label>
+                    <div>{{ slot?.officeName || '-' }}</div>
+                </div>
+                <div>
+                    <label>Date</label>
+                    <div>{{ startIso | date:'MM/dd/yyyy' }}</div>
+                </div>
+                <div>
+                    <label>Start Time</label>
+                    <div>{{ startIso | date:'shortTime' }}</div>
+                </div>
+                <div>
+                    <label>End Time</label>
+                    <div>{{ endIso | date:'shortTime' }}</div>
+                </div>
+            </div>
+
+            <div class="disclaimer">
+                <kendo-checkbox [(ngModel)]="disclaimerAccepted"></kendo-checkbox>
+                <span>I acknowledge the disclaimer and agree to the terms.</span>
+            </div>
+
+            <button kendoButton themeColor="primary"
+                    (click)="confirm()"
+                    [disabled]="!disclaimerAccepted || expired">
+                Confirm Reservation
+            </button>
+        </kendo-card-body>
+    </kendo-card>-->
+    <div class="black-card" *ngIf="!expired">
+        <div class="location">
+            <div class="location-label"><strong>Location</strong></div>
+            <div class="location-data">{{ modeOptionTrailingText }}</div>
+        </div>
+        <div class="date">
+            <div class="date-label"><strong>Date and time</strong></div>
+            <div class="date-data">
+                <div>{{ startIso | date:'EEEE, MMMM d, y' }}</div>
+                <div *ngIf="endIso; else startOnly">
+                    {{ startIso | date:'h:mm a' }} – {{ endIso | date:'h:mm a' }}
+                </div>
+                <ng-template #startOnly>
+                    <div>{{ startIso | date:'h:mm a' }}</div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+
+    <div class="blue-card" *ngIf="!expired">
+        <div class="disclaimer-paragraph">
+            <p><strong>Please review and agree to the following terms before submitting your reservation request</strong></p>
+            <ol *ngIf="mode === 'inPerson'">
+                <li> Please have a copy of your reservation confirmation, proof of identification, and official notary application approval letter</li>
+                <li>
+                    For In-person reservations arrive 5 minutes prior to your reservation time. If you arrive more than 5 minutes AFTER your reservation time,
+                    you may be rescheduled or experience delays in getting your oath administered.
+                </li>
+            </ol>
+            <ol *ngIf="mode === 'virtual'">
+                <li> Please have a copy of your reservation confirmation and proof of identification for verification purposes</li>
+                <li>
+                    For Virtual reservations you may benefit with launching the application a few minutes prior to the scheduled appointment time to ensure 
+                    your camera and microphone are working appropriately.
+                </li>
+            </ol>
+        </div>
+        <div class="disclaimer">
+            <kendo-checkbox [(ngModel)]="disclaimerAccepted"></kendo-checkbox>
+            <span>I have read, understood and agree to the above terms</span>
+        </div>
+    </div>
+
+    <div class="buttons-row">
+        <button kendoButton
+                (click)="goBackToSlots()"
+                class="previous-button">
+            Previous
+        </button>
+        <button kendoButton
+                (click)="confirm()"
+                class="confirm-reservation"
+                [disabled]="!disclaimerAccepted || expired">
+            Confirm Reservation
+        </button>
+    </div>
+
+    <div *ngIf="expired" class="expired-note">
+        Your hold has expired. Please go back and select another available slot.
+        <div class="mt-12">
+            <button kendoButton (click)="goBackToSlots()">Back to Slots</button>
+        </div>
+    </div>
+</div>
+step3 confirm component ts file: 
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { interval, startWith, Subject, takeUntil } from 'rxjs';
@@ -833,6 +800,8 @@ export class ScheduleOathConfirmComponent implements OnInit, OnDestroy {
     holdExpiresAt!: Date;
     remaining = '';
     expired = false;
+    modeOptionTrailingText = '';
+    mode = 'inPerson';
 
     private destroy$ = new Subject<void>();
 
@@ -850,6 +819,12 @@ export class ScheduleOathConfirmComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         const s = this.store.snapshot;
+        this.mode = (this.store.snapshot.visitMode) ? (this.store.snapshot.visitMode) : ''; // 'inPerson' | 'virtual' | 'external'
+        this.modeOptionTrailingText =
+            (this.mode === 'inPerson') ?
+            (s.selectedSlot.officeName +' '+'(In-Person reservation)') : 
+            ('Virtual Appointment');
+
         if (!s.selectedSlot || !s.holdEndTimeUtc) {
             this.router.navigate(['/schedule-oath/date-time']);
             return;
@@ -879,7 +854,10 @@ export class ScheduleOathConfirmComponent implements OnInit, OnDestroy {
         // Must have an appointmentId to confirm
         if (!s.appointmentId) { this.goBackToSlots(); return; }
 
+        if (!s.visitTypeId) { this.goBackToSlots(); return; }
+
         this.service.confirmReservation({
+            visitTypeId: s.visitTypeId,
             appointmentId: s.appointmentId,
             disclaimerAccepted: this.disclaimerAccepted
         }).subscribe({
@@ -896,69 +874,4 @@ export class ScheduleOathConfirmComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
-}
-step - 4 schedule-oath-confirmation.component.ts file
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { ScheduleOathStore } from '../schedule-oath/schedule-oath.state';
-
-@Component({
-    selector: 'app-schedule-oath-confirmation',
-    templateUrl: './schedule-oath-confirmation.component.html',
-    styleUrls: ['./schedule-oath-confirmation.component.css']
-})
-
-
-export class ScheduleOathConfirmationComponent {
-    mockData = {
-        "confirmationNumber": "12",
-        "officeName": "Boston",
-        "startTimeUtc": "2021-05-16T04:10:23.000Z",
-        "endTimeUtc": "2021-05-16T05:10:23.000Z"
-    }
-    copied = false;
-    constructor(public store: ScheduleOathStore, public router: Router) {
-
-    }
-
-    print() { window.print(); }
-    done() {
-        this.store.reset();  
-        this.router.navigate(['/']);
-    }
-
-    async copyConf(text: string | number | null | undefined) {
-        const value = (text ?? '').toString().trim();
-        if (!value) return;
-
-        try {
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(value);
-            } else {
-                const ta = document.createElement('textarea');
-                ta.value = value;
-                // keep off-screen but selectable
-                ta.style.position = 'fixed';
-                ta.style.left = '-9999px';
-                ta.style.opacity = '0';
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-            }
-            this.showCopiedHint();
-        } catch (err) {
-            console.error('Copy failed:', err);
-        }
-    }
-
-    private showCopiedHint() {
-        this.copied = true;
-        setTimeout(() => (this.copied = false), 1500);
-    }
-    startOver() { this.router.navigate(['/schedule-oath']); }
-
-    takeToProfilePage() {
-        this.router.navigate(['/profile-homepage']);
-    }
 }
